@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2
+
+- Swap poker controls: D-pad center (left middle) deals/draws; right middle holds/confirms.
+- Update retry and menu prompts to identify the new physical controls.
+- Retain upstream SeedSigner controls and the outer-button entry gesture.
+- Verify all eight GPIO mappings and the remapped actions in host and ARM checks.
+
 ## 0.3.1
 
 - Capture short button taps independently of rendering and SPI writes.
