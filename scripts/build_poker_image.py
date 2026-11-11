@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from payload_assets import APP_FILES, MANIFEST as ASSET_MANIFEST, PREFIX as ASSET_PREFIX, validate_asset_inventory
+from strategy_assets import validate_strategy_inventory
 
 BASE_SHA256 = "67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9"
 BASE_SIZE = 52_428_800
@@ -26,7 +27,7 @@ OVERLAY_NAME = "poker-overlay.cpio"
 INITRAMFS_LINE = "initramfs poker-overlay.cpio followkernel"
 SETTINGS = {"persistent_settings": "E", "display_config": "st7789_320x240"}
 EXECUTABLES = {"start.sh"}
-PROJECT_VERSION = "0.3.2"
+PROJECT_VERSION = "0.4.0"
 
 
 def sha(data):
@@ -83,10 +84,11 @@ def collect_payload(root):
             raise ValueError(f"Links and special payload files are forbidden: {name}")
     if "start.sh" not in records or not records["start.sh"][1].startswith(b"#!/bin/sh\n"):
         raise ValueError("Payload needs a /bin/sh start.sh launcher")
-    required = {"opt/dino/launcher.py", "opt/dino/hardware.py", "opt/dino/poker_engine.py", "opt/dino/poker_ui.py"}
+    required = {"opt/dino/launcher.py", "opt/dino/hardware.py", "opt/dino/poker_engine.py", "opt/dino/poker_ui.py", "opt/dino/poker_strategy.py"}
     if not required <= records.keys():
         raise ValueError("Poker payload is missing required application source")
     validate_asset_inventory({name:content for name,(mode,content) in records.items() if stat.S_ISREG(mode)})
+    validate_strategy_inventory({name:content for name,(mode,content) in records.items() if stat.S_ISREG(mode)})
     for name in list(records):
         for parent in PurePosixPath(name).parents:
             if str(parent) != ".":
@@ -285,6 +287,7 @@ def inspect_image(path, base_path=None):
         if record["mode"] != expected_mode or record["mtime"] != EPOCH:
             raise ValueError(f"Archive mode/timestamp differs: {name}")
     visual_assets = validate_asset_inventory({name:entry["content"] for name,entry in entries.items() if stat.S_ISREG(entry["mode"])})
+    strategy_assets = validate_strategy_inventory({name:entry["content"] for name,entry in entries.items() if stat.S_ISREG(entry["mode"])})
     preserved = None
     if base_path:
         original = regular(base_path).read_bytes()
@@ -313,6 +316,7 @@ def inspect_image(path, base_path=None):
             "hardware_tested": False, "physical_device_written": False,
             "project": "SeedSigner Poker", "project_version": PROJECT_VERSION,
             "visual_assets": visual_assets,
+            "strategy_assets": strategy_assets,
             "base_seedsigner_version": "0.8.7", "target": "Pi Zero 1.3 / Plus-compatible Play ST7789 320x240",
             "game_state_persistence": "RAM only; reset on reboot", "emulator_or_rom_included": False}
 

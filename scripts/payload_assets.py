@@ -26,7 +26,10 @@ PATH = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,199}\Z")
 APP_FILES = frozenset(("start.sh", "opt/dino/LICENSE", "opt/dino/NOTICE",
                       "opt/dino/THIRD-PARTY-ASSETS.txt",
                       "opt/dino/hardware.py", "opt/dino/launcher.py",
-                      "opt/dino/poker_engine.py", "opt/dino/poker_ui.py"))
+                      "opt/dino/poker_engine.py", "opt/dino/poker_ui.py",
+                      "opt/dino/poker_strategy.py",
+                      "opt/dino/strategy/subset_counts.dat",
+                      "opt/dino/strategy/strategy.json"))
 
 
 def _integer(value, low, high, label):

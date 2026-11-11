@@ -38,7 +38,7 @@ def main():
     files_after = payload_file_hashes()
     unchanged = before == after and files_before == files_after
     passed = result.wasSuccessful() and unchanged and not result.skipped
-    report = {"schema": 3, "date": "2026-11-10", "version": "0.3.2",
+    report = {"schema": 3, "date": "2026-11-10", "version": "0.4.0",
               "status": "PASS" if passed else "FAIL", "tests_run": result.testsRun,
               "failures": len(result.failures), "errors": len(result.errors),
               "skipped": len(result.skipped), "payload_unchanged_during_checks": unchanged,
@@ -50,7 +50,7 @@ def main():
     flow = importlib.import_module("test_full_flow")
     runtime_ui = importlib.import_module("test_runtime_ui")
     flow_report = {
-        "schema": 3, "date": "2026-11-10", "version": "0.3.2",
+        "schema": 3, "date": "2026-11-10", "version": "0.4.0",
         "status": report["status"],
         "tests_run": (unittest.defaultTestLoader.loadTestsFromModule(flow).countTestCases()
                       + unittest.defaultTestLoader.loadTestsFromModule(runtime_ui).countTestCases()),
@@ -71,7 +71,7 @@ def main():
     (ROOT / "validation/full-flow.json").write_text(json.dumps(flow_report, indent=2) + "\n")
     latency = importlib.import_module("test_input_latency")
     latency_report = {
-        "schema": 1, "date": "2026-11-10", "version": "0.3.2",
+        "schema": 1, "date": "2026-11-10", "version": "0.4.0",
         "status": report["status"],
         "scope": "Production input sampler with real wall-clock short taps during blocked rendering/display work; fake GPIO and LCD, no physical device latency claim",
         "test_file": "tests/test_input_latency.py",

@@ -37,13 +37,14 @@ try:
     stage('imports-complete')
     # Read the production adapter with simulated physical BOARD pins, not a
     # duplicate of BUTTON_PINS. These literal expected masks encode the user's
-    # left-center Deal / right-middle Hold layout independently of that tuple.
+    # standard pin layout independently of that tuple. Down is Deal / Draw;
+    # both middle buttons Hold / Confirm and start the next hand from results.
     from types import SimpleNamespace
     mapping_owner = PlusHardware()
     pressed_pins = set()
     mapping_owner.gpio = SimpleNamespace(
         LOW=0, input=lambda pin: 0 if pin in pressed_pins else 1)
-    physical_contract = {31:1, 35:2, 29:4, 37:8, 38:16, 40:32, 33:64, 36:128}
+    physical_contract = {31:1, 35:2, 29:4, 37:8, 33:16, 40:32, 38:64, 36:128}
     mapping_results = []
     assert mapping_owner.read_mask() == 0
     for pin, expected_mask in physical_contract.items():
@@ -60,8 +61,10 @@ try:
     pressed_pins.clear()
     physical_control_mapping = {
         'status':'PASS', 'pins_checked':mapping_results,
-        'left_dpad_center':{'physical_board_pin':33, 'logical_action':'KEY2', 'role':'Deal / Draw'},
-        'right_middle':{'physical_board_pin':38, 'logical_action':'CENTER', 'role':'Hold / Confirm'},
+        'left_dpad_center':{'physical_board_pin':33, 'logical_action':'CENTER', 'role':'Hold / Confirm; next deal on results'},
+        'right_middle':{'physical_board_pin':38, 'logical_action':'KEY2', 'role':'Hold / Confirm; next deal on results'},
+        'dpad_down':{'physical_board_pin':35, 'logical_action':'DOWN', 'role':'Deal / Draw'},
+        'dpad_up':{'physical_board_pin':31, 'logical_action':'UP', 'role':'Hint; double press toggles autoplay'},
         'outer_chord_board_pins':[40,36],
         'outer_chord_unchanged':True,
         'scope':'Production PlusHardware.read_mask with simulated GPIO levels in stock ARM Python; no physical GPIO exercised',
@@ -196,7 +199,16 @@ try:
         def __enter__(self): return self
         def __exit__(self, *args): pass
         def read(self): return self.router.update(self.clock(), self.hardware.read_mask())
+        def read_timed(self):
+            captured_at = self.clock()
+            entered, actions = self.router.update(captured_at, self.hardware.read_mask())
+            return entered, tuple((captured_at, action) for action in actions)
         def reset(self): self.router.reset()
+        @property
+        def gesture_pending(self):
+            gate = self.router.gate
+            return (gate.hold_started is not None or gate.latched or
+                    self.router.suppress_until_neutral)
 
     def runtime_case(name, trace, long_animation=False, production_session=False):
         timeline = [0.0]
@@ -252,7 +264,7 @@ try:
         return runtime_game,runtime_ui,result
 
     def play_trace(t):
-        if .10<=t<.19 or .90<=t<.99 or 1.10<=t<1.80: return launcher.KEY2
+        if .10<=t<.19 or .90<=t<.99 or 1.10<=t<1.80: return 1<<1
         if .60<=t<.69: return 1<<4
         if 2.0<=t<4.15: return launcher.SIGNER_CHORD
         return 0
@@ -261,7 +273,7 @@ try:
     assert runtime_game.credits==10000-100+runtime_game.total_win
     assert runtime_ui._animation is None
     def animation_trace(t):
-        if .10<=t<.19: return launcher.KEY2
+        if .10<=t<.19: return 1<<1
         if .20<=t<2.35: return launcher.SIGNER_CHORD
         return 0
     runtime_game,runtime_ui,animation=runtime_case('gesture-during-animation',animation_trace,True)
@@ -280,7 +292,7 @@ try:
         if any(start<=t<start+.09 for start in (.40,.60,.80,1.00)): return 1<<3
         if any(start<=t<start+.09 for start in (1.20,1.60,1.80,2.00)): return 1<<4
         if 1.40<=t<1.49: return 1<<2
-        if 2.50<=t<2.59 or 3.10<=t<3.19: return launcher.KEY2
+        if 2.50<=t<2.59 or 3.10<=t<3.19: return 1<<1
         if 4.00<=t<6.15: return launcher.SIGNER_CHORD
         return 0
     runtime_game,runtime_ui,selected_case=runtime_case('selected-three-hands',selected_trace)
@@ -293,7 +305,7 @@ try:
     real_getrandom = poker_engine.os.getrandom
     def temporarily_unready(*args,**kwargs): raise BlockingIOError()
     def entropy_trace(t):
-        if .10<=t<.19 or .40<=t<.49: return launcher.KEY2
+        if .10<=t<.19 or .40<=t<.49: return 1<<1
         if .80<=t<2.95: return launcher.SIGNER_CHORD
         return 0
     try:
@@ -334,7 +346,7 @@ try:
             assert not threaded_closed[0], 'Input thread survived GPIO cleanup'
             if threaded_started[0] is None: return 0
             elapsed = time.monotonic()-threaded_started[0]
-            if .120<=elapsed<.155 or .450<=elapsed<.950: return launcher.KEY2
+            if .120<=elapsed<.155 or .450<=elapsed<.950: return 1<<1
             if 1.100<=elapsed<3.250: return launcher.SIGNER_CHORD
             return 0
         def present(self, image):
@@ -373,7 +385,7 @@ try:
                   input_factory=real_input_factory,signer_runner=threaded_signer,
                   sleep=threaded_sleep)
     assert threaded_calls==['signer']
-    assert [action for _,action in threaded_actions]==['KEY2','KEY2'], threaded_actions
+    assert [action for _,action in threaded_actions]==['DOWN','DOWN'], threaded_actions
     assert threaded_game.phase=='hold' and threaded_game.rounds==0
     assert threaded_game.credits==9900 and threaded_ui._animation is None
     first_action_ms=(threaded_actions[0][0]-threaded_started[0])*1000
@@ -383,7 +395,7 @@ try:
         'status':'PASS','production_sampled_input_used':True,
         'blocked_present_seconds':.240,'tap_seconds':.035,
         'tap_window_inside_present_seconds':[.120,.155],
-        'held_key_seconds':.500,'ordinary_actions':['KEY2','KEY2'],
+        'held_key_seconds':.500,'ordinary_actions':['DOWN','DOWN'],
         'first_action_dispatch_ms_from_present_start':round(first_action_ms,3),
         'ending_phase':threaded_game.phase,'ending_credits':threaded_game.credits,
         'settled_rounds':threaded_game.rounds,
@@ -404,7 +416,7 @@ try:
             cpu_reads[0] += 1
             if cpu_started[0] is None: return 0
             elapsed = time.monotonic()-cpu_started[0]
-            return launcher.KEY2 if .120<=elapsed<.160 else 0
+            return 1<<1 if .120<=elapsed<.160 else 0
     class CPULoadLCD:
         def show_image(self, image):
             assert len(rgb565_bytes(image))==153600
@@ -424,7 +436,7 @@ try:
             cpu_owner.present(threaded_ui.render())
             cpu_frames += 1
         cpu_entered,cpu_actions = cpu_stream.read()
-        assert not cpu_entered and cpu_actions==('KEY2',), cpu_actions
+        assert not cpu_entered and cpu_actions==('DOWN',), cpu_actions
         cpu_stats = cpu_stream.stats
     assert not cpu_stream.running
     cpu_closed[0] = True
@@ -439,11 +451,64 @@ try:
         'captured_actions':list(cpu_actions),'sampler_stats':cpu_stats,
         'sampler_stopped_before_cleanup':True}
     stage('threaded-input-complete')
+    # Exercise the delivered probability table, background advisor and actual
+    # autoplay controller in stock ARM Python, without GPIO or future-RNG access.
+    from poker_strategy import StrategyAdvisor, StrategyTable, _round
+    strategy_start = time.monotonic()
+    strategy_table = StrategyTable()
+    strategy_cases = []
+    strategy_game = Session(rng=random.Random(1))
+    strategy_game.deal()
+    for cards, expected in (((12,25,38,1,2),7), ((0,1,2,3,17),31),
+                            ((11,24,37,50,12),31), ((0,15,30,44,12),16)):
+        strategy_game.initial = list(cards)
+        begin = time.monotonic()
+        answer = strategy_table.advise(_round(strategy_game.snapshot()))
+        assert answer['mask'] == expected, (cards,answer)
+        strategy_cases.append({'cards':list(cards),'mask':answer['mask'],
+                               'milliseconds':round((time.monotonic()-begin)*1000,3)})
+    auto_clock = [0.70]
+    auto_game = Session(rng=random.Random(250))
+    auto_advisor = StrategyAdvisor()
+    auto_ui = PokerUI(session=auto_game, clock=lambda:auto_clock[0], advisor=auto_advisor)
+    auto_ui.speed = 2
+    auto_ui.handle_sampled('UP', 0.0)
+    auto_ui.handle_sampled('UP', .60)
+    assert not auto_ui.autoplay and auto_game.credits == 10000
+    auto_ui.pause_autoplay()
+    auto_clock[0] = 1.0
+    auto_ui.handle_sampled('UP', .90)
+    auto_clock[0] = 2.0
+    auto_ui.handle_sampled('UP', 1.10)
+    assert auto_ui.autoplay
+    auto_deadline = time.monotonic()+30
+    while auto_game.rounds < 3 and time.monotonic()<auto_deadline:
+        auto_clock[0] += .05
+        auto_ui.update()
+        time.sleep(.001)
+    assert auto_game.rounds >= 3 and auto_ui.autoplay, auto_game.snapshot()
+    auto_ui.pause_autoplay()
+    paused = auto_game.snapshot()
+    auto_clock[0] += 100
+    auto_ui.update()
+    assert auto_game.snapshot() == paused and not auto_ui.autoplay
+    auto_ui.close()
+    assert not auto_advisor._thread.is_alive()
+    strategy_result = {'status':'PASS','cases':strategy_cases,
+        'autoplay_rounds':auto_game.rounds,'manual_pause_preserved_state':True,
+        'up_double_tap_uses_captured_edge_time':True,
+        'worker_stopped_before_signer_boundary':True,
+        'bellman_span':strategy_table.certificate,
+        'table_sha256':hashlib.sha256(strategy_table.raw).hexdigest(),
+        'scope':'Actual delivered Python strategy and UI in emulation; no physical Pi timing claim',
+        'total_emulated_seconds':round(time.monotonic()-strategy_start,3)}
+    stage('strategy-autoplay-complete')
     report={'status':'PASS','python':sys.version,'pillow':PIL.__version__,
-            'version':'0.3.2','visual_assets':asset_proof,
+            'version':'0.4.0','visual_assets':asset_proof,
             'physical_control_mapping':physical_control_mapping,
-            'machine':os.uname().machine,'rounds_checked':104,
+            'machine':os.uname().machine,'rounds_checked':107,
             'engine_rounds_checked':102,'runtime_rounds_checked':2,
+            'autoplay_rounds_checked':3,
             'input_game_render_handoff_simulation':'PASS',
             'active_hands_selection':'PASS','animation_skip_double_spend':'PASS',
             'gesture_during_animation_and_menu':'PASS','rgb565_primary_colors':'PASS',
@@ -455,6 +520,7 @@ try:
             'entropy_wait_retry_gesture':'PASS',
             'runtime_cases':[play,animation,menu,selected_case,waiting_case],
             'threaded_input_regression':threaded_result,
+            'strategy_and_autoplay':strategy_result,
             'performance':{'ui_constructor_ms':round(constructor_ms,3),
                            'first_render_ms':round(first_render_ms,3),
                            'first_deal_and_result_render_ms':frame_render_ms,

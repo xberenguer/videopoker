@@ -11,7 +11,7 @@ import sys
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.3.2'
+VERSION = '0.4.0'
 PREFIX = 'seedsigner-poker-v' + VERSION
 
 
@@ -24,23 +24,23 @@ def main():
         name: content for name, (mode, content) in records.items()
         if stat.S_ISREG(mode)})
     files = []
-    for directory in ('payload', 'scripts', 'tests'):
+    for directory in ('payload', 'scripts', 'tests', 'native'):
         files.extend(p for p in (ROOT/directory).rglob('*')
                      if p.is_file() and not p.is_symlink()
                      and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.pyo'))
     files.extend(ROOT/name for name in ('README.md','LICENSE','NOTICE'))
-    # Keep the public README's local links and supplied header photo usable in
-    # future source packages. The original release archive remains immutable.
     files.extend(ROOT/name for name in ('CHANGELOG.md', 'requirements-dev.txt', '.gitignore')
                  if (ROOT/name).is_file())
     files.extend(path for path in (ROOT/'docs').rglob('*')
                  if path.is_file() and not path.is_symlink()
                  and path.suffix.lower() in ('.md', '.json', '.jpg', '.jpeg', '.png', '.svg'))
+    files.extend(path for path in (ROOT/'validation/strategy-research').glob('*.md')
+                 if path.is_file() and not path.is_symlink())
     files.extend(ROOT/'inputs'/name for name in (
         'seedsigner-pgp.asc', 'seedsigner.0.8.7.sha256.txt',
         'seedsigner.0.8.7.sha256.txt.sig'))
     files.extend((ROOT/'validation').glob('*.json'))
-    capture_directory = ROOT/'validation/screenshots-v032'
+    capture_directory = ROOT/'validation/screenshots-v040'
     capture_path = capture_directory/'capture-record.json'
     capture = json.loads(capture_path.read_text())
     if capture.get('version') != VERSION:
@@ -76,7 +76,7 @@ def main():
     for name, digest in arm['png_sha256'].items():
         if not re.fullmatch(r'[a-z0-9][a-z0-9-]*\.png', name):
             raise ValueError('Invalid target-runtime capture filename')
-        path = ROOT/'validation/arm-probe-v0.3.2'/name
+        path = ROOT/'validation/arm-probe-v0.4.0'/name
         if (not path.is_file() or path.is_symlink()
                 or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
             raise ValueError('Target-runtime capture missing or changed: ' + name)
