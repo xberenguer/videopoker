@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "version": "0.3.2",
+  "status": "PASS",
+  "baseline_version": "0.3.1",
+  "native_pngs_compared": 18,
+  "unchanged_screens": 16,
+  "intentional_notice_changes": [
+    "insufficient-credits",
+    "shuffle-wait"
+  ],
+  "ui_sha256": "23068de55a15f32239043286c7afcd2aa6d767c0252c7c3e43b4863fc89cc2ee",
+  "engine_sha256": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d",
+  "asset_manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
+  "screens": [
+    {
+      "name": "ready",
+      "identical": true,
+      "current_sha256": "2979b24f7eb66dd6aa2bb193b6afa72b0eb9f005d0120975c92d7bcbbcfe8831"
+    },
+    {
+      "name": "hold",
+      "identical": true,
+      "current_sha256": "e60adcbfce62202bb2c4e78e4e8e544efff0252e1198e3aa6c1b1ba1b71defcc"
+    },
+    {
+      "name": "result",
+      "identical": true,
+      "current_sha256": "a1011f0a43a1feca03c34b9337da5f0ebb5c578aa85dc16a084be9c1a35c6688"
+    },
+    {
+      "name": "multiplier-result",
+      "identical": true,
+      "current_sha256": "c68b298c90481d24f6cea528bad491da866a0587c27c3e33d74531e5724f4737"
+    },
+    {
+      "name": "inspect",
+      "identical": true,
+      "current_sha256": "3c4dd6c4a4a6dffa7ad2bcfd30edd805eeb693926f3e80bcdfced0478ecd7904"
+    },
+    {
+      "name": "gold-controls",
+      "identical": true,
+      "current_sha256": "496e8832ba179757e28358be4437a6a50d18a2d23dddbe00556309fcdedccd41"
+    },
+    {
+      "name": "paytable",
+      "identical": true,
+      "current_sha256": "dd4ed2bb5506d7b2d25a76153c2e7b4328e0cad6dc4dfc87217f829c1e2255a3"
+    },
+    {
+      "name": "paytable-bonus",
+      "identical": true,
+      "current_sha256": "87527b395d4aea8b2644d9272aebc512e621a44c62c145cc911a0fe24e310d50"
+    },
+    {
+      "name": "help-1",
+      "identical": true,
+      "current_sha256": "b51958bc83f66d05faf822e40cfab7c89915b977028251c5513d4d39d64f752b"
+    },
+    {
+      "name": "help-2",
+      "identical": true,
+      "current_sha256": "39f542d41bec3e11548517732755b051fc3259bb0a420b2ecd61b59201112db8"
+    },
+    {
+      "name": "help-3",
+      "identical": true,
+      "current_sha256": "df4eca6c8134caac5617ff7c24167b70d35df70badbc8ce66e86a79278b972cf"
+    },
+    {
+      "name": "help-4",
+      "identical": true,
+      "current_sha256": "9169e46a1d4d5234f31a89fb1ea793923950419cf8e2e9a3f1a4c8e87ef0f0b5"
+    },
+    {
+      "name": "partial-hands",
+      "identical": true,
+      "current_sha256": "f469c8aa11b874958e4b5a25747c894525684ac94089380e1ebc6ab4a33f3dbe"
+    },
+    {
+      "name": "single-hand-ready",
+      "identical": true,
+      "current_sha256": "efb388d23aaba2004c35c2fc5ae76639664d8a8726c9720913bf2bf9368e6eab"
+    },
+    {
+      "name": "hold-help-1",
+      "identical": true,
+      "current_sha256": "ca53e052c91705bddadae1aad6f9b57d650568c5f99800976a0ba563f76beb27"
+    },
+    {
+      "name": "hold-help-2",
+      "identical": true,
+      "current_sha256": "fbc12733a6a9bb6bf5108ecbcc5765060670043f1d7697b59cb31920ce29d577"
+    },
+    {
+      "name": "insufficient-credits",
+      "identical": false,
+      "current_sha256": "2d313ca811bb9dce9fc3b3d0f04fe1bf741dbb1b8a5a4df37ea62d3fa2b0d748"
+    },
+    {
+      "name": "shuffle-wait",
+      "identical": false,
+      "current_sha256": "7a136daf3a3595cbec7909d24c18d3862ad3cdb14ba868161c7a258c41574f4f"
+    }
+  ],
+  "scope": "Updated physical control names on recovery/credits notices; all eight README gallery frames unchanged"
+}

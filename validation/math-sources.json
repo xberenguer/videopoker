@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "checked_date": "2026-11-10",
+  "implementation": "Independent original code, classic 10-hand 9/6 Double Double Bonus with next-hand multipliers",
+  "references": [
+    {
+      "url": "https://wizardofodds.com/games/video-poker/tables/ultimate-x/",
+      "title": "Ultimate X -- Multi-Line, Double Double Bonus 9/6 table, 10-Play column",
+      "use": "Payout schedule and ten-hand future-multiplier schedule; distinguishes this from three/five play and single-line variants",
+      "kind": "Original mathematical analysis by Wizard of Odds"
+    },
+    {
+      "url": "https://assets.lotoquebec.com/ressources/assets/v3/assets/blt8296e79a7001648c/blt356b997b1c75bb8a/65a6ca31cdbb964331c4f545/ultimate-x-five-play-poker_rules_en.pdf",
+      "title": "IGT Ultimate X Five Play Poker rules, published by Loto-Quebec",
+      "use": "Shared initial five cards and holds; each line draws from its own remaining 47-card deck; multipliers apply next game to corresponding line; bonus-off retains earned multipliers; dealt royal auto-hold and settle",
+      "limit": "Five-play manual is a primary mechanics reference, not the source of the ten-play multiplier schedule"
+    },
+    {
+      "url": "https://www.videopoker.com/play/?game=69&title=Ultimate+X+Poker",
+      "title": "VideoPoker.com Ultimate X Poker",
+      "use": "Vendor page and authenticated selected classic ten-play 9/6 DDB screenshots confirm the chosen game, payout columns, multiplier table and help behavior",
+      "limit": "Public client behavior was inspected read-only in bounded static contexts; no access to proprietary server RNG or server math implementation. Vendor source, artwork and sounds are not included in the runtime or distributable source archive."
+    },
+    {
+      "url": "https://wizardofvegas.com/articles/ultimate-expected-value/",
+      "title": "Ultimate Expected Value",
+      "use": "Firsthand classic Ultimate X observation: prior multipliers pay below five credits, and unplayed hand positions lose their multipliers on a deal",
+      "limit": "Casino observation corroborates the classic rule contract; it is not a direct audit of VideoPoker.com server settlement"
+    }
+  ],
+  "rng": "Private Python random.SystemRandom instance using OS entropy and unbiased random.sample without replacement; where getrandom is available, a nonblocking readiness check prevents early-boot UI blocking, with no deterministic or weaker fallback",
+  "storage": "Session state is RAM only and resets on reboot",
+  "credit_value": "Play credits only; no deposits, cashout or external prizes",
+  "official_reference_screens": [
+    {
+      "file": "reference/official-ten-play-pays.png",
+      "sha256": "62deabb753bf0b3882d3e12f7246d180399bb84e38d3671276b1253c19f86600",
+      "observed": "Actual VideoPoker.com classic ten-play 9/6 DDB payout columns: royal250,500,750,1000,4000 for base1..5; all other categories linear. Ten-play multiplier table exactly matches the engine."
+    },
+    {
+      "file": "reference/official-help-1.png",
+      "sha256": "0025f97b48c12a8ebb0ae2064720f0e13659c2b3ec789c354106bd9247d8a45b",
+      "observed": "Maximum credits per hand activates Ultimate X; multiplier is awarded to corresponding next hand; shared held cards appear on all active hands."
+    },
+    {
+      "file": "reference/official-help-2.png",
+      "sha256": "38d729a296cfbed2707c54942c6b3b108ce2f4b702971f8010f04bd8330d7f9f",
+      "observed": "Each hand draws independently from separate52-card deck excluding the initially dealt5cards; only highest winner paid."
+    },
+    {
+      "file": "reference/official-help-3.png",
+      "sha256": "dcfa29efbbf6ac1a2ab56fb86628a52b3c126e3c8a8ec03e0e559c5ea4b2e1d9",
+      "observed": "Deal starts at currentbet; Speed changes game speed; SelectHands changes activehands; BetPerHand changescreditsbetperline."
+    },
+    {
+      "file": "reference/official-help-4.png",
+      "sha256": "8772ab8b7e6c64b4135579dd2a1d2efb3efe4c6f8f06370d5341ccf8b8b5dff8",
+      "observed": "BET MAX setsmaximumcredits and starts the game."
+    }
+  ],
+  "variable_bet_scope": {
+    "bet_choices_per_hand": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      10
+    ],
+    "feature_earns_multipliers_only_at": 10,
+    "base_bet_at_feature": 5,
+    "royal_base_payouts_by_coin": [
+      250,
+      500,
+      750,
+      1000,
+      4000
+    ],
+    "bet_max_starts_game": true,
+    "add_credits_preserves_session": true,
+    "multiplier_behavior_at_lower_bet": "A single pending ten-position board applies at any1..5/10creditwager. All pending entries are consumed on the next deal, including forfeiture on inactive positions. New multipliers are earned only at10credits. Classic rule contract corroborated by firsthand casino account; server implementation not independently audited.",
+    "active_hand_range": [
+      1,
+      10
+    ],
+    "select_hands_only_at_one_credit": true,
+    "gameplay_api": "Independent original implementation; not a copy of vendor client or server code"
+  },
+  "reference_client_inspection": {
+    "local_reference": "reference/official-game.min.js",
+    "sha256": "2fa21718f7df75fde2e6d4da207e3cdd1c50993ced634c5c296f1e2cf680f48f",
+    "method": "Bounded static function contexts only; not executed, copied or redistributed",
+    "verified_facts": [
+      "BET PER HAND cycles1,2,3,4,5,10 when all ten positions are active",
+      "SELECT HANDS enabled at one credit; adds one position and wraps10to1",
+      "BET PER HAND on a partial one-credit board activates another position",
+      "First BET PER HAND after a settled round resets all ten positions to one credit",
+      "BET MAX sets all ten positions to ten credits and starts a deal when credits suffice",
+      "BET MAX short funds configures floor(credits/10) ordinary coins capped5, without a deal; tiny fallback selectsonecoin",
+      "BET PER HAND affordability check uses10*min(currentcoins+1,5), otherwise selectsall10onecoin",
+      "Royal initial deal automatically holds all five and starts the draw settlement",
+      "Win rollup timing is client presentation; payout math arrives from server",
+      "SEE PAYS preview is independent of the actual game wager, initialized1 and retained across opens; BET UP/DOWN follows1,2,3,4,5,10 without wrapping",
+      "SEE PAYS preview10 highlights the five-credit payout column and multiplier column; preview1..5 highlights only the corresponding payout column"
+    ],
+    "server_settlement_audited": false
+  },
+  "vendor_gameplay_source_copied": false,
+  "public_website_visual_assets_included": true,
+  "visual_asset_manifest": "payload/opt/dino/assets/videopoker/manifest.json",
+  "math_unchanged_since_version": "0.2.0"
+}

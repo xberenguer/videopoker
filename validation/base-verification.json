@@ -1,0 +1,13 @@
+{
+  "release": "0.8.7",
+  "image": "seedsigner_os.0.8.7.pi0.img",
+  "sha256": "67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9",
+  "checksum_matches": true,
+  "detached_signature_valid": true,
+  "expected_primary_fingerprint": "46739B74B56AD88F14B0882EC7EF709007260119",
+  "gpg_validsig_status": [
+    "[GNUPG:] VALIDSIG 46739B74B56AD88F14B0882EC7EF709007260119 2026-07-07 1783443825 0 4 0 1 10 00 46739B74B56AD88F14B0882EC7EF709007260119"
+  ],
+  "key_url": "https://keybase.io/seedsigner/pgp_keys.asc",
+  "fingerprint_source": "https://keybase.io/_/api/1.0/user/lookup.json?usernames=seedsigner"
+}

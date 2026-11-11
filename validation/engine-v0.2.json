@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "tests_run": 30,
+  "test_file": "tests/test_poker_engine.py",
+  "rules": "Classic ten-play9/6DDB as observed in vendor screens/client help, with classic bank contract and server audit limitation documented",
+  "code_sha256": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d",
+  "eval_algorithm_changed_since_exhaustive_validation": false,
+  "source_and_reference_limits": "math-sources.json",
+  "physical_hardware_tested": false,
+  "entropy_readiness_guard": "Nonblocking getrandom(1, GRND_NONBLOCK) before SystemRandom sampling; BlockingIOError produces RandomNotReady and leaves state unchanged; no weaker RNG fallback"
+}

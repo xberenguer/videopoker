@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "scope": "Local original-byte SHA and exact decoded frame-0 RGBA identity; not a license clearance or whole-screen match",
+  "manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
+  "asset_count": 146,
+  "runtime_pngs_verified": 146,
+  "public_source_images": 144,
+  "exact_rgba_pixel_identities": 144,
+  "identity_set_sha256": "e98872456aa15cd474e3d0eccaf5c2f84131b6ca3b3f6b106400f4629645a25e",
+  "roles": {
+    "active-badge-frame": 13,
+    "background": 3,
+    "card-back": 2,
+    "card-front": 52,
+    "glyph-atlas-bold": 1,
+    "glyph-atlas-regular": 1,
+    "gui": 23,
+    "help-control": 7,
+    "help-screen": 6,
+    "inactive-badge-frame": 7,
+    "multiplier": 14,
+    "multiplier-label": 1,
+    "win-indicator": 16
+  },
+  "source_animation_policy": "Every cached source must have exactly one frame; badge animation uses individually preserved source files",
+  "unsupported_lost_animation": [],
+  "badge_sequence_frames": 20,
+  "font_provenance": [
+    {
+      "style": "bold",
+      "source_sha256": "d72db21f9242aedd6b917d8549ad5921766b24d5f8d0becfda2ff4c620b3c2e0",
+      "atlas_sha256": "c7bf3ae9acb57cf298c3522a2e11c29eca05bf50f635554aac7bf5a1f596b181",
+      "selected_glyphs_checked": 95
+    },
+    {
+      "style": "regular",
+      "source_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+      "atlas_sha256": "271f146256e9bde6fc3488aaf3d1b5f04e7c030db7f206e95ac5b7f418f29f2b",
+      "selected_glyphs_checked": 95
+    }
+  ],
+  "selected_font_glyphs_verified": 190,
+  "raw_fonts_in_payload": [],
+  "network_used": false,
+  "failures": []
+}

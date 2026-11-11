@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "version": "0.3.1",
+  "status": "MEASURED_WITHOUT_PASS_THRESHOLD",
+  "ui_sha256": "d9c95cbe2d667075cb18e0df7f72ef175f0b5356dda0a1229d0503144ff2dc97",
+  "asset_manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
+  "state": {
+    "phase": "ready",
+    "active_hands": 1,
+    "bet_per_hand": 1,
+    "credits": 10000,
+    "ui_speed": 1,
+    "badge_elapsed_seconds": 0
+  },
+  "v02": {
+    "status": "MEASURED_WITHOUT_PASS_THRESHOLD",
+    "candidate_sha256": "e83c8533e96d3e5d91b9f1395fe0d3ef5f750127b7d4bb891e97159e49c0db5d",
+    "reference_sha256": "5e43dc41e03b0c0bb3541e85c75c7b0ae10b79c76adfebe24eef502412b22e5f",
+    "reference_original_size": [
+      664,
+      498
+    ],
+    "comparison_size": [
+      320,
+      240
+    ],
+    "reference_format": "JPEG",
+    "reference_is_lossy": true,
+    "method": "Full reference RGB resized once using Pillow LANCZOS; no crop, shift, masks or color adjustment",
+    "mean_absolute_rgb_error": 38.823515625,
+    "root_mean_squared_rgb_error": 60.49884497290469,
+    "psnr_db": 12.495861942632146,
+    "exact_rgb_pixel_fraction": 0.0119140625,
+    "scope": "Only the supplied captured state; browser compression, labels, state and font rasterization count as differences"
+  },
+  "reference_url": "https://www.videopoker.com/play/?game=69&title=Ultimate+X+Poker",
+  "mean_error_reduction_fraction": 0.4414267600289683,
+  "current": {
+    "status": "MEASURED_WITHOUT_PASS_THRESHOLD",
+    "candidate_sha256": "efb388d23aaba2004c35c2fc5ae76639664d8a8726c9720913bf2bf9368e6eab",
+    "reference_sha256": "5e43dc41e03b0c0bb3541e85c75c7b0ae10b79c76adfebe24eef502412b22e5f",
+    "reference_original_size": [
+      664,
+      498
+    ],
+    "comparison_size": [
+      320,
+      240
+    ],
+    "reference_format": "JPEG",
+    "reference_is_lossy": true,
+    "method": "Full reference RGB resized once using Pillow LANCZOS; no crop, shift, masks or color adjustment",
+    "mean_absolute_rgb_error": 21.68577690972222,
+    "root_mean_squared_rgb_error": 38.12376301499645,
+    "psnr_db": 16.50688838425848,
+    "exact_rgb_pixel_fraction": 0.00921875,
+    "scope": "Only the supplied captured state; browser compression, labels, state and font rasterization count as differences"
+  }
+}
