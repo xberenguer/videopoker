@@ -202,6 +202,13 @@ class SampledInput:
             return dict(self._stats)
 
     @property
+    def pressed_mask(self):
+        """Current debounced levels; startup and fault recovery are neutral."""
+        with self._lock:
+            buttons = self.router.buttons
+            return buttons.stable if buttons.armed else 0
+
+    @property
     def gesture_pending(self):
         """Expose chord suppression without allowing the UI to own its state."""
         with self._lock:
@@ -361,6 +368,10 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                                 pause = getattr(ui, "pause_autoplay", None)
                                 if callable(pause):
                                     pause()
+                            pressed_mask = getattr(inputs, "pressed_mask", None)
+                            set_pressed_mask = getattr(ui, "set_pressed_mask", None)
+                            if pressed_mask is not None and callable(set_pressed_mask):
+                                dirty = bool(set_pressed_mask(pressed_mask)) or dirty
                             handle_sampled = getattr(ui, "handle_sampled", None)
                             for captured_at, action in timed_actions:
                                 if callable(handle_sampled):

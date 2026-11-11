@@ -522,10 +522,11 @@ class PokerUI:
     """
     SPEEDS = (0.13, 0.065, 0.0)
     DOUBLE_UP_SECONDS = 0.35
-    HINT_FLASH_SECONDS = 0.28
-    AUTO_HINT_SECONDS = 0.60
-    AUTO_HOLD_SECONDS = 0.15
-    AUTO_RESULT_SECONDS = 1.0
+    UP_MASK = 1
+    AUTO_CONSIDER_SECONDS = 6.0
+    AUTO_SELECT_SECONDS = 0.65
+    AUTO_HOLD_SECONDS = 2.0
+    AUTO_RESULT_SECONDS = 4.0
 
     def __init__(self, session=None, width=WIDTH, height=HEIGHT, font_dir=None, clock=time.monotonic, advisor=None):
         if (width, height) != (WIDTH, HEIGHT):
@@ -556,15 +557,44 @@ class PokerUI:
         self._advisor_token = None
         self._advisor_board = None
         self._advice = None
-        self._advice_notice = False
-        self._hint_started = None
-        self._hint_flash = False
+        self._up_held = False
+        self._hint_failed_key = None
         self._last_up = None
         self._captured_input_at = None
         self.autoplay = False
         self._auto_stage = None
         self._auto_due = None
+        self._auto_index = None
         self._closed = False
+
+    def set_pressed_mask(self, mask):
+        """Apply current stable GPIO state before dispatching queued edges.
+
+        A released UP edge may arrive late after drawing. It can contribute to
+        a sampled-time double press, but can never leave a stale hint visible.
+        """
+        if self._closed:
+            return False
+        if type(mask) is not int or not 0 <= mask < 256:
+            raise ValueError('Invalid pressed button mask')
+        held = bool(mask & self.UP_MASK)
+        if held == self._up_held:
+            return False
+        self._up_held = held
+        self._hint_failed_key = None
+        if not held and not self.autoplay:
+            # Preserve _last_up: a real double tap has a release between edges.
+            return self._cancel_advice()
+        return False
+
+    @property
+    def hint_visible(self):
+        if (not self._up_held or self.autoplay or self.menu is not None
+                or self.button_focus is not None or self.notice or self._animation is not None
+                or self._advice is None):
+            return False
+        state = self.session.snapshot()
+        return state['phase'] == 'hold' and self._advisor_board == self._advice_key(state)
 
     def handle_sampled(self, action, captured_at):
         """Keep gesture timing tied to GPIO edges through a slow LCD update."""
@@ -632,7 +662,7 @@ class PokerUI:
 
     def _clear_notice(self):
         self.notice = None
-        self._credit_notice = self._entropy_notice = self._advice_notice = False
+        self._credit_notice = self._entropy_notice = False
         self._retry_max_bet = False
 
     @staticmethod
@@ -651,8 +681,6 @@ class PokerUI:
     def _cancel_advice(self):
         had_advice = self._advisor_token is not None or self._advice is not None
         self._advisor_token = self._advisor_board = self._advice = None
-        self._hint_started = None
-        self._hint_flash = False
         if had_advice and self._advisor is not None:
             try:
                 self._advisor.cancel()
@@ -663,7 +691,7 @@ class PokerUI:
     def pause_autoplay(self):
         changed = self.autoplay or self._advisor_token is not None or self._advice is not None
         self.autoplay = False
-        self._auto_stage = self._auto_due = None
+        self._auto_stage = self._auto_due = self._auto_index = None
         self._last_up = None
         return self._cancel_advice() or changed
 
@@ -678,24 +706,25 @@ class PokerUI:
         self._closed = True
 
     def _strategy_failed(self):
+        failed_key = self._advisor_board or self._advice_key(self.session.snapshot())
+        last_up = self._last_up
         self.pause_autoplay()
-        self._clear_notice()
-        self.notice = 'Best hold unavailable'
-        self._advice_notice = True
+        self._last_up = last_up
+        # A failed peek stays silent and does not spin up another request every
+        # frame. Releasing and pressing UP again permits an explicit retry.
+        self._hint_failed_key = failed_key
         return True
 
     def _request_hint(self, now):
         state = self.session.snapshot()
-        if state['phase'] != 'hold':
-            self._clear_notice()
-            self.notice = 'Deal a hand for a hint'
-            self._advice_notice = True
-            return True
+        if state['phase'] != 'hold' or (not self.autoplay and not self._up_held):
+            return False
         key = self._advice_key(state)
+        if not self.autoplay and key == self._hint_failed_key:
+            return False
         if key == self._advisor_board and (self._advisor_token is not None or self._advice is not None):
             return False
         self._cancel_advice()
-        self._clear_notice()
         try:
             advisor = self._get_advisor()
             token = advisor.request(state)
@@ -718,15 +747,20 @@ class PokerUI:
                 self._clear_notice()
                 self.autoplay = True
                 phase = self.session.snapshot()['phase']
-                self._auto_stage = 'solve' if phase == 'hold' else ('result-animation' if phase == 'result' else 'deal')
-                self._auto_due = now
+                self._auto_stage = 'consider' if phase == 'hold' else ('result-animation' if phase == 'result' else 'deal')
+                self._auto_due = None if phase == 'hold' else now
+                self._auto_index = None
                 if phase == 'hold': self._request_hint(now)
             return True
         if self.autoplay:
             return True
-        return self._request_hint(now)
+        if self._animation is None and self.notice is None:
+            return self._request_hint(now)
+        return False
 
     def _poll_advice(self, now):
+        if not self.autoplay and not self._up_held:
+            return self._cancel_advice()
         if self._advisor_board is not None and self._advisor_board != self._advice_key(self.session.snapshot()):
             self.pause_autoplay()
             return True
@@ -749,8 +783,6 @@ class PokerUI:
             return self._strategy_failed()
         self._advisor_token = None
         self._advice = dict(answer)
-        self._hint_started = now
-        self._hint_flash = True
         return True
 
     def _update_autoplay(self, now):
@@ -774,30 +806,47 @@ class PokerUI:
             if self.notice:
                 self.pause_autoplay()
             elif self.session.snapshot()['phase'] == 'hold':
-                self._auto_stage = 'solve'
+                self._auto_stage, self._auto_due = 'consider', None
                 self._request_hint(now)
             else:
                 self._auto_stage = 'result-animation'
             return True
-        if stage == 'solve':
+        if stage == 'consider':
             if phase != 'hold':
                 self.pause_autoplay()
                 return True
+            if self._auto_due is None:
+                # The six-second look starts only after the full deal reveal,
+                # independent of animation SPEED or advisor completion time.
+                self._auto_due = now+self.AUTO_CONSIDER_SECONDS
+                return True
+            if self._advice is None and self._advisor_token is None:
+                return self._request_hint(now)
+            if now < self._auto_due:
+                return False
             if self._advice is None:
-                return self._request_hint(now) if self._advisor_token is None else False
-            self._auto_stage, self._auto_due = 'show', now+self.AUTO_HINT_SECONDS
+                return False
+            if phase != 'hold' or self._advisor_board != self._advice_key(state) or self._advice is None:
+                self.pause_autoplay()
+                return True
+            self.selected_card = self._auto_index = 0
+            self._auto_stage, self._auto_due = 'select', now+self.AUTO_SELECT_SECONDS
             return True
-        if stage == 'show':
+        if stage == 'select':
             if now < self._auto_due:
                 return False
             if phase != 'hold' or self._advisor_board != self._advice_key(state) or self._advice is None:
                 self.pause_autoplay()
                 return True
-            mask = self._advice['mask']
-            for index, held in enumerate(state['held']):
-                if held != bool(mask & (1 << index)):
-                    self.session.toggle_hold(index)
-            self._auto_stage, self._auto_due = 'draw', now+self.AUTO_HOLD_SECONDS
+            index = self._auto_index
+            if state['held'][index] != bool(self._advice['mask'] & (1 << index)):
+                self.session.toggle_hold(index)
+            if index == 4:
+                self._auto_stage, self._auto_due = 'draw', now+self.AUTO_HOLD_SECONDS
+            else:
+                self._auto_index = self.selected_card = index+1
+                # Never catch up multiple card selections after a slow frame.
+                self._auto_due = now+self.AUTO_SELECT_SECONDS
             return True
         if stage == 'draw':
             if now < self._auto_due:
@@ -819,7 +868,6 @@ class PokerUI:
     def _play(self, max_bet=False):
         before = self.session.snapshot()
         self._cancel_advice()
-        self._advice_notice = False
         try:
             if before['phase'] == 'hold':
                 if max_bet: return False
@@ -924,13 +972,12 @@ class PokerUI:
         if self._closed:
             return False
         dirty = self._update_visual(now)
+        if (self._up_held and not self.autoplay and self.menu is None
+                and self.button_focus is None and self.notice is None
+                and self._animation is None):
+            dirty = self._request_hint(now) or dirty
         dirty = self._poll_advice(now) or dirty
         dirty = self._update_autoplay(now) or dirty
-        flashing = (self._advice is not None and self._animation is None
-                    and int(max(0.0, now-self._hint_started)/self.HINT_FLASH_SECONDS) % 2 == 0)
-        if flashing != self._hint_flash:
-            self._hint_flash = flashing
-            dirty = True
         return dirty
 
     def _update_visual(self, now):
@@ -987,40 +1034,30 @@ class PokerUI:
             d = ImageDraw.Draw(image)
             d.rounded_rectangle((8, 76, 312, 154), radius=4, fill=(0, 0, 0), outline=GOLD, width=2)
             self.renderer.center(d, 160, 88, self.notice[:48], 10, GOLD, True)
-            self.renderer.center(d, 160, 107, 'DOWN: ADD 10,000' if self._credit_notice else 'UP: HINT  DOUBLE UP: AUTO' if self._advice_notice else 'DOWN: RETRY', 11, WHITE, True)
+            self.renderer.center(d, 160, 107, 'DOWN: ADD 10,000' if self._credit_notice else 'DOWN: RETRY', 11, WHITE, True)
             detail = ('Existing multipliers are kept.' if self._credit_notice else
                       'Cards and credits are unchanged.' if self._entropy_notice else
-                      'DOWN DEALS  K3 CONTROLS' if self._advice_notice else 'K3: GAME CONTROLS')
+                      'K3: GAME CONTROLS')
             self.renderer.center(d, 160, 127, detail, 10, MUTED)
         return image
 
     def _draw_advice(self, image):
-        if self.menu is not None or self.button_focus is not None:
+        if not self.hint_visible:
             return
         state = self.session.snapshot()
-        if (self._hint_flash and self._advice is not None and state['phase'] == 'hold'
-                and self._advisor_board == self._advice_key(state) and self._animation is None):
-            draw = ImageDraw.Draw(image)
-            for index in range(5):
-                if not self._advice['mask'] & (1 << index):
-                    continue
-                source_left = 103+87*index
-                left = int(math.floor(source_left/2.0))
-                right = int(math.ceil((source_left+83)/2.0))-1
-                center = int(round((source_left+41)/2.0))
-                held_box = (center-15, 184, center+15, 202) if state['held'][index] else None
-                held_pixels = image.crop(held_box) if held_box else None
-                draw.rounded_rectangle((left-2, 131, right+2, 196), radius=3,
-                                       outline=(0, 0, 0), width=4)
-                draw.rounded_rectangle((left-1, 132, right+1, 195), radius=2,
-                                       outline=(255, 32, 32), width=2)
-                if held_pixels is not None:
-                    image.paste(held_pixels, held_box[:2])
-        status = ('ANALYZING' if self._advisor_token is not None else
-                  ('HOLD RED CARDS' if self._advice['mask'] else 'DRAW FIVE') if self._advice is not None else '')
-        if self.autoplay:
-            status = 'AUTO: '+(status or 'PLAYING')
-        if status:
-            draw = ImageDraw.Draw(image)
-            draw.rounded_rectangle((94, 197, 224, 208), radius=3, fill=(0, 0, 0), outline=GOLD)
-            self.renderer.center(draw, 159, 198, status, 7, WHITE, True)
+        draw = ImageDraw.Draw(image)
+        for index in range(5):
+            if not self._advice['mask'] & (1 << index):
+                continue
+            source_left = 103+87*index
+            left = int(math.floor(source_left/2.0))
+            right = int(math.ceil((source_left+83)/2.0))-1
+            center = int(round((source_left+41)/2.0))
+            held_box = (center-15, 184, center+15, 202) if state['held'][index] else None
+            held_pixels = image.crop(held_box) if held_box else None
+            draw.rounded_rectangle((left-2, 131, right+2, 196), radius=3,
+                                   outline=(0, 0, 0), width=4)
+            draw.rounded_rectangle((left-1, 132, right+1, 195), radius=2,
+                                   outline=(255, 32, 32), width=2)
+            if held_pixels is not None:
+                image.paste(held_pixels, held_box[:2])
