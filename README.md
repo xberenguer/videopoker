@@ -9,7 +9,7 @@
 
 An independent, offline video poker frontend for SeedSigner Play and compatible Plus hardware. Play classic 10-hand **9/6 Double Double Bonus** with next-hand multipliers, then use the outer-button gesture to open SeedSigner. Use best-hold hints or let autoplay play the hands. Virtual credits only; game state resets when powered off.
 
-[Download v0.4.0](https://github.com/xberenguer/videopoker/releases/tag/v0.4.0) · [Build and validation](docs/TECHNICAL.md) · [Licenses and credits](#licenses-and-credits)
+[Download v0.4.1](https://github.com/xberenguer/videopoker/releases/tag/v0.4.1) · [Build and validation](docs/TECHNICAL.md) · [Licenses and credits](#licenses-and-credits)
 
 This is an experimental community project, not an official SeedSigner, BitKit, IGT, Action Gaming or VideoPoker.com release.
 
@@ -36,7 +36,7 @@ Actual software-rendered game screens at **320 × 240**, enlarged for readabilit
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/hint-on.png" alt="Holding UP shows solid red borders around the three aces" width="400"><br><strong>Hold UP to peek</strong></td>
-    <td align="center"><img src="docs/screenshots/autoplay.png" alt="Autoplay selects cards with normal yellow focus and HELD tags" width="400"><br><strong>Hands-free autoplay</strong></td>
+    <td align="center"><img src="docs/screenshots/autoplay.png" alt="Autoplay with a small A indicator, normal yellow focus and HELD tags" width="400"><br><strong>Hands-free autoplay</strong></td>
   </tr>
 </table>
 
@@ -44,8 +44,8 @@ Actual software-rendered game screens at **320 × 240**, enlarged for readabilit
 
 Designed for a **Raspberry Pi Zero 1.3** with the **320 × 240 ST7789** display and standard SeedSigner buttons, including SeedSigner Play and compatible Plus HATs. Other boards and the regular 240 × 240 display are not qualified by this release.
 
-1. Download `seedsigner-v0.8.7-poker-v0.4.0-peek-play-plus-pi0.img` and its matching `.sha256` file from the [v0.4.0 release](https://github.com/xberenguer/videopoker/releases/tag/v0.4.0).
-2. Verify the download with `shasum -a 256 -c seedsigner-v0.8.7-poker-v0.4.0-peek-play-plus-pi0.img.sha256`.
+1. Download `seedsigner-v0.8.7-poker-v0.4.1-play-plus-pi0.img` and its matching `.sha256` file from the [v0.4.1 release](https://github.com/xberenguer/videopoker/releases/tag/v0.4.1).
+2. Verify the download with `shasum -a 256 -c seedsigner-v0.8.7-poker-v0.4.1-play-plus-pi0.img.sha256`.
 3. In Raspberry Pi Imager, choose **Use custom**, select the IMG and write it to your intended microSD card. This erases that card; let verification finish.
 4. Insert the card and power on. The device starts in poker.
 
@@ -58,19 +58,19 @@ To open SeedSigner, hold the **top + bottom action buttons** together for **two 
 | D-pad left / right | Select a card; move between focused gold controls |
 | Either middle button: D-pad center or right middle | Hold / unhold the selected card; after completed results, deal the next hand; confirm in menus |
 | D-pad DOWN | Deal / Draw; skip a running animation without placing another bet |
-| D-pad UP | Hold to peek at the best hold; release to clear. Double-tap within 350 ms to toggle autoplay |
+| D-pad UP | Hold to peek at the best hold; release to clear. Click three times, with at most 350 ms between adjacent clicks, to start autoplay |
 | Top action button | Hold / unhold; after results, open hand details |
 | Bottom action button | Focus the gold controls; return to cards or leave a menu |
 | Up / down inside menus or result details | Navigate the current menu or result hands |
 | Top + bottom, hold two seconds, then release all | Open SeedSigner |
 
-The selected card has a bold yellow border and pointer. Recommended cards have solid **red** borders only while UP is held; release clears the peek. Autoplay uses the ordinary yellow selection and HELD tags. The selected gold control has a full white outline. Any other manual button pauses autoplay before performing its normal action. Autoplay also pauses if credits, randomness or advice are unavailable; it never refills credits automatically.
+The selected card has a bold yellow border and pointer. Recommended cards have solid **red** borders only while UP is held; release clears the peek. Autoplay uses the ordinary yellow selection and HELD tags. The selected gold control has a full white outline. Any button click stops autoplay and is consumed without dealing, changing a hold or opening a menu. Press again for its normal action. Autoplay also pauses if credits, randomness or advice are unavailable; it never refills credits automatically.
 
 ## Hints and autoplay
 
-Hold **UP** after a deal to peek at the recommended cards in solid red. Release UP to return immediately to the normal board. There are no hint banners or extra screens. Double-tap **UP** to start or stop autoplay; menus keep their ordinary navigation controls.
+Hold **UP** after a deal to peek at the recommended cards in solid red. Release UP to return immediately to the normal board. There are no hint banners or extra screens. Click **UP three times** to start autoplay. A small yellow **A** appears at the top left while it is active. Click any button to stop; that click performs no other action. Menus keep their ordinary navigation controls.
 
-Autoplay plays at a human pace: it considers the dealt hand for at least six seconds, selects cards from left to right at 0.65 seconds per card, waits two seconds after choosing holds, then draws. Settled results remain visible for four seconds before the next deal. It uses the normal yellow card pointer and HELD tags, with no red hints or autoplay labels. A round normally takes about 15–18 seconds, depending on animation and advice time.
+Autoplay plays at a human pace: it considers the dealt hand for at least six seconds, selects cards from left to right at 0.65 seconds per card, waits two seconds after choosing holds, then draws. Settled results remain visible for four seconds before the next deal. It uses the normal yellow card pointer and HELD tags, with no red hints or extra banners. The small yellow A is the only autoplay indicator. A round normally takes about 15–18 seconds, depending on animation and advice time.
 
 The advisor evaluates all 32 holds using exhaustive counts for the remaining 47-card deck. In ten-hand feature play, its numerical expected-value strategy accounts for both the **current multipliers** and the value of the **next hand's multipliers**. Ordinary lower-coin play uses payout expected value. It sees only the visible hand and round settings; it cannot predict the next draw.
 
@@ -91,9 +91,9 @@ The display uses the reference site's card and interface artwork with independen
 
 ## Validation
 
-Stock ARMv6 functional emulation also passed three paced autoplay rounds and the held-hint/release pixel checks. Its virtual instruction and presentation clocks do not qualify physical timing.
+Stock ARMv6 functional emulation also passed three paced autoplay rounds and the held-hint/release pixel checks, captured-timestamp triple-click activation, the A indicator and consumed-button cancellation. Its virtual instruction and presentation clocks do not qualify physical timing.
 
-The current source passes **185 functional host checks**, with no failures, errors or skips. Wall-clock input timing remains unqualified under host contention. The [validation reports](validation/release-validation.json) record source-bound host checks, independent enumeration of **2,598,960 five-card hands**, image readback and stock ARMv6 runtime checks. The hint/autoplay tests cover cancellation, stale results, animation guards, insufficient credits and worker shutdown. Strategy counts are independently enumerated, and the full-game policy is checked numerically. See the reports for the exact release results and scope.
+The current source passes **188 functional host checks**, with no failures, errors or skips. Wall-clock input timing remains unqualified under host contention. The [validation reports](validation/release-validation.json) record source-bound host checks, independent enumeration of **2,598,960 five-card hands**, image readback and stock ARMv6 runtime checks. The hint/autoplay tests cover cancellation, stale results, animation guards, insufficient credits and worker shutdown. Strategy counts are independently enumerated, and the full-game policy is checked numerically. See the reports for the exact release results and scope.
 
 The supplied photo shows the game on physical SeedSigner Play hardware. It does not establish the exact image hash or a complete camera/signing round trip. Emulator timings are not physical Pi performance measurements. This release has not completed physical cold-boot, button, camera and signing qualification.
 

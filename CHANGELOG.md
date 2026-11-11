@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.1
+
+- Start autoplay with three quick UP clicks instead of two, using captured button timestamps and at most 350 ms between adjacent clicks.
+- Show a small yellow A in the upper-left margin only while autoplay is active, without covering current or next-hand multipliers.
+- Stop autoplay on any button click and consume that click so it cannot also deal, draw, change a hold or open a menu. Press again to resume manual controls.
+- Clear the indicator when the SeedSigner entry gesture begins. Preserve solid-red held-peek hints, normal yellow autoplay selection and the existing slower pace.
+- Preserve the poker math, strategy data, randomness, stock SeedSigner application and image base.
+
+Validation: 188 functional host checks passed with no failures, errors or skips. Stock ARMv6 functional emulation passed three autoplay rounds, delayed-dispatch triple-click activation, indicator-only pixel checks and consumed-key cancellation. Virtual instruction and presentation clocks do not qualify physical timing. No SD card was written and physical cold boot, button timing, camera scanning and signing remain unqualified.
+
 ## 0.4.0
 
 - Make both middle buttons hold/unhold and confirm; after completed results, either middle deals the next hand. DOWN is Deal/Draw, with animation skip guards.
