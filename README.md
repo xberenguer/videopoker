@@ -1,136 +1,79 @@
-<p align="center">
-  <img src="docs/images/seedsigner-play-videopoker.jpg" alt="Video poker running on a SeedSigner Play" width="640">
-</p>
-<p align="center"><em>Running on SeedSigner Play.</em></p>
+![Video Poker running on SeedSigner Play](docs/images/seedsigner-play-videopoker.jpg)
 
 # Video Poker
 
-**Ten hands of Double Double Bonus. One SeedSigner Play.**
+An offline Ultimate X style video poker cabinet for **SeedSigner Play / compatible Plus hardware**, with the twelve-game menu, three-, five- and ten-hand layouts, game-specific paytables, next-hand multipliers, hints and autoplay. Version **0.5.1** includes the twelve-game cabinet, triple-UP autoplay toggle, and fixed maximum wagers.
 
-An independent, offline video poker frontend for SeedSigner Play and compatible Plus hardware. Play classic 10-hand **9/6 Double Double Bonus** with next-hand multipliers, then use the outer-button gesture to open SeedSigner. Use best-hold hints or let autoplay play the hands. Virtual credits only; game state resets when powered off.
+[Download IMG](https://github.com/xberenguer/videopoker/releases/download/v0.5.1/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img) · [SHA-256](https://github.com/xberenguer/videopoker/releases/download/v0.5.1/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img.sha256) · [Matching source](https://github.com/xberenguer/videopoker/releases/download/v0.5.1/seedsigner-poker-v0.5.1-source.tar.gz)
 
-[Download v0.4.8](https://github.com/xberenguer/videopoker/releases/tag/v0.4.8) · [Build and validation](docs/TECHNICAL.md) · [Licenses and credits](#licenses-and-credits)
-
-This is an experimental community project, not an official SeedSigner, BitKit, IGT, Action Gaming or VideoPoker.com release.
+Virtual credits only. State stays in RAM and resets when powered off. This is an independent community project; third-party graphics keep their original rights. It is not an official SeedSigner, BitKit, IGT, Action Gaming or VideoPoker.com release.
 
 ## Screenshots
 
-Actual software-rendered game screens at **320 × 240**, enlarged for readability.
+Actual software renders at 320 × 240, enlarged for readability.
 
-<table>
-  <tr>
-    <td align="center"><img src="docs/screenshots/ready.png" alt="Ready to deal" width="400"><br><strong>Ready to deal</strong></td>
-    <td align="center"><img src="docs/screenshots/hold.png" alt="Select cards and hold" width="400"><br><strong>Select cards and hold</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/result.png" alt="Ten-hand draw results" width="400"><br><strong>Ten-hand draw results</strong></td>
-    <td align="center"><img src="docs/screenshots/multiplier-result.png" alt="Next-hand multipliers" width="400"><br><strong>Next-hand multipliers</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/gold-controls.png" alt="Bottom-row control selection" width="400"><br><strong>Bottom-row control selection</strong></td>
-    <td align="center"><img src="docs/screenshots/paytable-bonus.png" alt="9/6 paytable and multiplier schedule" width="400"><br><strong>9/6 paytable and multiplier schedule</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/inspect.png" alt="Individual hand inspection" width="400"><br><strong>Individual hand inspection</strong></td>
-    <td align="center"><img src="docs/screenshots/help-1.png" alt="Built-in help" width="400"><br><strong>Built-in help</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/hint-on.png" alt="Holding UP shows solid red borders around the three aces" width="400"><br><strong>Hold UP to peek</strong></td>
-    <td align="center"><img src="docs/screenshots/autoplay.png" alt="Autoplay with the A beside the speaker and normal yellow focus and HELD tags" width="400"><br><strong>Hands-free autoplay</strong></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/manual-best-hold.png" alt="Double UP selects the best holds without drawing" width="400"><br><strong>Manual best holds</strong></td>
-    <td align="center"><img src="docs/screenshots/autoplay-fast.png" alt="Fast autoplay adds two filled yellow triangles beside A" width="400"><br><strong>Visible autoplay pace</strong></td>
-  </tr>
-</table>
+| Cabinet | Three hands |
+| --- | --- |
+| ![Twelve-game cabinet](docs/screenshots/cabinet-menu.png) | ![Three-hand Bonus Poker](docs/screenshots/cabinet-bp3-result.png) |
+| Five hands | Ten hands |
+| ![Five-hand Joker Poker](docs/screenshots/cabinet-joker5-result.png) | ![Ten-hand Double Double Bonus](docs/screenshots/cabinet-ddb10-result.png) |
+| Deuces Bonus paytable | Manual autoplay |
+| ![Deuces Bonus paytable](docs/screenshots/cabinet-dwb10-paytable.png) | ![Manual autoplay](docs/screenshots/autoplay-manual-think.png) |
 
-## Get started
+## Games
 
-Designed for a **Raspberry Pi Zero 1.3** with the **320 × 240 ST7789** display and standard SeedSigner buttons, including SeedSigner Play and compatible Plus HATs. Other boards and the regular 240 × 240 display are not qualified by this release.
+| Three hands | Five hands | Ten hands |
+| --- | --- | --- |
+| Bonus Poker | Jacks or Better | Bonus Poker |
+| Bonus Poker Deluxe | Double Bonus | Double Double Bonus |
+| Double Double Bonus | Joker Poker | Triple Double Bonus |
+| Deuces Wild | Deuces Wild | Deuces Bonus Poker |
 
-1. Download `seedsigner-v0.8.7-poker-v0.4.8-play-plus-pi0.img` and its matching `.sha256` file from the [v0.4.8 release](https://github.com/xberenguer/videopoker/releases/tag/v0.4.8).
-2. Verify the download with `shasum -a 256 -c seedsigner-v0.8.7-poker-v0.4.8-play-plus-pi0.img.sha256`.
-3. In Raspberry Pi Imager, choose **Use custom**, select the IMG and write it to your intended microSD card. This erases that card; let verification finish.
-4. Insert the card and power on. The device starts in poker.
+The menu opens on boot. Every game is fixed at **max bet with all 3, 5 or 10 hands active**: ten credits per hand, made up of five base credits plus five feature credits. Tile selection prepares this full board without spending credits; DOWN deals. Bet Per Hand and Select Hands are disabled in this cabinet. BET MAX remains a Deal shortcut. Joker Poker uses a 53-card deck; Deuces Wild variants use wild twos. Triple Double Bonus includes the reference's lower-coin royal and aces-with-kicker exceptions.
 
-To open SeedSigner, hold the **top + bottom action buttons** together for **two seconds**, then release **every button**. Reboot to return to poker.
+Returning from More Games preserves the entire current game. Selecting a tile clears the cards, restores the full max-bet board, preserves shared credits, and restores that game's pending multipliers. Games cannot be changed during a live hand.
 
 ## Controls
 
-| Button | Action |
-| --- | --- |
-| D-pad left / right | Select a card; move between focused gold controls |
-| Either middle button: D-pad center or right middle | Hold / unhold the selected card; after completed results, deal the next hand; confirm in menus |
-| D-pad DOWN | Deal / Draw; skip a running animation without placing another bet |
-| D-pad UP | Manual: hold 0.30 s for a red peek; double-tap to set the best holds. During autoplay: double-tap for the next speed. Triple-tap toggles autoplay on/off |
-| Top action button | Hold / unhold; after results, open hand details |
-| Bottom action button | Focus the gold controls; return to cards or leave a menu |
-| Up / down inside menus or result details | Navigate the current menu or result hands |
-| Top + bottom, hold two seconds, then release all | Open SeedSigner |
+- **D-pad:** navigate the cabinet menu. Either middle button selects a game; bottom right returns from a menu when a game is open.
+- **LEFT / RIGHT:** select a card. **Either middle:** hold/unhold; advance to the next deal after results.
+- **DOWN:** Deal / Draw. A fresh DOWN during draw-result presentation immediately deals the next hand; during a deal reveal it only finishes revealing. Held buttons do not repeat.
+- **UP held for 0.30 seconds, during manual play:** peek at best holds with solid red borders. Release clears the hint. When holding nothing is best, the Draw button flashes red. Brief multi-taps do not show red.
+- **Double UP during manual play:** select all best holds without drawing.
+- **Triple UP:** toggle autoplay on/off. Every activation starts in **M**.
+- **During autoplay:** double UP cycles **M → Medium → Fast → M**. Triple UP turns autoplay off without also changing speed. Single/held UP keeps autoplay active. Other buttons stop it and consume that click, except DOWN in M.
+- **M:** DOWN deals and waits for you to think; the next DOWN applies best holds together and draws immediately. Results wait for the next DOWN. No artificial pauses or card animations. A tiny M appears beside A.
+- **Medium / Fast:** fully automatic, with one / two small filled yellow triangles beside A. They retain the established study, selection and result timings.
+- **Top right:** inspect completed hands. **Bottom right:** select the gold controls; either middle activates the selected control.
+- **SeedSigner:** hold the outer right top and bottom buttons for two seconds, then release all buttons. Autoplay stops, workers close and GPIO/SPI are released before the unchanged signer application starts. Reboot returns to the cabinet.
 
-The selected card has a bold yellow border and pointer. Recommended cards have solid **red** borders only after UP has been held continuously for 0.30 seconds; release clears the peek. Autoplay uses the ordinary yellow selection and HELD tags. The selected gold control has a full white outline. Every other button stops autoplay and is consumed without dealing, changing a hold or opening a menu. Press again for its normal action. Autoplay also pauses if credits, randomness or advice are unavailable; it never refills credits automatically.
+Input recovery discards stale physical presses and requires neutral release. It preserves the autoplay mode. M cancels a queued Draw and waits for a fresh press; continuous modes preserve their intentional playback progress. M retries only an already requested Deal/Draw if secure randomness is temporarily unavailable. A stop key cancels pending actions. No weaker random source is substituted.
 
-## Hints and autoplay
+## Hardware and flashing
 
-Hold **UP** for **0.30 seconds** in manual play to peek at the recommended cards in solid red; release clears the red. Brief double- and triple-taps stay clear. **Double-tap UP** to set the exact best holds, including clearing incorrect choices. The hand stays in manual play: you decide when to draw.
+Raspberry Pi **Zero 1.3**, compatible Play/Plus ST7789 **320 × 240** display and standard SeedSigner button wiring. Other boards and the regular 240 × 240 screen are not qualified.
 
-**Triple-tap UP toggles autoplay on or off.** While autoplay is active, **double-tap UP** advances Slow → Medium → Fast → Slow. Holding UP does not select a speed. Every other button stops autoplay without also performing its normal game action. Tap sequences use captured button times, with at most 350 ms between adjacent taps. A double-tap waits briefly for a possible third tap, so triple-tapping never also changes speed or applies manual holds.
+Verify the matching IMG's SHA-256 file, then flash the IMG with Raspberry Pi Imager. The builder writes regular files only; it never writes an SD card. The pinned SeedSigner OS 0.8.7 firmware, kernel and application remain stock. A deterministic gzip/newc overlay adds the game and configures the existing 320 × 240 display. The complete image remains 50 MiB.
 
-| Autoplay pace | Study cards | Select five holds | Before Draw | Results | Nominal full round |
-| --- | --- | --- | --- | --- | --- |
-| Slow | 6 s | 2 s | 0.5 s | 2.5 s | 12.3 s |
-| Medium | 3.2 s | 1.2 s | 0.28 s | 1.35 s | 6.9 s |
-| Fast | 1.6 s | 0.6 s | 0.15 s | 0.8 s | 3.7 s |
+## Build and verification
 
-These are programmed timings including animations; rendering or pending advice can extend a round. The yellow **A** sits to the right of the speaker. Medium adds a small filled yellow triangle in the left slot; Fast adds a second triangle on its right. Slow shows only A. Autoplay keeps the ordinary yellow focus and HELD tags, with no extra banners or red hints.
-
-The advisor evaluates all 32 holds using exhaustive counts for the remaining 47-card deck. In ten-hand feature play, its numerical expected-value strategy accounts for both the **current multipliers** and the value of the **next hand's multipliers**. Ordinary lower-coin play uses payout expected value. It sees only the visible hand and round settings; it cannot predict the next draw.
-
-The continuation strategy uses floating-point calculations with a numerical convergence check. This is not a formal proof, casino certification or a guarantee of winning. Strategy data loads on first use in a cancellable worker, which must stop before SeedSigner opens. [Method and limits](docs/TECHNICAL.md#hints-and-autoplay).
-
-## In this version
-
-- Ten hands, shared initial cards and holds, with independent replacement decks.
-- The classic ten-play 9/6 Double Double Bonus paytable and next-hand multiplier schedule.
-- One to ten active hands, bet controls, paytable/help screens and result inspection.
-- Both middle buttons hold or confirm and start the next hand after results; DOWN deals and draws.
-- Hold-to-peek solid red best-hold borders and human-paced autoplay, with multiplier-aware numerical strategy.
-- Responsive physical input sampled independently of drawing; held Deal does not repeat.
-- Cached badge rendering and crisp selection borders sized for the actual LCD.
-- RAM-only credits and multipliers. No accounts, networking, real-money wagering or cash-out.
-
-The display uses the reference site's card and interface artwork with independently written gameplay code. See the separate asset-rights notice below.
-
-## Validation
-
-Stock ARMv6 functional emulation also passed three paced autoplay rounds and the held-hint/release pixel checks, captured-timestamp double/triple-tap handling, manual best holds, all three speed indicators and consumed-button cancellation. Its virtual instruction and presentation clocks do not qualify physical timing.
-
-The current source passes **205 functional host checks**, with no failures, errors or skips. Wall-clock input timing remains unqualified under host contention. The [validation reports](validation/release-validation.json) record source-bound host checks, independent enumeration of **2,598,960 five-card hands**, image readback and stock ARMv6 runtime checks. The hint/autoplay tests cover cancellation, stale results, animation guards, insufficient credits and worker shutdown. Strategy counts are independently enumerated, and the full-game policy is checked numerically. See the reports for the exact release results and scope.
-
-The supplied photo shows the game on physical SeedSigner Play hardware. It does not establish the exact image hash or a complete camera/signing round trip. Emulator timings are not physical Pi performance measurements. This release has not completed physical cold-boot, button, camera and signing qualification.
-
-The game and signer share one operating system. The entry gesture is an interface gate, not authentication or isolation. Full wallet qualification requires a cold boot, all controls, camera scanning and a signing round trip with a disposable test seed.
-
-## Build it yourself
-
-The image is based on the signed official **SeedSigner 0.8.7 Pi Zero** release. The kernel, firmware and upstream signer application are retained.
-
-Build dependencies, the pinned base checksum and public signing key, reproduction commands and math details are in [the technical guide](docs/TECHNICAL.md). Development dependencies are listed in [requirements-dev.txt](requirements-dev.txt).
-
-Run host tests from the repository root:
+Use Python 3.12 with Pillow and mtools for image assembly. The checked runtime PNGs, raster glyphs and certified strategy tables are included; a normal rebuild needs no network or raw font files. Obtain the pinned official `seedsigner_os.0.8.7.pi0.img` in `inputs/` and verify it against the supplied upstream checksum/signature material.
 
 ```sh
-python3 -m pip install -r requirements-dev.txt
-PYTHONDONTWRITEBYTECODE=1 python3 -B -m pytest -q -p no:cacheprovider
+python -B scripts/validate_host.py --deterministic-only
+python -B scripts/build_poker_image.py build \
+  --base inputs/seedsigner_os.0.8.7.pi0.img --payload payload \
+  --output outputs/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img
 ```
 
-Some checks require the pinned base image or the installed macOS Arial fonts. Some environment-dependent tests can report conditional skips in a fresh checkout. The packaged PNG assets are sufficient to build and run the game without installing those source fonts.
+Final reports are in `validation/`. Host checks bind every runtime file to its SHA-256. Independent image readback compares the packaged files and all 334 preserved upstream files. The stock ARMv6 kernel/rootfs probe boots the compressed overlay and exercises all twelve actual asynchronous advisors, menu selection, full boards, M holds and payouts.
 
-## Licenses and credits
+Math checks independently transcribe every displayed paytable, test credit settlement and multiplier carryover, compare all 32 holds against an unpruned EV calculation for every game, and check wild-hand counts against an independent rank/suit oracle. The continuation policies also have Bellman and independent stationary-policy certificates. These are numerical checks, not formal interval proofs.
 
-- Original game logic, integration and build code: **GPL-2.0-or-later**, see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-- [SeedSigner](https://github.com/SeedSigner/seedsigner) and its OS components retain their own licenses. The technical guide links the stock OS corresponding source.
-- Card/interface artwork, logos and rasterized Arial glyphs retain their original owners' rights. They are **not relicensed under this project's GPL**. No separate public redistribution permission is recorded in this repository. See [third-party notices](payload/opt/dino/THIRD-PARTY-ASSETS.txt) and the [per-file provenance manifest](payload/opt/dino/assets/videopoker/manifest.json).
-- Header photo: supplied by the project owner for this README; it is separate from the GPL code license.
+Actual software screenshots cover every game's menu selection, ready, hold, results and paytable screens. Artwork auditing checks the original pixels and explicitly records the menu graphics cropped from the visible reference screenshot. Browser rasterization and screenshot compression prevent a claim of universal pixel identity. No vendor gameplay JavaScript is shipped.
 
-Historical release artifacts remain available unchanged; their local-build notices describe how those artifacts were prepared. This repository's documentation does not grant additional rights to third-party artwork, marks or fonts.
+The functional ARM diagnostic uses virtual instruction and presentation clocks. Physical cold boot, button latency, Pi performance, camera scanning and signing still need device testing. Earlier failed diagnostics remain recorded separately. Do not treat an emulated pass as a physical hardware test.
+
+## Sources and rights
+
+Reference: [Ultimate X Poker](https://www.videopoker.com/play/?game=69&title=Ultimate%20X%20Poker). Original code: GPL-2.0-or-later. Stock components, reference graphics and rasterized Arial glyphs retain their own rights; see `NOTICE` and `payload/opt/dino/THIRD-PARTY-ASSETS.txt`. Public visibility does not itself grant a redistribution license.

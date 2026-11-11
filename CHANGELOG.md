@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1
+
+- Add the twelve-game cabinet with 3-, 5- and 10-hand modes, wild-card graphics, game-specific pays, multipliers and advice.
+- Start and keep every cabinet game at max bet with its complete board. Bet Per Hand and Select Hands remain disabled.
+- Restore triple-UP autoplay on/off. Every activation starts M; double-UP cycles M, Medium and Fast. Single/held UP and DOWN in M preserve autoplay.
+- Preserve game credits and each game's pending multipliers when selecting another game. Keep the existing SeedSigner entry gesture.
+
+Functional host, stock ARM and image/source verification are recorded in the matching release artifacts. Physical Pi performance, cold boot, camera and signing are not qualified by emulation.
+
 ## 0.4.8
 
 - Delay red hints until UP has been held continuously for 0.30 seconds. Brief double/triple taps show no red; release immediately clears hints.
