@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "0.4.1",
+  "version": "0.4.8",
   "scope": "Application-generated screenshots, not physical-device photographs; enlarged without inventing pixels",
   "capture_tool": "scripts/render_previews.py",
-  "capture_record": "validation/screenshots-v041/capture-record.json",
+  "capture_record": "validation/screenshots-v048/capture-record.json",
   "payload_sha256": {
     "poker_ui.py": "a2b792b46ffc2e53accbf084e1fe43dabf9057b546d294121e6420643051a93b",
     "poker_engine.py": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d",
@@ -44,7 +44,33 @@
       "subset_counts.dat": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2"
     },
     "peek": "Solid red borders only while UP is physically held; release has no overlay",
-    "autoplay": "Three UP clicks; normal yellow selection and HELD tags with a small top-left A; any button click stops without another game action. Six-second consideration, 0.65-second card steps, two-second draw pause and four-second results"
+    "autoplay": "Triple UP toggles autoplay on/off. During autoplay double UP advances one speed; holding does not. Manual double UP sets exact best holds without drawing. A has no icon Slow, filled left triangle Medium, and adds right triangle Fast. Other buttons stop autoplay without another action.",
+    "autoplay_profiles": [
+      {
+        "name": "slow",
+        "consider": 6.0,
+        "select": 0.4,
+        "draw": 0.5,
+        "result": 2.5,
+        "animation": 0.1
+      },
+      {
+        "name": "medium",
+        "consider": 3.2,
+        "select": 0.24,
+        "draw": 0.28,
+        "result": 1.35,
+        "animation": 0.065
+      },
+      {
+        "name": "fast",
+        "consider": 1.6,
+        "select": 0.12,
+        "draw": 0.15,
+        "result": 0.8,
+        "animation": 0.04
+      }
+    ]
   },
   "screenshots": [
     {
@@ -170,7 +196,7 @@
     {
       "file": "docs/screenshots/hint-on.png",
       "caption": "Hold UP to peek",
-      "sha256": "2ced5cc4c190eb8854897aaa58cae32ae5ac55cd934edb32617bd3e0a60f6118",
+      "sha256": "4391d25baa9e3555ad7cb81f2f5447bfdb028290f885e2e646ad7626c4fe96c8",
       "dimensions": [
         1280,
         960
@@ -179,13 +205,13 @@
         320,
         240
       ],
-      "native_capture_sha256": "42753ba31624ab58010600cf8fcda0eb0b83f801afc2a28f1a9c7efd6142a928",
+      "native_capture_sha256": "2b06b1a73aeace4220b1462de408e5df4d7324277e7747624be82efbaad2f687",
       "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
     },
     {
       "file": "docs/screenshots/autoplay.png",
-      "caption": "Human-paced autoplay with small yellow A indicator, ordinary focus and HELD tags",
-      "sha256": "71481176fe6cce70fac7e1e8d66f88fd18b9e03f95d06fd352107e0b3785efce",
+      "caption": "Slow autoplay with A to the right of the speaker",
+      "sha256": "a295a78ffba0e679e0c12828cab0b76df2776674bdef0d576363a9b3447fd452",
       "dimensions": [
         1280,
         960
@@ -194,8 +220,38 @@
         320,
         240
       ],
-      "native_capture_sha256": "8cce5f418d9d581c38bf2c5ff312bc5452d29d26c247faf9589f5e163a846cde",
+      "native_capture_sha256": "388ed940672337b910488b925bc7a7c228349d8df5d7e3cbb448a2de142d87fc",
       "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/manual-best-hold.png",
+      "caption": "Double UP sets best holds without drawing",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved",
+      "sha256": "c88f468fac5c562063dc3a720a09d691d9b1d30decaf2592e7d6880edff909f1",
+      "native_capture_sha256": "941720324d76b304bf54a1da3946ff125d1c921f877c935b5046333cdd8b018a"
+    },
+    {
+      "file": "docs/screenshots/autoplay-fast.png",
+      "caption": "Fast autoplay with two filled speed triangles",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved",
+      "sha256": "7cf7366ca0d16787ca9ef82c4e047b438c7ff1d4c9f2c9642cecd4c8a590e1a8",
+      "native_capture_sha256": "515d3f12d81c37e39e440d457287c3a10e07142ede0f497e88c09aba8dfe7241"
     }
   ]
 }
