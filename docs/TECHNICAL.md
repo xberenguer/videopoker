@@ -1,6 +1,6 @@
 # 10-Play Multiplier Poker for SeedSigner Play
 
-An independent offline, play-credit implementation of classic 10-hand 9/6 Double Double Bonus with next-hand multipliers. It boots into poker and opens SeedSigner after the existing outer-action-button hold/release gesture. Version 0.4.0 uses the reference website's actual card and interface graphics with independently written gameplay code. This is not official IGT, Action Gaming, VideoPoker.com, BitKit or SeedSigner software.
+An independent offline, play-credit implementation of classic 10-hand 9/6 Double Double Bonus with next-hand multipliers. It boots into poker and opens SeedSigner after the existing outer-action-button hold/release gesture. Version 0.4.1 uses the reference website's actual card and interface graphics with independently written gameplay code. This is not official IGT, Action Gaming, VideoPoker.com, BitKit or SeedSigner software.
 
 ## Hardware and operation
 
@@ -8,8 +8,8 @@ An independent offline, play-credit implementation of classic 10-hand 9/6 Double
 - D-pad left/right: select a card.
 - Both middle buttons (D-pad center and right middle): hold/unhold the selected card; after results, start the next deal. In menus, confirm the selection.
 - D-pad DOWN: Deal / Draw. During animation, skip presentation without placing another bet.
-- Hold D-pad UP to peek at the best hold: recommended cards have solid red borders only while the button is held. Release UP to clear them. Double-tap UP within 350 ms to toggle autoplay.
-- Any other manual button stops autoplay before handling its normal action. UP/DOWN navigate normally inside menus. Hint requests never open an explanation screen or add text to the board.
+- Hold D-pad UP to peek at the best hold: recommended cards have solid red borders only while the button is held. Release UP to clear them. Click UP three times, with no more than 350 ms between clicks, to start autoplay.
+- Any button click stops autoplay and consumes that click, preserving the current holds and hand. Press again to use the ordinary control. UP/DOWN navigate normally inside menus. Hint requests never open an explanation screen or add text to the board.
 - KEY1 (top right): inspect completed hands; in the enlarged view, UP/DOWN select a result.
 - KEY3 (bottom right): focus the gold controls or return from a menu.
 - Hold KEY1 + KEY3 continuously for two seconds, then release every button to open SeedSigner. Autoplay pauses as soon as the entry gesture begins. Reboot returns to poker.
@@ -34,7 +34,7 @@ This build contains the selected Ten Play 9/6 DDB configuration; More Games iden
 
 ## Flashing
 
-Download `seedsigner-v0.8.7-poker-v0.4.0-peek-play-plus-pi0.img` and its matching `.sha256` file from the [v0.4.0 release](https://github.com/xberenguer/videopoker/releases/tag/v0.4.0), or use a reproducible build from `outputs/`. Verify with `shasum -a 256 -c seedsigner-v0.8.7-poker-v0.4.0-peek-play-plus-pi0.img.sha256`, then use Raspberry Pi Imager → Use custom to write the IMG to the intended microSD card. Writing erases that card. Let Imager's verification finish, insert the card and power the device.
+Save the IMG and its SHA-256 file from `outputs/`. Verify the checksum, then use Raspberry Pi Imager → Use custom to write the IMG to the intended microSD card. Writing erases that card. Let Imager's verification finish, insert the card and power the device.
 
 Qualification requires a physical cold boot, all buttons, card holds, Deal/Draw, display orientation, SeedSigner entry, camera scanning and a signing round trip using a disposable test seed. Automated and emulated tests cannot establish physical hardware behavior. The game and signer share one operating system; the entry gesture is not authentication or security isolation. Never enter a seed into a website.
 
@@ -53,7 +53,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -B scripts/validate_math.py
 PYTHONDONTWRITEBYTECODE=1 python3 -B scripts/validate_game_contract.py
 PYTHONDONTWRITEBYTECODE=1 python3 -B scripts/build_poker_image.py build \
   --base inputs/seedsigner_os.0.8.7.pi0.img --payload payload \
-  --output outputs/seedsigner-v0.8.7-poker-v0.4.0-peek-play-plus-pi0.img
+  --output outputs/seedsigner-v0.8.7-poker-v0.4.1-play-plus-pi0.img
 ```
 
 The builder refuses to overwrite existing outputs; use a fresh output name for a rebuild. Put the official base IMG, signed checksum, signature and provided public key in `inputs/` when reproducing from the source archive. The test suite's base-file tests run when the pinned base and `mcopy` are available. Development previews can be rendered with `scripts/render_previews.py --font-dir /path/to/stock/fonts`.
@@ -62,7 +62,7 @@ The source archive includes the poker implementation, hardware integration, test
 
 ## Hints and autoplay
 
-Autoplay gives six seconds to consider the dealt cards, selects cards in the normal yellow style at 0.65 seconds per card, waits two seconds before drawing, then leaves completed results visible for four seconds. Card animations add to that time. There is no autoplay label, explanatory banner or red autoplay hint. This pace is independent of the selected animation speed.
+Autoplay gives six seconds to consider the dealt cards, selects cards in the normal yellow style at 0.65 seconds per card, waits two seconds before drawing, then leaves completed results visible for four seconds. Card animations add to that time. A small yellow A at the top left identifies active autoplay. There is no explanatory banner or red autoplay hint. This pace is independent of the selected animation speed.
 
 Advice evaluates all 32 possible holds using exhaustive integer category counts from the actual remaining 47-card deck. For ten-hand feature play it includes the current multiplier total and the nonlinear value of the ten next-hand multipliers. The continuation values are solved offline over all 134,459 suit-equivalent initial hands and 107 reachable multiplier totals, with an independent stationary-policy check. This is numerical expected-value optimization; ties within 1e-9 credits use more held cards, then the lower mask. It never predicts the actual next draw or reads the random generator.
 
@@ -76,9 +76,11 @@ PYTHONDONTWRITEBYTECODE=1 python3 -B scripts/build_strategy_tables.py --threads 
 
 Copy the generated `subset_counts.dat` and `strategy.json` from `validation/strategy-research/generated` into `payload/opt/dino/strategy` before rebuilding the image. Native host compiler output and intermediate caches are not payload files. The packaged data is sufficient for a normal image rebuild.
 
-## Validation for 0.4.0
+## Validation for 0.4.1
 
-All 185 functional host checks passed. The actual strategy/advisor/UI also passed stock ARMv6 functional emulation, including three paced autoplay rounds, held-UP hint/release pixel checks, and silent normal-looking autoplay. That diagnostic uses a virtual instruction clock and an injected presentation clock; it does not qualify wall-clock input latency or physical-device speed.
+All 188 functional host checks passed. Stock ARMv6 functional emulation also passed three paced autoplay rounds, captured-timestamp triple-click activation, held-hint release checks, the small A indicator, and consumed-key cancellation. No physical timing claim follows from the virtual instruction/presentation clocks used by that diagnostic.
+
+The current build is checked with source-bound functional host tests and stock ARMv6 functional emulation. The ARM diagnostic uses virtual instruction and presentation clocks; it does not qualify physical input timing or Pi speed. Final results are recorded in the validation reports.
 
 The source-bound host, input, image readback, target-runtime and strategy reports are in `validation/`. Functional checks and wall-clock input qualification are reported separately: the current Mac has produced scheduling gaps beyond the unchanged 100 ms safety guard. Failed timing attempts remain archived; a functional-only result does not certify button latency or physical Pi speed. They cover both middle controls, DOWN Deal/Draw, hints, autoplay, cancellation and cleanup, all 32 hold masks, the exact replacement deck, and the unchanged poker evaluator and payouts. Strategy counts are checked against independent enumeration; full-game policy evaluation agrees with the Bellman solution. Numerical certificates use floating-point arithmetic rather than formal interval proofs.
 
