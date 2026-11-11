@@ -416,9 +416,11 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                                 for captured_at, kind, value in input_events:
                                     if kind in ('levels', 'reset'):
                                         if kind == 'reset':
-                                            pause = getattr(ui, 'pause_autoplay', None)
-                                            if callable(pause):
-                                                dirty = bool(pause()) or dirty
+                                            reset_ui = getattr(ui, 'on_input_reset', None)
+                                            if not callable(reset_ui):
+                                                reset_ui = getattr(ui, 'pause_autoplay', None)
+                                            if callable(reset_ui):
+                                                dirty = bool(reset_ui()) or dirty
                                         if callable(sampled_levels):
                                             dirty = bool(sampled_levels(value, captured_at)) or dirty
                                         elif callable(set_pressed_mask):

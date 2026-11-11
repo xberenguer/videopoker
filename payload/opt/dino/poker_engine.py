@@ -8,6 +8,8 @@ Cards are integers 0..51: rank = card % 13 + 2; suits are C, D, H, S.
 
 import os
 import random
+from poker_games import get_game
+from poker_evaluate import evaluate_game_hand
 
 
 NUM_HANDS = 10
@@ -36,13 +38,13 @@ class RandomNotReady(ValueError):
     """The OS has not finished initializing its secure random generator."""
 
 
-def _cards(cards):
+def _cards(cards, deck_size=52):
     """Validate card identity without accepting booleans as card integers."""
     try:
         result = tuple(cards)
     except TypeError as error:
         raise ValueError("A hand must contain five cards") from error
-    if (len(result) != 5 or any(type(card) is not int or not 0 <= card < 52
+    if (len(result) != 5 or any(type(card) is not int or not 0 <= card < deck_size
                                 for card in result) or len(set(result)) != 5):
         raise ValueError("A hand must contain five distinct cards from 0 through 51")
     return result
@@ -112,12 +114,24 @@ class Session:
     base plus five-credit feature wager. Only10 earns future multipliers.
     """
 
-    def __init__(self, credits=STARTING_CREDITS, rng=None):
+    def __init__(self, credits=STARTING_CREDITS, rng=None, game_id="ddb10", cabinet_defaults=False):
         if type(credits) is not int or credits < 0:
             raise ValueError("Starting credits must be a non-negative integer")
+        self.game = get_game(game_id)
+        self.deck = tuple(range(self.game.deck_size))
+        self._cabinet_defaults = bool(cabinet_defaults)
         self._starting_credits = credits
         self._rng = random.SystemRandom() if rng is None else rng
         self.reset()
+
+    @property
+    def max_hands(self):
+        return self.game.hands
+
+    @property
+    def paytable(self):
+        categories=self.game.categories
+        return str(self.game.pays[categories.index('full_house')])+'/'+str(self.game.pays[categories.index('flush')])+' '+self.game.title
 
     @property
     def base_bet(self):
@@ -135,18 +149,18 @@ class Session:
         """Start a new free-credit session; never write or restore SD state."""
         self.credits = self._starting_credits
         self.phase = "ready"
-        self.bet_per_hand = 10
-        self.num_hands = NUM_HANDS
+        self.bet_per_hand = 1 if self._cabinet_defaults else 10
+        self.num_hands = 1 if self._cabinet_defaults else self.max_hands
         self.initial = []
         self.held = [False] * 5
         self.hands = []
         self.results = []
-        self.multipliers = [1] * NUM_HANDS
-        self.active_multipliers = [1] * NUM_HANDS
-        self.round_feature = True
-        self.round_base_bet = BASE_BET
-        self.round_bet_per_hand = 10
-        self.round_num_hands = NUM_HANDS
+        self.multipliers = [1] * self.max_hands
+        self.active_multipliers = [1] * self.max_hands
+        self.round_feature = self.feature
+        self.round_base_bet = self.base_bet
+        self.round_bet_per_hand = self.bet_per_hand
+        self.round_num_hands = self.num_hands
         self._reset_on_bet = False
         self.last_bet = 0
         self.total_win = 0
@@ -161,7 +175,9 @@ class Session:
             "bet_choices": list(BET_CHOICES), "total_bet": self.total_bet,
             "last_bet": self.last_bet, "total_win": self.total_win,
             "rounds": self.rounds, "num_hands": self.num_hands,
-            "max_hands": NUM_HANDS, "paytable": PAYTABLE,
+            "max_hands": self.max_hands, "paytable": self.paytable,
+            "game_id":self.game.id, "game_title":self.game.title,
+            "family":self.game.family, "deck_size":self.game.deck_size,
             "round_feature": self.round_feature,
             "round_base_bet": self.round_base_bet,
             "round_bet_per_hand": self.round_bet_per_hand,
@@ -187,7 +203,7 @@ class Session:
             raise ValueError("Finish the current hand before changing the bet")
         self.bet_per_hand = value
         if value > 1:
-            self.num_hands = NUM_HANDS
+            self.num_hands = self.max_hands
         self._clear_round_for_bet_change()
         return self.snapshot()
 
@@ -197,16 +213,16 @@ class Session:
         # The observed reference resets all ten lines to one credit the first
         # time BET PER HAND is pressed after a completed round.
         if self._reset_on_bet:
-            self.num_hands = NUM_HANDS
+            self.num_hands = self.max_hands
             return self.set_bet_per_hand(1)
         # Match the reference's all-lines affordability check, including the
         # partial-board case; its check caps at five before the5->10 transition.
-        minimum_next_cost = NUM_HANDS * min(self.bet_per_hand + 1, BASE_BET)
+        minimum_next_cost = self.max_hands * min(self.bet_per_hand + 1, BASE_BET)
         if self.credits < minimum_next_cost:
-            self.num_hands = NUM_HANDS
+            self.num_hands = self.max_hands
             return self.set_bet_per_hand(1)
         # At one-credit partial boards, BET PER HAND activates one more line.
-        if self.num_hands < NUM_HANDS:
+        if self.num_hands < self.max_hands:
             return self.set_num_hands(self.num_hands + 1)
         index = BET_CHOICES.index(self.bet_per_hand)
         return self.set_bet_per_hand(BET_CHOICES[(index + 1) % len(BET_CHOICES)])
@@ -222,7 +238,7 @@ class Session:
             self._reset_on_bet = False
 
     def set_num_hands(self, count):
-        if type(count) is not int or not 1 <= count <= NUM_HANDS:
+        if type(count) is not int or not 1 <= count <= self.max_hands:
             raise ValueError("Choose from 1 through 10 active hands")
         if self.phase == "hold":
             raise ValueError("Finish the current hand before changing active hands")
@@ -234,7 +250,7 @@ class Session:
         return self.snapshot()
 
     def cycle_num_hands(self):
-        return self.set_num_hands(self.num_hands % NUM_HANDS + 1)
+        return self.set_num_hands(self.num_hands % self.max_hands + 1)
 
     set_active_hands = set_num_hands
     cycle_active_hands = cycle_num_hands
@@ -243,15 +259,15 @@ class Session:
         """The official BET MAX button sets10 credits AND starts a game."""
         if self.phase == "hold":
             raise ValueError("Finish the current hand before changing the bet")
-        if self.credits < 100:
+        if self.credits < 10*self.max_hands:
             # The reference chooses affordable ordinary coins, capped at five,
             # without starting a deal. Its tiny-balance fallback selects one
             # credit on every line even if that board is not yet affordable.
-            affordable = max(1, min(5, self.credits // NUM_HANDS))
-            self.num_hands = NUM_HANDS
+            affordable = max(1, min(5, self.credits // self.max_hands))
+            self.num_hands = self.max_hands
             return self.set_bet_per_hand(affordable)
         old = (self.bet_per_hand, self.num_hands)
-        self.bet_per_hand, self.num_hands = 10, NUM_HANDS
+        self.bet_per_hand, self.num_hands = 10, self.max_hands
         try:
             return self.deal()
         except Exception:
@@ -286,11 +302,11 @@ class Session:
         if self.credits < cost:
             raise ValueError("Not enough credits; add free credits or lower the bet")
         # All failure-prone generation/validation precedes any state mutation.
-        cards = self._sample(DECK, 5)
-        royal = evaluate_hand(cards) == "royal_flush"
+        cards = self._sample(self.deck, 5)
+        royal = evaluate_game_hand(cards,self.game) == "royal_flush"
         active = list(self.multipliers)
-        if (len(active) != NUM_HANDS or any(type(value) is not int or value not in
-                (1, 2, 3, 4, 8, 10, 12) for value in active)):
+        if (len(active) != self.max_hands or any(type(value) is not int or value not in
+                self.game.possible_multipliers for value in active)):
             raise ValueError("Invalid multiplier state")
         self.credits -= cost
         self.last_bet = cost
@@ -301,7 +317,7 @@ class Session:
         self.active_multipliers = active
         # Classic Ultimate X consumes the pending board on the next deal.
         # Choosing fewer hands forfeits pending bonuses at inactive positions.
-        self.multipliers = [1] * NUM_HANDS
+        self.multipliers = [1] * self.max_hands
         self.round_feature = self.feature
         self.round_base_bet = self.base_bet
         self.round_bet_per_hand = self.bet_per_hand
@@ -324,10 +340,10 @@ class Session:
     def draw(self):
         if self.phase != "hold":
             raise ValueError("Deal a hand before drawing")
-        initial = _cards(self.initial)
+        initial = _cards(self.initial,self.game.deck_size)
         if len(self.held) != 5 or any(type(held) is not bool for held in self.held):
             raise ValueError("Invalid hold state")
-        remaining = tuple(card for card in DECK if card not in initial)
+        remaining = tuple(card for card in self.deck if card not in initial)
         replacements = 5 - sum(self.held)
         hands, results = [], []
         following = list(self.multipliers)
@@ -336,9 +352,9 @@ class Session:
             # A discarded initial card cannot reappear on any line's draw.
             replacement = iter(self._sample(remaining, replacements)) if replacements else iter(())
             hand = [card if held else next(replacement) for card, held in zip(initial, self.held)]
-            category = evaluate_hand(hand)
-            base_payout = payout_for(category, self.round_base_bet)
-            next_multiplier = MULTIPLIERS[category] if self.round_feature else 1
+            category = evaluate_game_hand(hand,self.game)
+            base_payout = self.game.award(category, self.round_base_bet)
+            next_multiplier = self.game.multiplier(category) if self.round_feature else 1
             hands.append(hand)
             results.append({"category": category, "base_payout": base_payout,
                             "payout": base_payout * multiplier, "multiplier": multiplier,
