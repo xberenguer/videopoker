@@ -5,7 +5,7 @@
   "capture_tool": "scripts/render_previews.py",
   "capture_record": "validation/screenshots-v040/capture-record.json",
   "payload_sha256": {
-    "poker_ui.py": "ae548ed6e859cc0eabd06aae6b37668196b356ad6e25916711ba8b5d355c1f6d",
+    "poker_ui.py": "a2b792b46ffc2e53accbf084e1fe43dabf9057b546d294121e6420643051a93b",
     "poker_engine.py": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d",
     "poker_strategy.py": "5c98988fbeca991f85904d32ce9c3b7731055d733dd833942667e0b6683a2539"
   },
@@ -42,7 +42,9 @@
     "data_sha256": {
       "strategy.json": "997c119917a280e373f7ca949b77b3f9f9f0709333a7812d809d44dd1cea46a4",
       "subset_counts.dat": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2"
-    }
+    },
+    "peek": "Solid red borders only while UP is physically held; release has no overlay",
+    "autoplay": "Normal yellow selection and HELD tags; six-second consideration, 0.65-second card steps, two-second draw pause and four-second results"
   },
   "screenshots": [
     {
@@ -167,8 +169,8 @@
     },
     {
       "file": "docs/screenshots/hint-on.png",
-      "caption": "Flashing best-hold hints",
-      "sha256": "2d0236e5af9fa992329f6fc627af905abed7ea041725c02647fcf1fe5ca48732",
+      "caption": "Hold UP to peek",
+      "sha256": "2ced5cc4c190eb8854897aaa58cae32ae5ac55cd934edb32617bd3e0a60f6118",
       "dimensions": [
         1280,
         960
@@ -177,13 +179,13 @@
         320,
         240
       ],
-      "native_capture_sha256": "89038ec02c06ccccbf8d3e311a04479cce1ce71499315149de780f933c29c518",
+      "native_capture_sha256": "42753ba31624ab58010600cf8fcda0eb0b83f801afc2a28f1a9c7efd6142a928",
       "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
     },
     {
       "file": "docs/screenshots/autoplay.png",
-      "caption": "Hands-free autoplay",
-      "sha256": "b3dc58fe8dbff4ce25b3f58673f55973232ce3180dac333fa4b85e83f229b454",
+      "caption": "Human-paced autoplay with ordinary focus and HELD tags",
+      "sha256": "7214bb230e15767b5a5080fe1238ed3adcdad1eabccb0ffad94e5da19359015b",
       "dimensions": [
         1280,
         960
@@ -192,7 +194,7 @@
         320,
         240
       ],
-      "native_capture_sha256": "97bc2e8423f2b2be4ea055c7c3e4c1b16f11f10a9223b9c516e11ab3b9485a1a",
+      "native_capture_sha256": "d05a3562efb41b69fc9dbe9f635f5b204f8b16fbe27501fcb040a07fd4b28673",
       "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
     }
   ]
