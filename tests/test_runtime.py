@@ -359,7 +359,11 @@ class RuntimeTests(unittest.TestCase):
                 self.playing, self.pauses = True, []
             def pause_autoplay(self):
                 self.pauses.append(clock())
+                changed = self.playing
                 self.playing = False
+                return changed
+            def render(self):
+                return self.playing
             def update(self, now):
                 if .2 <= now < .6:
                     self.assert_paused()
@@ -379,6 +383,8 @@ class RuntimeTests(unittest.TestCase):
         self.assertGreaterEqual(ui.pauses[0], .2)
         self.assertLess(ui.pauses[0], .22)
         self.assertFalse(ui.playing)
+        self.assertIn(('frame', True), events)
+        self.assertIn(('frame', False), events)
         self.assertEqual(ui.actions, [])
         self.assertFalse(any(isinstance(event, tuple) and event[0] == "message" for event in events))
 

@@ -4,6 +4,7 @@ import random
 import sys
 import unittest
 from pathlib import Path
+from PIL import ImageChops
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'payload/opt/dino'))
@@ -65,6 +66,10 @@ class AutoplayUITests(unittest.TestCase):
 
     def start_auto(self, ui, clock):
         self.tap_up(ui)
+        self.assertFalse(ui.autoplay)
+        clock.advance(.1)
+        self.tap_up(ui)
+        self.assertFalse(ui.autoplay)
         clock.advance(.1)
         self.tap_up(ui)
         self.assertTrue(ui.autoplay)
@@ -158,7 +163,7 @@ class AutoplayUITests(unittest.TestCase):
         self.assertEqual(ui.session.snapshot(), before)
         self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
 
-    def test_ready_and_result_up_are_silent_but_real_double_taps_start_auto(self):
+    def test_ready_and_result_up_are_silent_until_three_clicks_start_auto(self):
         for phase in ('ready', 'result'):
             with self.subTest(phase=phase):
                 ui, clock, advisor = self.make_ui()
@@ -169,6 +174,8 @@ class AutoplayUITests(unittest.TestCase):
                 self.assertIsNone(ui.notice)
                 self.assertEqual(advisor.requests, [])
                 self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+                clock.advance(.2); self.tap_up(ui)
+                self.assertFalse(ui.autoplay)
                 clock.advance(.2); self.tap_up(ui)
                 self.assertTrue(ui.autoplay)
                 self.assertFalse(ui.hint_visible)
@@ -215,7 +222,7 @@ class AutoplayUITests(unittest.TestCase):
         self.assertLess(clock()-dealt_at, 16)
         self.assertEqual(len(advisor.requests), 2)
 
-    def test_autoplay_images_are_exactly_normal_yellow_focus_and_held_tags(self):
+    def test_autoplay_uses_normal_yellow_and_only_adds_a_small_top_left_a(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.start_auto(ui, clock)
         # Keep UP physically held while auto runs: still no red or labels.
@@ -225,7 +232,17 @@ class AutoplayUITests(unittest.TestCase):
             self.tick(ui, clock, seconds)
             self.assertTrue(ui.autoplay)
             self.assertFalse(ui.hint_visible)
-            self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+            frame, normal = ui.render(), self.normal_frame(ui)
+            difference = ImageChops.difference(frame, normal)
+            bounds = difference.getbbox()
+            self.assertIsNotNone(bounds)
+            self.assertGreaterEqual(bounds[0], 4)
+            self.assertGreaterEqual(bounds[1], 10)
+            self.assertLessEqual(bounds[2], 17)
+            self.assertLessEqual(bounds[3], 24)
+            self.assertIn((255, 255, 0), set(frame.crop((4, 10, 17, 24)).getdata()))
+            frame.paste(normal.crop((4, 10, 17, 24)), (4, 10))
+            self.assertEqual(frame.tobytes(), normal.tobytes())
         self.assertEqual(ui.session.phase, 'result')
         self.assertEqual(ui.session.held, [True, False, True, False, True])
 
@@ -247,38 +264,46 @@ class AutoplayUITests(unittest.TestCase):
         self.finish_selections(ui, clock)
         self.assertEqual(ui.session.held, [False, True, False, False, True])
 
-    def test_other_manual_actions_stop_auto_before_their_normal_action(self):
-        for action in ('LEFT', 'RIGHT', 'CENTER', 'KEY1', 'KEY2', 'KEY3', 'DOWN'):
+    def test_every_button_stops_auto_without_performing_an_extra_game_action(self):
+        for action in ('UP', 'LEFT', 'RIGHT', 'CENTER', 'KEY1', 'KEY2', 'KEY3', 'DOWN'):
             with self.subTest(action=action):
                 ui, clock, advisor = self.make_ui()
                 ui.handle('DOWN'); self.start_auto(ui, clock)
                 token = ui._advisor_token; cancels = advisor.cancels
                 advisor.answers[token] = {'mask': 31}
-                ui.handle(action)
+                snapshot = ui.session.snapshot()
+                selection = ui.selected_card
+                if action == 'UP': self.press_up(ui)
+                else: ui.handle(action)
                 self.assertFalse(ui.autoplay)
                 self.assertIsNone(ui._advice)
                 self.assertIsNone(ui._advisor_token)
                 self.assertEqual(advisor.cancels, cancels+1)
-                snapshot = ui.session.snapshot(); self.tick(ui, clock, 30)
+                self.assertEqual(ui.session.snapshot(), snapshot)
+                self.assertEqual(ui.selected_card, selection)
+                self.assertIsNone(ui.button_focus)
+                self.assertIsNone(ui.menu)
+                self.tick(ui, clock, 30)
                 self.assertEqual(ui.session.snapshot(), snapshot)
                 self.assertNotIn(token, advisor.polls)
-                if action in ('CENTER', 'KEY1', 'KEY2'):
-                    self.assertEqual(ui.session.held, [True, False, False, False, False])
-                elif action == 'DOWN': self.assertEqual(ui.session.phase, 'result')
-                elif action == 'KEY3': self.assertEqual(ui.button_focus, 0)
+                self.assertFalse(ui.hint_visible)
+                self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
 
-    def test_double_tap_crosses_releases_and_turns_auto_off(self):
+    def test_slow_taps_reset_the_three_click_sequence_and_one_click_stops_auto(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.tap_up(ui)
         clock.advance(.36); self.tap_up(ui)
         self.assertFalse(ui.autoplay)
         clock.advance(.1); self.tap_up(ui)
-        self.assertTrue(ui.autoplay)
+        self.assertFalse(ui.autoplay)
         clock.advance(.1); self.tap_up(ui)
         self.assertTrue(ui.autoplay)
         clock.advance(.1); self.tap_up(ui)
         self.assertFalse(ui.autoplay)
         self.assertIsNone(ui._advisor_token)
+        for _ in range(2):
+            clock.advance(.1); self.tap_up(ui)
+            self.assertFalse(ui.autoplay)
 
     def test_menu_and_bottom_focus_up_down_never_start_peek_or_auto(self):
         ui, clock, advisor = self.make_ui()
@@ -408,25 +433,72 @@ class AutoplayUITests(unittest.TestCase):
         self.assertFalse(ui.set_pressed_mask(1))
         self.assertEqual(ui.session.snapshot(), before)
 
-    def test_separate_sampled_taps_drained_together_cannot_become_a_double(self):
+    def test_three_separate_sampled_taps_drained_together_cannot_start_auto(self):
         ui, clock, advisor = self.make_ui(); ui.handle('DOWN')
         ui.set_pressed_mask(0)
-        ui.handle_sampled('UP', clock()-.70)
-        ui.handle_sampled('UP', clock()-.10)
+        for captured in (clock()-1.2, clock()-.6, clock()):
+            ui.handle_sampled('UP', captured)
         self.assertFalse(ui.autoplay)
         self.assertEqual(advisor.requests, [])
         self.assertFalse(ui.hint_visible)
 
-    def test_real_double_survives_released_levels_and_delayed_dispatch(self):
+    def test_real_triple_survives_released_levels_and_delayed_dispatch(self):
         ui, clock, advisor = self.make_ui(); ui.handle('DOWN')
         captured = clock()-.05
         ui.set_pressed_mask(0)
         ui.handle_sampled('UP', captured)
         clock.advance(.65)
         ui.handle_sampled('UP', captured+.20)
+        self.assertFalse(ui.autoplay)
+        clock.advance(.65)
+        ui.handle_sampled('UP', captured+.40)
         self.assertTrue(ui.autoplay)
         self.assertFalse(ui.hint_visible)
         self.assertIsNone(ui._captured_input_at)
+
+    def test_stop_click_before_overdue_draw_only_stops_then_next_down_draws(self):
+        ui, clock, advisor = self.make_ui()
+        ui.handle('DOWN'); self.start_auto(ui, clock)
+        self.answer(ui, clock, advisor, 0b10101)
+        self.finish_selections(ui, clock)
+        before = ui.session.snapshot()
+        clock.advance(10)
+        ui.handle('DOWN'); self.tick(ui, clock)
+        self.assertFalse(ui.autoplay)
+        self.assertEqual(ui.session.snapshot(), before)
+        ui.handle('DOWN')
+        self.assertEqual(ui.session.phase, 'result')
+        self.assertEqual(ui.session.rounds, before['rounds']+1)
+
+    def test_up_used_to_stop_does_not_show_a_hint_until_released_and_pressed_again(self):
+        ui, clock, advisor = self.make_ui()
+        ui.handle('DOWN'); self.start_auto(ui, clock)
+        requests = len(advisor.requests)
+        self.press_up(ui); self.tick(ui, clock, 5)
+        self.assertFalse(ui.autoplay)
+        self.assertFalse(ui.hint_visible)
+        self.assertEqual(len(advisor.requests), requests)
+        self.release_up(ui)
+        clock.advance(.4)
+        self.press_up(ui)
+        self.assertFalse(ui.autoplay)
+        self.assertEqual(len(advisor.requests), requests+1)
+
+    def test_small_a_does_not_cover_top_left_current_or_next_multiplier_labels(self):
+        class House:
+            def sample(self, population, count):
+                self.asserted_count = count
+                return [0, 13, 26, 1, 14]
+        ui, clock, advisor = self.make_ui(rng=House())
+        ui.session.multipliers = [12]*10
+        ui.handle('DOWN')
+        for index in range(5): ui.session.toggle_hold(index)
+        ui.handle('DOWN')
+        self.assertEqual(ui.session.multipliers, [12]*10)
+        self.start_auto(ui, clock)
+        frame, normal = ui.render(), self.normal_frame(ui)
+        self.assertEqual(frame.crop((0, 0, 37, 10)).tobytes(), normal.crop((0, 0, 37, 10)).tobytes())
+        self.assertEqual(frame.crop((0, 24, 37, 41)).tobytes(), normal.crop((0, 24, 37, 41)).tobytes())
 
     def test_invalid_sampled_times_or_masks_cannot_enable_auto(self):
         ui, clock, advisor = self.make_ui()
