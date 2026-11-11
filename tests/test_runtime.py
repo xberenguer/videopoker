@@ -92,14 +92,14 @@ class RouterTests(unittest.TestCase):
     def test_held_deal_key_emits_only_one_edge(self):
         actions = []
         for now in (.1, .14, .2, .5, 1.0):
-            unlock, events = self.router.update(now, launcher.KEY2)
+            unlock, events = self.router.update(now, 1 << 1)
             self.assertFalse(unlock)
             actions.extend(events)
-        self.assertEqual(actions, ["KEY2"])
+        self.assertEqual(actions, ["DOWN"])
 
     def test_bounce_does_not_emit_a_deal(self):
         actions = []
-        for now, mask in ((.1, launcher.KEY2), (.11, 0), (.12, launcher.KEY2), (.13, 0), (.2, 0)):
+        for now, mask in ((.1, 1 << 1), (.11, 0), (.12, 1 << 1), (.13, 0), (.2, 0)):
             actions.extend(self.router.update(now, mask)[1])
         self.assertEqual(actions, [])
 
@@ -166,6 +166,95 @@ class RouterTests(unittest.TestCase):
 
 
 class RuntimeTests(unittest.TestCase):
+    def test_runtime_preserves_captured_times_and_prefers_timed_input_dispatch(self):
+        clock, events, captured = Clock(), [], []
+        class TimedInput:
+            running = False
+            gesture_pending = False
+            def __init__(self, hardware, *, clock):
+                self.calls = 0
+            def __enter__(self):
+                self.running = True
+                return self
+            def __exit__(self, *args):
+                self.running = False
+            def reset(self):
+                pass
+            def read(self):
+                raise AssertionError("Runtime ignored timestamp-capable input")
+            def read_timed(self):
+                self.calls += 1
+                if self.calls == 1:
+                    return False, ()
+                if self.calls == 2:
+                    return False, ((.002, "UP"), (.008, "DOWN"))
+                return True, ()
+        class TimedUI(FakeUI):
+            def handle_sampled(self, action, at):
+                captured.append((action, at, clock()))
+        hardware = FakeHardware(clock, lambda t: 0, events)
+        ui = TimedUI()
+        launcher.run_poker_gate(lambda: hardware, lambda: ui, clock, clock.sleep,
+                               input_factory=TimedInput)
+        self.assertEqual(captured, [("UP", .002, .01), ("DOWN", .008, .01)])
+        self.assertEqual(ui.actions, [])
+
+    def test_legacy_input_receives_read_time_when_ui_accepts_sampled_events(self):
+        clock, events, captured = Clock(), [], []
+        class LegacyInput:
+            running = False
+            def __init__(self, hardware, *, clock):
+                self.calls = 0
+            def __enter__(self):
+                self.running = True
+                return self
+            def __exit__(self, *args):
+                self.running = False
+            def reset(self):
+                pass
+            def read(self):
+                self.calls += 1
+                return ((True, ()) if self.calls > 2 else
+                        (False, ("DOWN",) if self.calls == 2 else ()))
+        class TimedUI(FakeUI):
+            def handle_sampled(self, action, at):
+                captured.append((action, at))
+        hardware = FakeHardware(clock, lambda t: 0, events)
+        launcher.run_poker_gate(lambda: hardware, TimedUI, clock, clock.sleep,
+                               input_factory=LegacyInput)
+        self.assertEqual(captured, [("DOWN", .01)])
+
+    def test_pending_short_chord_pauses_autoplay_before_another_update(self):
+        clock, events = Clock(), []
+        class AutoUI(FakeUI):
+            def __init__(self):
+                super().__init__()
+                self.playing, self.pauses = True, []
+            def pause_autoplay(self):
+                self.pauses.append(clock())
+                self.playing = False
+            def update(self, now):
+                if .2 <= now < .6:
+                    self.assert_paused()
+                return False
+            def assert_paused(self):
+                if self.playing:
+                    raise AssertionError("Autoplay updated during the reserved chord")
+        ui = AutoUI()
+        def trace(t):
+            if .2 <= t < .6 or 1 <= t < 3.2:
+                return launcher.SIGNER_CHORD
+            return 0
+        hardware = FakeHardware(clock, trace, events)
+        launcher.run_poker_gate(lambda: hardware, lambda: ui, clock, clock.sleep,
+                               input_factory=SynchronousInput)
+        self.assertTrue(ui.pauses)
+        self.assertGreaterEqual(ui.pauses[0], .2)
+        self.assertLess(ui.pauses[0], .22)
+        self.assertFalse(ui.playing)
+        self.assertEqual(ui.actions, [])
+        self.assertFalse(any(isinstance(event, tuple) and event[0] == "message" for event in events))
+
     def test_handoff_closes_hardware_before_starting_signer(self):
         clock, events, ui = Clock(), [], FakeUI()
         hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
@@ -177,11 +266,57 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(ui.actions, [])
         self.assertFalse(any(name.startswith("seedsigner") for name in sys.modules))
 
+    def test_handoff_joins_input_and_closes_ui_before_hardware_and_signer(self):
+        clock, events = Clock(), []
+        class ClosingUI(FakeUI):
+            def close(self):
+                events.append("ui-close")
+        class TracedInput(SynchronousInput):
+            def __exit__(self, *args):
+                super().__exit__(*args)
+                events.append("input-stop")
+        hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
+        launcher.main(hardware_factory=lambda: hardware, ui_factory=ClosingUI,
+                      clock=clock, sleep=clock.sleep, input_factory=TracedInput,
+                      signer_runner=lambda argv: events.append("signer"))
+        self.assertEqual(events[-4:], ["input-stop", "ui-close", "close", "signer"])
+        self.assertEqual(events.count("ui-close"), 1)
+
+    def test_failed_ui_close_aborts_signer_entry(self):
+        clock, events = Clock(), []
+        class UnclosedUI(FakeUI):
+            def close(self):
+                events.append("ui-close-failed")
+                raise RuntimeError("advisor still running")
+        hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
+        with self.assertRaises(launcher.UIShutdownError):
+            launcher.main(hardware_factory=lambda: hardware, ui_factory=UnclosedUI,
+                          clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
+                          signer_runner=lambda argv: events.append("signer"))
+        self.assertEqual(events[-2:], ["ui-close-failed", "close"])
+        self.assertNotIn("signer", events)
+
+    def test_render_failure_with_failed_ui_close_cannot_recover_into_signer(self):
+        clock, events = Clock(), []
+        class BrokenUI(FakeUI):
+            def render(self):
+                raise RuntimeError("render failure")
+            def close(self):
+                events.append("ui-close-failed")
+                raise RuntimeError("advisor still running")
+        hardware = FakeHardware(clock, lambda t: 0, events)
+        with self.assertRaises(launcher.UIShutdownError):
+            launcher.main(hardware_factory=lambda: hardware, ui_factory=BrokenUI,
+                          clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
+                          signer_runner=lambda argv: events.append("signer"))
+        self.assertEqual(events, ["open", "ui-close-failed", "close"])
+        self.assertEqual(clock(), 0)
+
     def test_game_failure_offers_retry_and_does_not_automatically_open_signer(self):
         clock, events, attempts = Clock(), [], []
         def trace(t):
             if .2 <= t < .5:
-                return launcher.KEY2
+                return 1 << 1
             return launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0
         hardware = FakeHardware(clock, trace, events)
         def broken_ui():
@@ -194,6 +329,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertGreaterEqual(clock(), 3.28)
         self.assertEqual(events[-2:], ["close", "signer"])
         self.assertTrue(any(isinstance(event, tuple) and event[0] == "message" for event in events))
+        self.assertIn(("message", "Game unavailable", "Down button: retry"), events)
 
     def test_gpio_failure_interrupts_the_signer_hold(self):
         clock, events, ui = Clock(), [], FakeUI()
@@ -213,10 +349,14 @@ class RuntimeTests(unittest.TestCase):
         class BrokenRender(FakeUI):
             def render(self):
                 raise RuntimeError("render failure")
+            def close(self):
+                events.append("ui-close")
         hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
         launcher.run_poker_gate(lambda: hardware, BrokenRender, clock, clock.sleep, input_factory=SynchronousInput)
         self.assertEqual(events[-1], "close")
         self.assertGreaterEqual(clock(), 3.28)
+        self.assertEqual(events.count("ui-close"), 1)
+        self.assertLess(events.index("ui-close"), events.index("close"))
 
     def test_dead_input_worker_recovers_with_a_delay_and_never_opens_signer(self):
         clock, events, ui = Clock(), [], FakeUI()

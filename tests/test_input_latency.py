@@ -70,12 +70,120 @@ class RuntimeTimeout(BaseException):
 
 
 class SampledInputTests(unittest.TestCase):
+    def test_up_tap_times_survive_coalescing_and_delayed_dispatch(self):
+        # A long pair wholly inside a blocked present must remain two singles;
+        # a genuine double across that present must remain a double. Gesture
+        # timing uses captured GPIO edges, not when the UI finally drains them.
+        for scenario, block_seconds, expected_double in (
+                ('separate-taps-coalesced', .520, False),
+                ('genuine-double-delayed', .450, True)):
+            with self.subTest(scenario=scenario):
+                hardware = MaskHardware()
+                first_present, blocked = threading.Event(), threading.Event()
+                services, samples, presses, blocks, producer_errors = [], [], [], [], []
+                began = time.monotonic()
+
+                class UI:
+                    def __init__(self):
+                        self.frames = 0
+                        self.double = False
+                    def handle(self, action):
+                        # Models the old dispatch-time fallback, so this test
+                        # fails if production stops forwarding sampled times.
+                        self.handle_sampled(action, time.monotonic())
+                    def handle_sampled(self, action, at):
+                        samples.append((action, at, time.monotonic()))
+                        if len(samples) == 2:
+                            self.double = 0 <= at-samples[0][1] <= .350
+                            raise EndRun()
+                    def update(self, now):
+                        if now-began > 3:
+                            raise RuntimeTimeout('Timestamped UP taps were lost')
+                        return (scenario == 'separate-taps-coalesced' and
+                                self.frames == 1 and now-began > .120)
+                    def render(self):
+                        self.frames += 1
+                        return self.frames
+                ui = UI()
+                class RuntimeHardware:
+                    def __enter__(self):
+                        return hardware
+                    def __exit__(self, *args):
+                        if services[0].running:
+                            raise AssertionError('Input survived timestamp-test cleanup')
+                        hardware.closed = True
+                def present(frame):
+                    first_present.set()
+                    if frame == 2:
+                        blocks.append(time.monotonic())
+                        blocked.set()
+                        time.sleep(block_seconds)
+                        blocks.append(time.monotonic())
+                hardware.present = present
+                hardware.show_message = lambda *args: producer_errors.append(('unexpected-recovery', args))
+                def factory(hw, *, clock):
+                    service = launcher.SampledInput(hw, clock=clock)
+                    services.append(service)
+                    return service
+                def producer():
+                    try:
+                        if not first_present.wait(1):
+                            raise AssertionError('First timestamp-test frame missing')
+                        wait_until(lambda: services and armed(services[0]))
+                        if scenario == 'separate-taps-coalesced':
+                            if not blocked.wait(1):
+                                raise AssertionError('Timestamp test never blocked')
+                            time.sleep(.020)
+                            presses.append(pulse(hardware, 1, .035))
+                            time.sleep(.375)
+                            presses.append(pulse(hardware, 1, .035))
+                        else:
+                            presses.append(pulse(hardware, 1, .035))
+                            if not blocked.wait(1):
+                                raise AssertionError('First UP did not trigger blocked present')
+                            time.sleep(.080)
+                            presses.append(pulse(hardware, 1, .035))
+                    except BaseException as error:
+                        producer_errors.append(repr(error))
+                actor = threading.Thread(target=producer)
+                actor.start()
+                try:
+                    with self.assertRaises(EndRun):
+                        launcher.main(hardware_factory=RuntimeHardware, ui_factory=lambda: ui,
+                                      input_factory=factory,
+                                      signer_runner=lambda argv: producer_errors.append('unexpected-signer'))
+                finally:
+                    actor.join(2)
+                self.assertEqual(producer_errors, [])
+                self.assertFalse(actor.is_alive())
+                self.assertEqual([action for action, _, _ in samples], ['UP', 'UP'])
+                self.assertEqual(ui.double, expected_double)
+                for (_, at, _), press in zip(samples, presses):
+                    self.assertGreaterEqual(at, press['started'])
+                    self.assertLessEqual(at, press['ended'])
+                captured_gap = samples[1][1]-samples[0][1]
+                dispatch_gap = samples[1][2]-samples[0][2]
+                if expected_double:
+                    self.assertLessEqual(captured_gap, .350)
+                    self.assertGreater(dispatch_gap, .350)
+                else:
+                    self.assertGreater(captured_gap, .350)
+                    self.assertLess(dispatch_gap, .100)
+                    self.assertTrue(all(blocks[0] <= at <= blocks[1] for _, at, _ in samples))
+                self.assertEqual(services[0].stats['gap_resets'], 0)
+                self.assertFalse(services[0].running)
+                self.assertEqual(hardware.reads_after_close, 0)
+                OBSERVATIONS.append({'scenario': scenario, 'status': 'PASS',
+                                     'captured_up_gap_ms': captured_gap*1000,
+                                     'dispatch_up_gap_ms': dispatch_gap*1000,
+                                     'double_tap': ui.double, 'stats': services[0].stats})
+
     def test_quick_taps_survive_blocked_render_and_spi_in_the_real_runtime(self):
         # Both presses begin and end while the *same production UI thread* is
         # blocked. A synchronous poller cannot observe either physical pulse.
         for stage, blocking_seconds, buttons in (
                 ('render', .150, ((1 << 3, .035),)),
-                ('present', .250, ((1 << 3, .035), (launcher.KEY2, .050)))):
+                ('present', .250, ((1 << 3, .035), (1 << 1, .050)))):
             with self.subTest(stage=stage):
                 hardware = MaskHardware()
                 blocked = threading.Event()
@@ -143,7 +251,7 @@ class SampledInputTests(unittest.TestCase):
                                       signer_runner=lambda argv: events.append('unexpected-signer'))
                 finally:
                     actor.join(2)
-                expected = ['RIGHT'] + (['KEY2'] if len(buttons) == 2 else [])
+                expected = ['RIGHT'] + (['DOWN'] if len(buttons) == 2 else [])
                 self.assertEqual(ui.actions, expected)
                 self.assertEqual(events, ['hardware-open', 'hardware-close'])
                 self.assertFalse(actor.is_alive())
@@ -169,18 +277,33 @@ class SampledInputTests(unittest.TestCase):
         hardware = MaskHardware()
         with launcher.SampledInput(hardware) as service:
             wait_until(lambda: armed(service))
-            press = pulse(hardware, launcher.KEY2, .180)
+            press = pulse(hardware, 1 << 1, .180)
             time.sleep(.025)
             pulse(hardware, 1 << 2, .040)
             time.sleep(.025)
             pulse(hardware, 1 << 3, .040)
             time.sleep(.025)
-            self.assertEqual(service.read(), (False, ('KEY2', 'LEFT', 'RIGHT')))
+            self.assertEqual(service.read(), (False, ('DOWN', 'LEFT', 'RIGHT')))
             self.assertEqual(service.read(), (False, ()))
             OBSERVATIONS.append({'scenario': 'held-deal-and-ordered-input', 'status': 'PASS',
                                  'held_deal_actual_ms': press['actual_ms'],
-                                 'actions': ['KEY2', 'LEFT', 'RIGHT'], 'deal_count': 1,
+                                 'actions': ['DOWN', 'LEFT', 'RIGHT'], 'deal_count': 1,
                                  'stats': service.stats})
+
+    def test_short_reserved_chord_is_visible_before_latching_without_action_leaks(self):
+        hardware = MaskHardware()
+        with launcher.SampledInput(hardware) as service:
+            wait_until(lambda: armed(service))
+            self.assertFalse(service.gesture_pending)
+            hardware.set(launcher.SIGNER_CHORD)
+            wait_until(lambda: service.gesture_pending)
+            with service._lock:
+                self.assertIsNotNone(service.router.gate.hold_started)
+                self.assertFalse(service.router.gate.latched)
+            self.assertEqual(service.read(), (False, ()))
+            hardware.set(0)
+            wait_until(lambda: not service.gesture_pending)
+            self.assertEqual(service.read(), (False, ()))
 
     def test_gpio_error_discards_pending_events_and_requires_neutral_release(self):
         hardware = MaskHardware()

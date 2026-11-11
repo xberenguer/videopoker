@@ -23,9 +23,21 @@ class SynchronousInput:
     def reset(self):
         self.router.reset()
 
+    @property
+    def gesture_pending(self):
+        gate = self.router.gate
+        return (gate.hold_started is not None or gate.latched or
+                self.router.suppress_until_neutral)
+
     def read(self):
+        entered, events = self.read_timed()
+        return entered, tuple(action for _, action in events)
+
+    def read_timed(self):
         try:
-            return self.router.update(self.clock(), self.hardware.read_mask())
+            now = self.clock()
+            entered, actions = self.router.update(now, self.hardware.read_mask())
+            return entered, tuple((now, action) for action in actions)
         except Exception:
             self.reset()
             raise

@@ -65,7 +65,7 @@ class RealControllerTests(unittest.TestCase):
             return session
         def trace(t):
             if .10 <= t < .19 or .40 <= t < .49:
-                return launcher.KEY2
+                return 1 << 1
             if .80 <= t < 2.95:
                 return launcher.SIGNER_CHORD
             return 0
@@ -87,7 +87,7 @@ class RealControllerTests(unittest.TestCase):
     def test_animation_skip_and_held_deal_do_not_double_spend(self):
         def trace(t):
             if .10 <= t < .19 or .90 <= t < .99 or 1.10 <= t < 1.80:
-                return launcher.KEY2
+                return 1 << 1
             if .60 <= t < .69:
                 return 1 << 4
             if 2.0 <= t < 4.15:
@@ -108,7 +108,7 @@ class RealControllerTests(unittest.TestCase):
             return ui
         def trace(t):
             if .10 <= t < .19:
-                return launcher.KEY2
+                return 1 << 1
             if .20 <= t < 2.35:
                 return launcher.SIGNER_CHORD
             return 0
@@ -138,7 +138,7 @@ class RealControllerTests(unittest.TestCase):
     def test_short_chord_in_game_does_not_toggle_hold_or_activate_gold_controls(self):
         def trace(t):
             if .10 <= t < .19:
-                return launcher.KEY2
+                return 1 << 1
             if .60 <= t < 1.0 or 1.20 <= t < 3.35:
                 return launcher.SIGNER_CHORD
             return 0

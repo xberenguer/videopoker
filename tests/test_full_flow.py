@@ -89,8 +89,8 @@ class FullFlowTests(unittest.TestCase):
             (1.80, 1.89, 1 << 4),       # 1 -> 2.
             (2.00, 2.09, 1 << 4),       # 2 -> 3.
             (2.20, 2.30, launcher.KEY3), # Return from gold controls.
-            (2.50, 2.59, launcher.KEY2), # Deal three credits total.
-            (3.10, 3.19, launcher.KEY2), # Draw after deal animation.
+            (2.50, 2.59, 1 << 1),       # Down: deal three credits total.
+            (3.10, 3.19, 1 << 1),       # Down: draw after deal animation.
             (4.00, 6.15, launcher.SIGNER_CHORD),
         )
         hardware = TraceHardware(clock, ui, trace)
@@ -121,19 +121,19 @@ class FullFlowTests(unittest.TestCase):
         session = Session(rng=random.Random(10))
         ui = ObservedUI(session, clock)
         trace = (
-            (.2, .4, launcher.KEY2),       # Deal once.
+            (.2, .4, 1 << 1),             # Down: deal once.
             (.6, .8, 1 << 4),             # Hold card 0 via center.
             (.9, 1.1, 1 << 3),            # Move right to card 1.
-            (1.2, 1.4, 1 << 4),           # Hold card 1.
-            (2.0, 2.2, launcher.KEY2),     # Draw once.
-            (2.8, 3.0, launcher.KEY2),     # Start next round after win presentation.
+            (1.2, 1.4, launcher.KEY2),     # Hold card 1 via right middle.
+            (2.0, 2.2, 1 << 1),           # Down: draw once.
+            (2.8, 3.0, 1 << 4),           # Center: next round after win presentation.
             (3.3, 5.5, launcher.SIGNER_CHORD),
         )
         hardware = TraceHardware(clock, ui, trace)
         launcher.main(hardware_factory=lambda: hardware, ui_factory=lambda: ui,
                       clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
                       signer_runner=lambda argv: hardware.events.append("signer_started"))
-        self.assertEqual(ui.actions, ["KEY2", "CENTER", "RIGHT", "CENTER", "KEY2", "KEY2"])
+        self.assertEqual(ui.actions, ["DOWN", "CENTER", "RIGHT", "KEY2", "DOWN", "CENTER"])
         self.assertEqual(hardware.events, ["hardware_open", "hardware_closed", "signer_started"])
         self.assertEqual(session.rounds, 1)
         self.assertEqual(session.phase, "hold")
@@ -180,12 +180,12 @@ class FullFlowTests(unittest.TestCase):
         clock, rng = SimulatedClock(), RoyalRandom()
         session = Session(rng=rng)
         ui = ObservedUI(session, clock)
-        trace = ((.2, 1.8, launcher.KEY2), (2.0, 4.2, launcher.SIGNER_CHORD))
+        trace = ((.2, 1.8, 1 << 1), (2.0, 4.2, launcher.SIGNER_CHORD))
         hardware = TraceHardware(clock, ui, trace)
         launcher.main(hardware_factory=lambda: hardware, ui_factory=lambda: ui,
                       clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
                       signer_runner=lambda argv: hardware.events.append("signer_started"))
-        self.assertEqual(ui.actions, ["KEY2"])
+        self.assertEqual(ui.actions, ["DOWN"])
         self.assertEqual(rng.calls, 1)
         self.assertEqual(session.phase, "result")
         self.assertEqual(session.rounds, 1)

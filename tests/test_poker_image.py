@@ -18,7 +18,7 @@ def minimal_payload(root):
     app = root / "opt/dino"
     app.mkdir(parents=True)
     (root / "start.sh").write_text("#!/bin/sh\n/usr/bin/python3 /opt/dino/launcher.py\n")
-    for filename in ("launcher.py", "hardware.py", "poker_engine.py", "poker_ui.py"):
+    for filename in ("launcher.py", "hardware.py", "poker_engine.py", "poker_ui.py", "poker_strategy.py"):
         (app / filename).write_text("# image assembly safety fixture\n")
     assets = app / "assets/videopoker"
     assets.mkdir(parents=True)
@@ -31,6 +31,21 @@ def minimal_payload(root):
              "width":1,"height":1,"sha256":image.sha(png),
              "source_url":"https://example.com/test-fixture.png","source_sha256":image.sha(png)}
     (assets / "manifest.json").write_text(json.dumps({"schema":1,"assets":[entry]}))
+    # Structural assembly fixture, deliberately not a usable advice table.
+    from strategy_assets import CATEGORIES, PAYOUTS, MULTIPLIERS
+    strategy = app / 'strategy'
+    strategy.mkdir()
+    raw = struct.pack('<8s6I4Q', b'UXSUB01\0', 1, 64, 14, 52, 4, 0,
+                      64, 4449046, 0, 0) + bytes(4449046)
+    (strategy / 'subset_counts.dat').write_bytes(raw)
+    reachable = {0}
+    for _ in range(10):
+        reachable = {s+m for s in reachable for m in (1, 2, 3, 4, 8, 10, 12)}
+    metadata = {'schema': 1, 'category_order': CATEGORIES, 'payouts': PAYOUTS,
+                'multiplier_order': MULTIPLIERS, 'table_sha256': image.sha(raw),
+                'bias': {'num_hands': 10, 'states': sorted(reachable),
+                         'values': [0.0] * len(reachable), 'bellman_span': 0.0}}
+    (strategy / 'strategy.json').write_text(json.dumps(metadata))
 
 
 class PayloadTests(unittest.TestCase):
@@ -73,6 +88,28 @@ class PayloadTests(unittest.TestCase):
             (root / "etc").mkdir()
             with self.assertRaises(ValueError):
                 image.collect_payload(root)
+
+    def test_strategy_resources_are_required_bounded_and_hash_checked(self):
+        for mutation in ('missing', 'truncated', 'changed', 'bad-bias'):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                minimal_payload(root)
+                data = root / 'opt/dino/strategy/subset_counts.dat'
+                if mutation == 'missing':
+                    data.unlink()
+                elif mutation == 'truncated':
+                    data.write_bytes(data.read_bytes()[:-1])
+                elif mutation == 'changed':
+                    raw = bytearray(data.read_bytes())
+                    raw[-1] = 1
+                    data.write_bytes(raw)
+                else:
+                    path = data.with_name('strategy.json')
+                    meta = json.loads(path.read_text())
+                    meta['bias']['bellman_span'] = float('nan')
+                    path.write_text(json.dumps(meta))
+                with self.assertRaises(ValueError):
+                    image.collect_payload(root)
 
     def test_existing_and_raw_device_outputs_are_refused(self):
         with tempfile.TemporaryDirectory() as directory:

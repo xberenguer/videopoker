@@ -31,16 +31,55 @@ class PokerUITests(unittest.TestCase):
 
     def test_deal_hold_draw_is_one_explicit_action_each(self):
         ui = self.make_ui()
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'hold')
         self.assertEqual(ui.session.credits, 9900)
         ui.handle('RIGHT'); ui.handle('CENTER')
         self.assertEqual(ui.session.held, [False, True, False, False, False])
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'result')
         self.assertEqual(len(ui.session.hands), 10)
         self.assertTrue(all(hand[1] == ui.session.initial[1] for hand in ui.session.hands))
         self.assertEqual(ui.session.rounds, 1)
+
+    def test_both_middle_buttons_hold_and_start_next_hand_but_do_not_deal_from_ready(self):
+        for action in ('CENTER', 'KEY2'):
+            with self.subTest(action=action):
+                ui = self.make_ui()
+                before = ui.session.snapshot()
+                ui.handle(action)
+                self.assertEqual(ui.session.snapshot(), before)
+                ui.handle('DOWN')
+                ui.handle(action)
+                self.assertEqual(ui.session.held, [True, False, False, False, False])
+                ui.handle(action)
+                self.assertEqual(ui.session.held, [False]*5)
+                ui.handle('DOWN')
+                result = ui.session.snapshot()
+                self.assertEqual(result['phase'], 'result')
+                ui.handle(action)
+                self.assertEqual(ui.session.phase, 'hold')
+                self.assertEqual(ui.session.credits, result['credits']-result['total_bet'])
+                self.assertEqual(ui.session.active_multipliers, result['multipliers'])
+                self.assertEqual(ui.session.rounds, 1)
+                self.assertIsNone(ui.menu)
+
+    def test_each_play_or_middle_button_only_skips_an_active_animation(self):
+        for action in ('DOWN', 'CENTER', 'KEY2'):
+            with self.subTest(action=action):
+                ui = PokerUI(Session(rng=random.Random(250)), clock=Clock())
+                ui.handle('DOWN')
+                before = ui.session.snapshot()
+                ui.handle(action)
+                self.assertIsNone(ui._animation)
+                self.assertEqual(ui.session.snapshot(), before)
+                ui.handle('DOWN')
+                result = ui.session.snapshot()
+                self.assertIsNotNone(ui._animation)
+                ui.handle(action)
+                self.assertIsNone(ui._animation)
+                self.assertEqual(ui.session.snapshot(), result)
+                self.assertIsNone(ui.menu)
 
     def test_gold_controls_are_navigable_without_spending(self):
         ui = self.make_ui()
@@ -52,7 +91,7 @@ class PokerUITests(unittest.TestCase):
         self.assertEqual(ui.menu['bet'], 2)
         self.assertEqual(ui.session.bet_per_hand, 10)
         self.assertEqual(ui.session.credits, 10000)
-        ui.handle('KEY2')
+        ui.handle('KEY3')
         self.assertIsNone(ui.menu)
         self.assertEqual(ui.button_focus, 0)
         ui.handle('KEY3')
@@ -64,7 +103,7 @@ class PokerUITests(unittest.TestCase):
         ui.handle('CENTER')
         self.assertEqual(ui.session.bet_per_hand, 1)
         self.assertEqual(ui.session.total_bet, 10)
-        ui.handle('KEY3'); ui.handle('KEY2')
+        ui.handle('KEY3'); ui.handle('DOWN')
         self.focus_button(ui, 4)
         ui.handle('CENTER')
         self.assertEqual(ui.session.bet_per_hand, 1)
@@ -93,7 +132,7 @@ class PokerUITests(unittest.TestCase):
         ui = self.make_ui()
         self.focus_button(ui, 0); ui.handle('CENTER'); ui.handle('CENTER')
         self.assertEqual(ui.menu, {'page': 'controls', 'index': 0})
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.menu['index'], 1)
         ui.handle('KEY3')
         self.assertIsNone(ui.menu)
@@ -111,31 +150,73 @@ class PokerUITests(unittest.TestCase):
 
     def test_insufficient_credit_prompt_refills_without_auto_deal(self):
         ui = self.make_ui(20)
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'ready')
         self.assertTrue(ui.notice)
         self.assertEqual(ui.render().size, (320, 240))
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.credits, 10020)
         self.assertEqual(ui.session.phase, 'ready')
         self.assertIsNone(ui.notice)
 
     def test_all_hands_and_card_focus_wrap_and_inspect(self):
         ui = self.make_ui()
-        ui.handle('LEFT'); ui.handle('UP')
-        self.assertEqual((ui.selected_card, ui.selected_hand), (4, 9))
-        ui.handle('KEY2'); ui.handle('KEY2'); ui.handle('UP'); ui.handle('CENTER')
+        ui.handle('LEFT')
+        self.assertEqual((ui.selected_card, ui.selected_hand), (4, 0))
+        ui.handle('DOWN'); ui.handle('DOWN'); ui.handle('KEY1'); ui.handle('UP')
         self.assertEqual(ui.menu, {'page': 'inspect', 'index': 9})
         ui.handle('DOWN')
         self.assertEqual(ui.menu['index'], 0)
         ui.handle('KEY3')
         self.assertIsNone(ui.menu)
 
+    def test_result_right_middle_deals_next_hand_and_claims_pending_multipliers(self):
+        ui = self.make_ui()
+        ui.handle('DOWN'); ui.handle('DOWN')
+        before = ui.session.snapshot()
+        self.assertEqual(before['phase'], 'result')
+        ui.handle('UP')
+        ui.handle('CENTER')
+        after = ui.session.snapshot()
+        self.assertEqual(after['phase'], 'hold')
+        self.assertEqual(after['credits'], before['credits'] - before['total_bet'])
+        self.assertEqual(after['rounds'], before['rounds'])
+        self.assertEqual(after['active_multipliers'], before['multipliers'])
+        self.assertEqual(after['held'], [False] * 5)
+        self.assertEqual((ui.selected_card, ui.selected_hand), (0, 0))
+        self.assertIsNone(ui.menu)
+
+    def test_result_top_right_inspects_selected_hand_without_changing_game(self):
+        ui = self.make_ui()
+        ui.handle('DOWN'); ui.handle('DOWN')
+        ui.selected_hand = 9
+        before = ui.session.snapshot()
+        ui.handle('KEY1')
+        self.assertEqual(ui.menu, {'page': 'inspect', 'index': 9})
+        self.assertEqual(ui.session.snapshot(), before)
+
+    def test_result_right_middle_skips_animation_before_it_can_start_next_deal(self):
+        clock = Clock()
+        ui = PokerUI(Session(rng=random.Random(250)), font_dir=FONT_DIR, clock=clock)
+        ui.handle('DOWN'); ui.handle('DOWN')  # Deal, then skip its reveal.
+        ui.handle('DOWN')
+        self.assertEqual(ui.session.phase, 'result')
+        self.assertIsNotNone(ui._animation)
+        before = ui.session.snapshot()
+        ui.handle('CENTER')
+        self.assertIsNone(ui._animation)
+        self.assertIsNone(ui.menu)
+        self.assertEqual(ui.session.snapshot(), before)
+        ui.handle('CENTER')
+        self.assertEqual(ui.session.phase, 'hold')
+        self.assertEqual(ui.session.credits, before['credits'] - before['total_bet'])
+        self.assertEqual(ui.session.rounds, before['rounds'])
+
     def test_nonblocking_animation_updates_without_debiting_again(self):
         clock = Clock()
         ui = PokerUI(Session(rng=random.Random(250)), font_dir=FONT_DIR, clock=clock)
         ui.speed = 0
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertIsNotNone(ui._animation)
         self.assertEqual(ui.session.credits, 9900)
         self.assertFalse(ui.update(clock.value))
@@ -151,22 +232,22 @@ class PokerUITests(unittest.TestCase):
     def test_middle_skips_animation_without_drawing_or_dealing_twice(self):
         clock = Clock()
         ui = PokerUI(Session(rng=random.Random(250)), font_dir=FONT_DIR, clock=clock)
-        ui.handle('KEY2'); ui.handle('KEY2')
+        ui.handle('DOWN'); ui.handle('DOWN')
         self.assertIsNone(ui._animation)
         self.assertEqual(ui.session.phase, 'hold')
         self.assertEqual(ui.session.credits, 9900)
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'result')
         self.assertIsNotNone(ui._animation)
         credits = ui.session.credits
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.credits, credits)
         self.assertEqual(ui.session.rounds, 1)
         self.assertIsNone(ui._animation)
 
     def test_renderer_does_not_mutate_state(self):
         ui = self.make_ui()
-        ui.handle('KEY2'); ui.handle('KEY2')
+        ui.handle('DOWN'); ui.handle('DOWN')
         state = ui.session.snapshot()
         original = copy.deepcopy(state)
         for selected in range(10):
@@ -177,8 +258,8 @@ class PokerUITests(unittest.TestCase):
     def test_all_views_are_native_rgb_frames(self):
         ui = self.make_ui()
         states = [ui.session.snapshot()]
-        ui.handle('KEY2'); states.append(ui.session.snapshot())
-        ui.handle('KEY2'); states.append(ui.session.snapshot())
+        ui.handle('DOWN'); states.append(ui.session.snapshot())
+        ui.handle('DOWN'); states.append(ui.session.snapshot())
         for state in states:
             for menu in (None, {'page': 'paytable', 'bet': 1}, {'page': 'paytable', 'bet': 5},
                          {'page': 'controls', 'index': 0}, {'page': 'controls', 'index': 1},
@@ -216,12 +297,13 @@ class PokerUITests(unittest.TestCase):
         self.assertEqual(ui.session.num_hands, 2)
         self.assertEqual(ui.session.total_bet, 2)
         self.assertEqual(ui.session.credits, 10000)
-        ui.handle('KEY3'); ui.handle('UP')
-        self.assertEqual(ui.selected_hand, 1)
+        ui.handle('KEY3')
+        self.assertIsNone(ui.button_focus)
+        self.assertEqual(ui.selected_hand, 0)
 
     def test_bet_per_hand_resets_to_ten_one_credit_hands_after_round(self):
         ui = self.make_ui()
-        ui.handle('KEY2'); ui.handle('KEY2')
+        ui.handle('DOWN'); ui.handle('DOWN')
         self.focus_button(ui, 4); ui.handle('CENTER')
         self.assertEqual(ui.session.phase, 'ready')
         self.assertEqual(ui.session.num_hands, 10)
@@ -260,7 +342,7 @@ class PokerUITests(unittest.TestCase):
 
     def test_control_menu_key_skips_animation_without_deal(self):
         ui = PokerUI(Session(rng=random.Random(250)), font_dir=FONT_DIR)
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertIsNotNone(ui._animation)
         ui.handle('KEY3')
         self.assertIsNone(ui._animation)
@@ -275,7 +357,7 @@ class PokerUITests(unittest.TestCase):
         clock = Clock()
         ui = PokerUI(Session(rng=RoyalSampler()), font_dir=FONT_DIR, clock=clock)
         ui.speed = 0
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'result')
         self.assertEqual(ui.session.total_win, 40000)
         self.assertIsNotNone(ui._animation)
@@ -308,7 +390,7 @@ class PokerUITests(unittest.TestCase):
         self.assertEqual(ui.menu['bet'], 10)
         ui.handle('LEFT'); ui.handle('LEFT')
         self.assertEqual(ui.menu['bet'], 4)
-        ui.handle('KEY2'); ui.handle('CENTER')
+        ui.handle('KEY3'); ui.handle('CENTER')
         self.assertEqual(ui.menu['bet'], 4)
         self.assertEqual(ui.session.bet_per_hand, 10)
         self.assertEqual(ui.session.credits, 10000)
@@ -358,8 +440,8 @@ class PokerUITests(unittest.TestCase):
         ui.renderer.text = text
         ui.renderer.fitted_label = fitted
         states = [ui.session.snapshot()]
-        ui.handle('KEY2'); states.append(ui.session.snapshot())
-        ui.handle('KEY2'); states.append(ui.session.snapshot())
+        ui.handle('DOWN'); states.append(ui.session.snapshot())
+        ui.handle('DOWN'); states.append(ui.session.snapshot())
         menus = (None, *({'page': 'controls', 'index': n} for n in range(4)),
                  {'page': 'paytable', 'bet': 1}, {'page': 'paytable', 'bet': 10},
                  {'page': 'options', 'index': 0}, {'page': 'more_games'},
@@ -385,13 +467,13 @@ class PokerUITests(unittest.TestCase):
         ui = PokerUI(Session(rng=sampler), font_dir=FONT_DIR)
         ui.speed = 2
         before = ui.session.snapshot()
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.snapshot(), before)
         self.assertEqual(ui.notice, 'Shuffling is getting ready')
         self.assertTrue(ui._entropy_notice)
         self.assertFalse(ui._credit_notice)
         self.assertEqual(ui.render().size, (320, 240))
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'hold')
         self.assertEqual(ui.session.credits, 9900)
         self.assertEqual(sampler.calls, 2)
@@ -411,13 +493,13 @@ class PokerUITests(unittest.TestCase):
         ui = PokerUI(Session(rng=sampler), font_dir=FONT_DIR)
         ui.speed = 2
         ui.session.multipliers = [12, 3, 4, 8, 10, 2, 1, 1, 1, 1]
-        ui.handle('KEY2'); ui.handle('CENTER'); ui.handle('RIGHT'); ui.handle('CENTER')
+        ui.handle('DOWN'); ui.handle('CENTER'); ui.handle('RIGHT'); ui.handle('CENTER')
         before = ui.session.snapshot()
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.snapshot(), before)
         self.assertTrue(ui._entropy_notice)
         self.assertFalse(ui._credit_notice)
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'result')
         self.assertEqual(ui.session.rounds, 1)
         self.assertEqual(ui.session.credits, 9900+ui.session.total_win)
@@ -441,7 +523,7 @@ class PokerUITests(unittest.TestCase):
         self.focus_button(ui, 5); ui.handle('CENTER')
         self.assertEqual(ui.session.snapshot(), before)
         self.assertTrue(ui._retry_max_bet)
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         self.assertEqual(ui.session.phase, 'hold')
         self.assertEqual(ui.session.num_hands, 10)
         self.assertEqual(ui.session.bet_per_hand, 10)
@@ -452,7 +534,7 @@ class PokerUITests(unittest.TestCase):
             def sample(self, population, count): raise RandomNotReady('not ready')
         ui = PokerUI(Session(rng=BlockedSampler()), font_dir=FONT_DIR)
         before = ui.session.snapshot()
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         words = []
         original = ui.renderer.text
         def capture(draw, xy, value, *args, **kwargs):
@@ -461,8 +543,8 @@ class PokerUITests(unittest.TestCase):
         ui.renderer.text = capture
         ui.render()
         self.assertIn('Shuffling is getting ready', words)
-        self.assertIn('D-PAD CENTER: RETRY', words)
-        self.assertNotIn('D-PAD CENTER: ADD 10,000', words)
+        self.assertIn('DOWN: RETRY', words)
+        self.assertNotIn('DOWN: ADD 10,000', words)
         self.assertNotIn('seed', '\n'.join(words).lower())
         self.assertNotIn('wallet', '\n'.join(words).lower())
         ui.handle('KEY3')
@@ -479,7 +561,7 @@ class PokerUITests(unittest.TestCase):
             self.assertEqual(renderer.source_card(card), source)
             expected = renderer.sprite('cards/'+str(source)+'.png', (83, 119))
             self.assertEqual(renderer.card(card, 83, 119, selected=True).tobytes(), expected.tobytes())
-        ui.handle('KEY2')
+        ui.handle('DOWN')
         state = ui.session.snapshot()
         first = renderer.render_source(state, selected_card=0)
         other = renderer.render_source(state, selected_card=4)
@@ -523,9 +605,9 @@ class PokerUITests(unittest.TestCase):
         self.assertEqual(ui.menu['index'], 3)
         for _ in range(9): ui.handle('LEFT')
         self.assertEqual(ui.menu['index'], 0)
-        ui.handle('KEY3'); ui.handle('KEY3'); ui.handle('KEY2')
+        ui.handle('KEY3'); ui.handle('KEY3'); ui.handle('DOWN')
         self.focus_button(ui, 0); ui.handle('CENTER'); ui.handle('CENTER')
-        for _ in range(9): ui.handle('KEY2')
+        for _ in range(9): ui.handle('DOWN')
         self.assertEqual(ui.menu['index'], 1)
         self.assertEqual(ui.session.phase, 'hold')
         self.assertEqual(ui.session.credits, 9900)
@@ -548,7 +630,7 @@ class PokerUITests(unittest.TestCase):
     def test_primary_render_uses_cached_art_and_glyphs_without_file_reads(self):
         from unittest.mock import patch
         ui = self.make_ui()
-        ui.handle('KEY2'); ui.handle('KEY2')
+        ui.handle('DOWN'); ui.handle('DOWN')
         state = ui.session.snapshot()
         state['active_multipliers'] = [2, 3, 4, 8, 10, 12, 1, 2, 3, 4]
         with patch('PIL.Image.open', side_effect=AssertionError('Runtime image decode after constructor')):
@@ -629,8 +711,8 @@ class PokerUITests(unittest.TestCase):
     def test_badge_cache_matches_full_lanczos_composition_for_every_frame(self):
         ui = self.make_ui()
         states = [ui.session.snapshot()]
-        ui.handle('KEY2'); ui.handle('CENTER'); states.append(ui.session.snapshot())
-        ui.handle('KEY2'); states.append(ui.session.snapshot())
+        ui.handle('DOWN'); ui.handle('CENTER'); states.append(ui.session.snapshot())
+        ui.handle('DOWN'); states.append(ui.session.snapshot())
         ui.session.set_bet_per_hand(1); ui.session.set_num_hands(1)
         ui.session.multipliers = [2, 3, 4, 8, 10, 12, 1, 2, 3, 4]
         states.append(ui.session.snapshot())
@@ -648,7 +730,7 @@ class PokerUITests(unittest.TestCase):
     def test_badge_and_focus_updates_skip_card_composition_and_full_resize(self):
         from unittest.mock import patch
         from PIL import Image
-        ui = self.make_ui(); ui.handle('KEY2')
+        ui = self.make_ui(); ui.handle('DOWN')
         state = ui.session.snapshot()
         renderer = ui.renderer
         renderer.render(state)
@@ -674,7 +756,7 @@ class PokerUITests(unittest.TestCase):
         self.assertIs(renderer._normal_board, logical_board)
 
     def test_nested_snapshot_changes_replace_the_single_board_cache(self):
-        ui = self.make_ui(); ui.handle('KEY2'); ui.handle('KEY2')
+        ui = self.make_ui(); ui.handle('DOWN'); ui.handle('DOWN')
         state = ui.session.snapshot()
         state['results'][0] = {'category': 'high_pair', 'base_payout': 5,
                                'payout': 5, 'multiplier': 1, 'next_multiplier': 2}
@@ -698,7 +780,7 @@ class PokerUITests(unittest.TestCase):
         self.assertNotEqual(renderer._normal_key, old_key)
 
     def test_mutating_returned_frames_does_not_poison_render_cache(self):
-        ui = self.make_ui(); ui.handle('KEY2')
+        ui = self.make_ui(); ui.handle('DOWN')
         state = ui.session.snapshot()
         expected = ui.renderer.render(state).tobytes()
         returned = ui.renderer.render(state)
@@ -710,7 +792,7 @@ class PokerUITests(unittest.TestCase):
 
     def test_native_focus_is_visible_without_obscuring_held_tags_or_footer(self):
         from PIL import Image
-        ui = self.make_ui(); ui.handle('KEY2')
+        ui = self.make_ui(); ui.handle('DOWN')
         ui.session.toggle_hold(2)
         state = ui.session.snapshot()
         renderer = ui.renderer

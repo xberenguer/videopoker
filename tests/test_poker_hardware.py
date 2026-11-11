@@ -25,7 +25,7 @@ class HardwareTests(unittest.TestCase):
         # Board pin numbers are the physical wiring, independent of the
         # implementation's ordered tuple and the display's orientation.
         expected = {31: "UP", 35: "DOWN", 29: "LEFT", 37: "RIGHT",
-                    38: "CENTER", 40: "KEY1", 33: "KEY2", 36: "KEY3"}
+                    33: "CENTER", 40: "KEY1", 38: "KEY2", 36: "KEY3"}
         self.assertEqual(set(owner.BUTTON_PINS), set(expected))
         self.assertEqual(len(owner.BUTTON_PINS), len(expected))
         self.assertEqual(owner.read_mask(), 0)
@@ -37,7 +37,7 @@ class HardwareTests(unittest.TestCase):
         active.update(expected)
         self.assertEqual(owner.read_mask(), 255)
 
-    def test_physical_center_swap_routes_deal_hold_and_unchanged_outer_chord(self):
+    def test_physical_down_and_both_middles_route_without_changing_outer_chord(self):
         active = set()
         owner = hardware.PlusHardware()
         owner.gpio = SimpleNamespace(LOW=0, input=lambda pin: 0 if pin in active else 1)
@@ -52,16 +52,21 @@ class HardwareTests(unittest.TestCase):
             actions.extend(emitted)
         sample(0, ())
         sample(.081, ())
-        # A held physical left/D-pad center must emit Deal exactly once.
-        for now in (.1, .12, .15, .4): sample(now, (33,))
+        # A held physical D-pad Down emits the primary Deal action once.
+        for now in (.1, .12, .15, .4): sample(now, (35,))
         sample(.5, ())
         sample(.52, ())
-        # Physical right middle now emits Hold / confirm.
+        # Both physical middle buttons retain their standard logical names;
+        # the poker UI assigns both to Hold / confirm and next-hand Deal.
+        sample(.54, (33,))
+        sample(.56, (33,))
+        sample(.58, ())
+        sample(.595, ())
         sample(.6, (38,))
         sample(.62, (38,))
         sample(.7, ())
         sample(.72, ())
-        self.assertEqual(actions, ["KEY2", "CENTER"])
+        self.assertEqual(actions, ["DOWN", "CENTER", "KEY2"])
         self.assertFalse(entered)
         # The same two outer physical action buttons still reserve entry;
         # neither produces a hold/menu action while forming the chord.
@@ -73,7 +78,7 @@ class HardwareTests(unittest.TestCase):
         sample(3.0, ())
         sample(3.081, ())
         self.assertTrue(entered)
-        self.assertEqual(actions, ["KEY2", "CENTER"])
+        self.assertEqual(actions, ["DOWN", "CENTER", "KEY2"])
 
     @unittest.skipUnless(Image, "Pillow is required for dirty-frame verification")
     def test_only_changed_pixels_are_sent_and_equal_frames_do_not_write(self):
