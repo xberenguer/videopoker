@@ -560,10 +560,23 @@ class PokerUI:
         self._hint_started = None
         self._hint_flash = False
         self._last_up = None
+        self._captured_input_at = None
         self.autoplay = False
         self._auto_stage = None
         self._auto_due = None
         self._closed = False
+
+    def handle_sampled(self, action, captured_at):
+        """Keep gesture timing tied to GPIO edges through a slow LCD update."""
+        if type(captured_at) not in (int, float) or not math.isfinite(captured_at):
+            raise ValueError('Invalid sampled input time')
+        previous = self._captured_input_at
+        self._captured_input_at = captured_at
+        try:
+            # Preserve subclasses' action logging and the ordinary public API.
+            return self.handle(action)
+        finally:
+            self._captured_input_at = previous
 
     def handle(self, action):
         action = str(action).upper()
@@ -695,8 +708,9 @@ class PokerUI:
 
     def _handle_up(self):
         now = self._clock()
-        double = self._last_up is not None and 0 <= now-self._last_up <= self.DOUBLE_UP_SECONDS
-        self._last_up = None if double else now
+        edge_time = now if self._captured_input_at is None else self._captured_input_at
+        double = self._last_up is not None and 0 <= edge_time-self._last_up <= self.DOUBLE_UP_SECONDS
+        self._last_up = None if double else edge_time
         if double:
             if self.autoplay:
                 self.pause_autoplay()

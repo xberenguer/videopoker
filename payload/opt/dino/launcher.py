@@ -251,6 +251,11 @@ class SampledInput:
             self._stop.wait(max(0.0, self.interval - (self.clock() - began)))
 
     def read(self):
+        entered, events = self.read_timed()
+        return entered, tuple(action for _, action in events)
+
+    def read_timed(self):
+        """Drain captured edges with their monotonic sampling timestamps."""
         with self._lock:
             if not self.running:
                 raise InputServiceError("Input sampling is unavailable")
@@ -260,9 +265,9 @@ class SampledInput:
                 self._stats['stale_resets'] += 1
                 self._reset_locked()
                 return False, ()
-            actions = tuple(action for _, action in self._queue)
+            events = tuple(self._queue)
             self._queue.clear()
-            return False, actions
+            return False, events
 
     def close(self):
         self._stop.set()
@@ -319,7 +324,14 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                 while True:
                     now = clock()
                     try:
-                        enter_signer, actions = inputs.read()
+                        read_timed = getattr(inputs, "read_timed", None)
+                        if callable(read_timed):
+                            enter_signer, timed_actions = read_timed()
+                        else:
+                            enter_signer, actions = inputs.read()
+                            captured_at = clock()
+                            timed_actions = tuple((captured_at, action) for action in actions)
+                        actions = tuple(action for _, action in timed_actions)
                     except InputServiceError:
                         raise
                     except Exception:
@@ -340,6 +352,7 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                         # imported or rebuilt, before it became visible.
                         inputs.reset()
                         actions = ()
+                        timed_actions = ()
                     if ui is None:
                         retry = "DOWN" in actions
                     else:
@@ -348,8 +361,12 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                                 pause = getattr(ui, "pause_autoplay", None)
                                 if callable(pause):
                                     pause()
-                            for action in actions:
-                                ui.handle(action)
+                            handle_sampled = getattr(ui, "handle_sampled", None)
+                            for captured_at, action in timed_actions:
+                                if callable(handle_sampled):
+                                    handle_sampled(action, captured_at)
+                                else:
+                                    ui.handle(action)
                                 dirty = True
                             dirty = bool(ui.update(now)) or dirty
                             if dirty:
