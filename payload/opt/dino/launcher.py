@@ -174,6 +174,8 @@ class SampledInput:
         self.max_sample_gap = max_sample_gap
         self.router = InputRouter(debounce_seconds, neutral_seconds)
         self._queue = deque()
+        self._events = deque()
+        self._last_levels = 0
         self._lock, self._stop = threading.Lock(), threading.Event()
         self._thread = None
         self._entered = False
@@ -185,6 +187,9 @@ class SampledInput:
     def _reset_locked(self):
         self.router.reset()
         self._queue.clear()
+        self._events.clear()
+        self._events.append((self.clock(), 'reset', 0))
+        self._last_levels = 0
         self._entered = False
         self._last_sample = None
 
@@ -240,15 +245,25 @@ class SampledInput:
                             self._reset_locked()
                     self._last_sample = now
                     entered, actions = self.router.update(now, mask)
+                    buttons = self.router.buttons
+                    levels = buttons.stable if buttons.armed else 0
+                    events = []
+                    if levels != self._last_levels:
+                        events.append((now, 'levels', levels))
+                        self._last_levels = levels
+                    events.extend((now, 'action', action) for action in actions)
                     if entered:
                         self._entered = True
                         self._queue.clear()
-                    elif actions:
-                        if len(self._queue) + len(actions) > self.max_events:
+                        self._events.clear()
+                    elif events:
+                        if (len(self._queue) + len(actions) > self.max_events
+                                or len(self._events) + len(events) > 3*self.max_events):
                             self._stats['queue_overflows'] += 1
                             self._reset_locked()
                         else:
                             self._queue.extend((now, action) for action in actions)
+                            self._events.extend(events)
             except Exception:
                 with self._lock:
                     self._stats['read_errors'] += 1
@@ -273,6 +288,26 @@ class SampledInput:
                 self._reset_locked()
                 return False, ()
             events = tuple(self._queue)
+            self._queue.clear()
+            self._events.clear()
+            return False, events
+
+    def read_events(self):
+        """Drain ordered debounced levels and actions, including UP releases.
+
+        Keeping captured releases makes tap-versus-hold independent of how
+        long the UI took to draw. Legacy read/read_timed retain press-only APIs.
+        """
+        with self._lock:
+            if not self.running:
+                raise InputServiceError('Input sampling is unavailable')
+            if self._entered:
+                return True, ()
+            if self._events and self.clock()-self._events[0][0] > self.max_age_seconds:
+                self._stats['stale_resets'] += 1
+                self._reset_locked()
+            events = tuple(self._events)
+            self._events.clear()
             self._queue.clear()
             return False, events
 
@@ -331,8 +366,12 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                 while True:
                     now = clock()
                     try:
+                        read_events = getattr(inputs, 'read_events', None)
                         read_timed = getattr(inputs, "read_timed", None)
-                        if callable(read_timed):
+                        if callable(read_events):
+                            enter_signer, input_events = read_events()
+                            timed_actions = tuple((at, value) for at, kind, value in input_events if kind == 'action')
+                        elif callable(read_timed):
                             enter_signer, timed_actions = read_timed()
                         else:
                             enter_signer, actions = inputs.read()
@@ -360,25 +399,48 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                         inputs.reset()
                         actions = ()
                         timed_actions = ()
+                        input_events = ()
                     if ui is None:
                         retry = "DOWN" in actions
                     else:
                         try:
-                            if getattr(inputs, "gesture_pending", False):
+                            gesture_pending = getattr(inputs, "gesture_pending", False)
+                            if gesture_pending:
                                 pause = getattr(ui, "pause_autoplay", None)
                                 if callable(pause):
                                     dirty = bool(pause()) or dirty
-                            pressed_mask = getattr(inputs, "pressed_mask", None)
                             set_pressed_mask = getattr(ui, "set_pressed_mask", None)
-                            if pressed_mask is not None and callable(set_pressed_mask):
-                                dirty = bool(set_pressed_mask(pressed_mask)) or dirty
                             handle_sampled = getattr(ui, "handle_sampled", None)
-                            for captured_at, action in timed_actions:
-                                if callable(handle_sampled):
-                                    handle_sampled(action, captured_at)
-                                else:
-                                    ui.handle(action)
-                                dirty = True
+                            if callable(read_events):
+                                sampled_levels = getattr(ui, 'set_pressed_mask_sampled', None)
+                                for captured_at, kind, value in input_events:
+                                    if kind in ('levels', 'reset'):
+                                        if kind == 'reset':
+                                            pause = getattr(ui, 'pause_autoplay', None)
+                                            if callable(pause):
+                                                dirty = bool(pause()) or dirty
+                                        if callable(sampled_levels):
+                                            dirty = bool(sampled_levels(value, captured_at)) or dirty
+                                        elif callable(set_pressed_mask):
+                                            dirty = bool(set_pressed_mask(value)) or dirty
+                                    elif kind == 'action' and not gesture_pending:
+                                        if callable(handle_sampled):
+                                            handle_sampled(value, captured_at)
+                                        else:
+                                            ui.handle(value)
+                                        dirty = True
+                            else:
+                                pressed_mask = getattr(inputs, "pressed_mask", None)
+                                if pressed_mask is not None and callable(set_pressed_mask):
+                                    dirty = bool(set_pressed_mask(pressed_mask)) or dirty
+                                for captured_at, action in timed_actions:
+                                    if gesture_pending:
+                                        continue
+                                    if callable(handle_sampled):
+                                        handle_sampled(action, captured_at)
+                                    else:
+                                        ui.handle(action)
+                                    dirty = True
                             dirty = bool(ui.update(now)) or dirty
                             if dirty:
                                 hardware.present(ui.render())

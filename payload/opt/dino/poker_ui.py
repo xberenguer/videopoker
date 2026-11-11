@@ -181,6 +181,17 @@ class Renderer:
         mask, _, _, _ = self._text_run(text, size, bold)
         draw.bitmap((int(round(xy[0])), int(round(xy[1]))), mask, fill=fill)
 
+    def speed_triangle(self, image, x):
+        # Supersampling keeps this tiny filled triangle readable on the LCD.
+        # Cache its 3x4 coverage mask; no per-frame resizing is needed.
+        if not hasattr(self, '_speed_triangle'):
+            mask = Image.new('L', (24, 32), 0)
+            ImageDraw.Draw(mask).polygon(((0, 0), (23, 15), (0, 31)), fill=255)
+            mask = mask.resize((3, 4), getattr(Image, 'Resampling', Image).LANCZOS)
+            peak = mask.getextrema()[1]
+            self._speed_triangle = mask.point(lambda value: round(value*255/peak))
+        image.paste(GOLD, (x, 208, x+3, 212), self._speed_triangle)
+
     def right(self, draw, right, y, text, size=11, fill=WHITE, bold=False):
         mask, _, _, _ = self._text_run(text, size, bold)
         self.text(draw, (right-mask.width, y), text, size, fill, bold)
@@ -523,11 +534,18 @@ class PokerUI:
     SPEEDS = (0.13, 0.065, 0.0)
     UP_CLICK_GAP_SECONDS = 0.35
     AUTOPLAY_UP_CLICKS = 3
+    HINT_HOLD_SECONDS = 0.30
     UP_MASK = 1
     AUTO_CONSIDER_SECONDS = 6.0
-    AUTO_SELECT_SECONDS = 0.65
-    AUTO_HOLD_SECONDS = 2.0
-    AUTO_RESULT_SECONDS = 4.0
+    AUTO_SELECT_SECONDS = 0.4
+    AUTO_HOLD_SECONDS = 0.5
+    AUTO_RESULT_SECONDS = 2.5
+    AUTO_PROFILES = (
+        dict(name='slow', consider=6.0, select=0.4, draw=0.5, result=2.5, animation=0.10),
+        dict(name='medium', consider=3.2, select=0.24, draw=0.28, result=1.35, animation=0.065),
+        dict(name='fast', consider=1.6, select=0.12, draw=0.15, result=0.8, animation=0.04),
+    )
+    UP_TAP_COMMIT_GRACE_SECONDS = 0.02
 
     def __init__(self, session=None, width=WIDTH, height=HEIGHT, font_dir=None, clock=time.monotonic, advisor=None):
         if (width, height) != (WIDTH, HEIGHT):
@@ -559,18 +577,29 @@ class PokerUI:
         self._advisor_board = None
         self._advice = None
         self._up_held = False
+        self._up_held_since = None
+        self._peek_ready = False
         self._hint_failed_key = None
         self._last_up = None
         self._up_click_count = 0
+        self._manual_up_due = None
+        self._manual_hold_key = None
         self._peek_blocked_until_release = False
         self._captured_input_at = None
         self.autoplay = False
         self._auto_stage = None
         self._auto_due = None
         self._auto_index = None
+        self.autoplay_speed = 0
+        self._auto_up_edge = self._auto_up_pause_at = self._auto_up_due = None
         self._closed = False
 
-    def set_pressed_mask(self, mask):
+    def set_pressed_mask_sampled(self, mask, captured_at):
+        if type(captured_at) not in (int, float) or not math.isfinite(captured_at):
+            raise ValueError('Invalid sampled input time')
+        return self.set_pressed_mask(mask, captured_at)
+
+    def set_pressed_mask(self, mask, captured_at=None):
         """Apply current stable GPIO state before dispatching queued edges.
 
         A released UP edge may arrive late after drawing. It can contribute to
@@ -586,15 +615,17 @@ class PokerUI:
         if held == self._up_held:
             return False
         self._up_held = held
+        self._up_held_since = (self._clock() if captured_at is None else captured_at) if held else None
+        self._peek_ready = False
         self._hint_failed_key = None
-        if not held and not self.autoplay:
+        if not held and not self.autoplay and not self._wants_manual_advice():
             # Preserve the click sequence across its physical releases.
             return self._cancel_advice()
         return False
 
     @property
     def hint_visible(self):
-        if (not self._up_held or self._peek_blocked_until_release
+        if (not self._up_held or not self._peek_ready or self._peek_blocked_until_release
                 or self.autoplay or self.menu is not None
                 or self.button_focus is not None or self.notice or self._animation is not None
                 or self._advice is None):
@@ -619,6 +650,8 @@ class PokerUI:
         if self._closed or action not in ('LEFT', 'RIGHT', 'UP', 'DOWN', 'CENTER', 'KEY1', 'KEY2', 'KEY3'):
             return False
         if self.autoplay:
+            if action == 'UP':
+                return self._handle_autoplay_up()
             # The stop click never also deals, toggles a hold, or opens a menu.
             self.pause_autoplay()
             self._peek_blocked_until_release = self._up_held
@@ -701,11 +734,108 @@ class PokerUI:
 
     def pause_autoplay(self):
         changed = self.autoplay or self._advisor_token is not None or self._advice is not None
+        self._resume_autoplay_clock()
+        self._clear_auto_up()
+        self._peek_blocked_until_release = self._peek_blocked_until_release or self._up_held
         self.autoplay = False
         self._auto_stage = self._auto_due = self._auto_index = None
         self._last_up = None
         self._up_click_count = 0
+        self._manual_up_due = None
+        self._manual_hold_key = None
         return self._cancel_advice() or changed
+
+    def _wants_manual_advice(self):
+        return (self._manual_hold_key is not None or
+                (not self.autoplay and self._manual_up_due is not None
+                 and self._up_click_count == 2))
+
+    def _commit_manual_up(self):
+        choose_holds = self._up_click_count == 2
+        self._manual_up_due = self._last_up = None
+        self._up_click_count = 0
+        state = self.session.snapshot()
+        if choose_holds and state['phase'] == 'hold':
+            self._manual_hold_key = self._advice_key(state)
+        return False
+
+    def _apply_manual_hold(self):
+        if self._manual_hold_key is None:
+            return False
+        state = self.session.snapshot()
+        if (self.autoplay or self._advice_key(state) != self._manual_hold_key
+                or self.menu is not None or self.button_focus is not None or self.notice):
+            self._manual_hold_key = None
+            return self._cancel_advice()
+        if self._animation is not None or self._advice is None:
+            return False
+        if self._advisor_board != self._manual_hold_key:
+            return False
+        mask = self._advice['mask']
+        self._manual_hold_key = None
+        for index, held in enumerate(state['held']):
+            if held != bool(mask & (1 << index)):
+                self.session.toggle_hold(index)
+        if not self._up_held:
+            self._cancel_advice()
+        return True
+
+    def _clear_auto_up(self):
+        self._auto_up_edge = self._auto_up_pause_at = self._auto_up_due = None
+        self._last_up = None
+        self._up_click_count = 0
+
+    def _handle_autoplay_up(self):
+        now = self._clock()
+        edge = now if self._captured_input_at is None else self._captured_input_at
+        if self._last_up is not None and edge < self._last_up:
+            return True
+        consecutive = self._last_up is not None and edge-self._last_up <= self.UP_CLICK_GAP_SECONDS
+        if self._auto_up_edge is not None and not consecutive:
+            self._commit_auto_up()
+        if self._auto_up_edge is None:
+            self._auto_up_edge = edge
+            self._auto_up_pause_at = now
+        self._up_click_count += 1
+        self._last_up = edge
+        self._auto_up_due = edge+self.UP_CLICK_GAP_SECONDS+self.UP_TAP_COMMIT_GRACE_SECONDS
+        if self._up_click_count == self.AUTOPLAY_UP_CLICKS:
+            # Triple-tap wins over its double-tap prefix; no speed change.
+            return self.pause_autoplay()
+        return True
+
+    def _commit_auto_up(self):
+        changed = self._up_click_count == 2
+        if changed:
+            self._cycle_autoplay_speed()
+        self._resume_autoplay_clock()
+        self._clear_auto_up()
+        return changed
+
+    def _resume_autoplay_clock(self):
+        if self._auto_up_pause_at is None:
+            return
+        paused = max(0.0, self._clock()-self._auto_up_pause_at)
+        if self._auto_due is not None:
+            self._auto_due += paused
+        if self._animation is not None:
+            self._animation['started'] += paused
+
+    def _cycle_autoplay_speed(self):
+        old = self.AUTO_PROFILES[self.autoplay_speed]
+        self.autoplay_speed = (self.autoplay_speed+1) % len(self.AUTO_PROFILES)
+        new = self.AUTO_PROFILES[self.autoplay_speed]
+        anchor = self._auto_up_pause_at
+        key = {'consider':'consider', 'select':'select', 'draw':'draw', 'result':'result'}.get(self._auto_stage)
+        if key is not None and self._auto_due is not None:
+            remaining = max(0.0, min(1.0, (self._auto_due-anchor)/old[key]))
+            self._auto_due = anchor+remaining*new[key]
+        if self._animation is not None:
+            animation = self._animation
+            progress = max(0.0, (anchor-animation['started'])/animation['interval'])
+            animation['interval'] = new['animation']
+            animation['started'] = anchor-progress*new['animation']
+            self._last_stage = None
 
     def close(self):
         if self._closed:
@@ -732,7 +862,8 @@ class PokerUI:
     def _request_hint(self, now):
         state = self.session.snapshot()
         if state['phase'] != 'hold' or (not self.autoplay and
-                (not self._up_held or self._peek_blocked_until_release)):
+                (not self._wants_manual_advice() and
+                 (not self._up_held or self._peek_blocked_until_release))):
             return False
         key = self._advice_key(state)
         if not self.autoplay and key == self._hint_failed_key:
@@ -755,11 +886,15 @@ class PokerUI:
         edge_time = now if self._captured_input_at is None else self._captured_input_at
         consecutive = (self._last_up is not None and
                        0 <= edge_time-self._last_up <= self.UP_CLICK_GAP_SECONDS)
+        if self._manual_up_due is not None and not consecutive:
+            self._commit_manual_up()
         self._up_click_count = self._up_click_count+1 if consecutive else 1
         self._last_up = edge_time
+        self._manual_up_due = edge_time+self.UP_CLICK_GAP_SECONDS+self.UP_TAP_COMMIT_GRACE_SECONDS
         if self._up_click_count == self.AUTOPLAY_UP_CLICKS:
             self._last_up = None
             self._up_click_count = 0
+            self._manual_up_due = self._manual_hold_key = None
             self._clear_notice()
             self.autoplay = True
             phase = self.session.snapshot()['phase']
@@ -773,7 +908,7 @@ class PokerUI:
         return False
 
     def _poll_advice(self, now):
-        if not self.autoplay and not self._up_held:
+        if not self.autoplay and not self._up_held and not self._wants_manual_advice():
             return self._cancel_advice()
         if self._advisor_board is not None and self._advisor_board != self._advice_key(self.session.snapshot()):
             self.pause_autoplay()
@@ -809,8 +944,9 @@ class PokerUI:
         state = self.session.snapshot()
         phase = state['phase']
         stage = self._auto_stage
+        profile = self.AUTO_PROFILES[self.autoplay_speed]
         if stage == 'result-animation':
-            self._auto_stage, self._auto_due = 'result', now+self.AUTO_RESULT_SECONDS
+            self._auto_stage, self._auto_due = 'result', now+profile['result']
             return True
         if stage in ('deal', 'result'):
             if now < self._auto_due:
@@ -830,9 +966,9 @@ class PokerUI:
                 self.pause_autoplay()
                 return True
             if self._auto_due is None:
-                # The six-second look starts only after the full deal reveal,
+                # The study pause starts only after the full deal reveal,
                 # independent of animation SPEED or advisor completion time.
-                self._auto_due = now+self.AUTO_CONSIDER_SECONDS
+                self._auto_due = now+profile['consider']
                 return True
             if self._advice is None and self._advisor_token is None:
                 return self._request_hint(now)
@@ -844,7 +980,7 @@ class PokerUI:
                 self.pause_autoplay()
                 return True
             self.selected_card = self._auto_index = 0
-            self._auto_stage, self._auto_due = 'select', now+self.AUTO_SELECT_SECONDS
+            self._auto_stage, self._auto_due = 'select', now+profile['select']
             return True
         if stage == 'select':
             if now < self._auto_due:
@@ -856,11 +992,11 @@ class PokerUI:
             if state['held'][index] != bool(self._advice['mask'] & (1 << index)):
                 self.session.toggle_hold(index)
             if index == 4:
-                self._auto_stage, self._auto_due = 'draw', now+self.AUTO_HOLD_SECONDS
+                self._auto_stage, self._auto_due = 'draw', now+profile['draw']
             else:
                 self._auto_index = self.selected_card = index+1
                 # Never catch up multiple card selections after a slow frame.
-                self._auto_due = now+self.AUTO_SELECT_SECONDS
+                self._auto_due = now+profile['select']
             return True
         if stage == 'draw':
             if now < self._auto_due:
@@ -896,9 +1032,11 @@ class PokerUI:
                 kind = 'deal'
             after = self.session.snapshot()
             self.button_focus = None
-            if after['phase'] in ('hold', 'result') and self.SPEEDS[self.speed] > 0:
+            interval = (self.AUTO_PROFILES[self.autoplay_speed]['animation']
+                        if self.autoplay else self.SPEEDS[self.speed])
+            if after['phase'] in ('hold', 'result') and interval > 0:
                 self._animation = {'kind': kind, 'before': before, 'after': after,
-                                   'started': self._clock(), 'interval': self.SPEEDS[self.speed]}
+                                   'started': self._clock(), 'interval': interval}
                 self._last_stage = None
                 self._update_visual(self._clock())
         except RandomNotReady:
@@ -985,12 +1123,26 @@ class PokerUI:
     def update(self, now):
         if self._closed:
             return False
-        dirty = self._update_visual(now)
+        peek_ready = (self._up_held and self._up_held_since is not None
+                      and now-self._up_held_since >= self.HINT_HOLD_SECONDS)
+        gesture_dirty = peek_ready != self._peek_ready
+        self._peek_ready = peek_ready
+        if self.autoplay and self._auto_up_edge is not None:
+            # Give a third tap time to arrive before committing a speed change.
+            if now < self._auto_up_due:
+                return False
+            gesture_dirty = self._commit_auto_up()
+        dirty = self._update_visual(now) or gesture_dirty
+        if not self.autoplay and self._manual_up_due is not None and now >= self._manual_up_due:
+            self._commit_manual_up()
+        if self._manual_hold_key is not None and self._animation is None:
+            dirty = self._request_hint(now) or dirty
         if (self._up_held and not self.autoplay and self.menu is None
                 and self.button_focus is None and self.notice is None
                 and self._animation is None):
             dirty = self._request_hint(now) or dirty
         dirty = self._poll_advice(now) or dirty
+        dirty = self._apply_manual_hold() or dirty
         dirty = self._update_autoplay(now) or dirty
         return dirty
 
@@ -1040,7 +1192,7 @@ class PokerUI:
     def render(self):
         snapshot = dict(self._visual if self._visual is not None else self.session.snapshot())
         snapshot['_button_focus'] = self.button_focus
-        snapshot['_speed'] = self.speed
+        snapshot['_speed'] = self.autoplay_speed if self.autoplay else self.speed
         snapshot['_badge_frame'] = self._badge_frame
         image = self.renderer.render(snapshot, self.selected_card, self.selected_hand, self.menu)
         self._draw_advice(image)
@@ -1054,10 +1206,13 @@ class PokerUI:
                       'K3: GAME CONTROLS')
             self.renderer.center(d, 160, 127, detail, 10, MUTED)
         if self.autoplay:
-            # Native LCD pixels in the unused margin, clear of cards/multipliers.
+            # Native LCD pixels right of the speaker, clear of credit and controls.
             d = ImageDraw.Draw(image)
-            self.renderer.text(d, (6, 12), 'A', 11, (0, 0, 0), True)
-            self.renderer.text(d, (5, 11), 'A', 11, GOLD, True)
+            self.renderer.text(d, (248, 207), 'A', 11, (0, 0, 0), True)
+            self.renderer.text(d, (247, 206), 'A', 11, GOLD, True)
+            chevrons = (256,) if self.autoplay_speed == 1 else ((256, 259) if self.autoplay_speed == 2 else ())
+            for x in chevrons:
+                self.renderer.speed_triangle(image, x)
         return image
 
     def _draw_advice(self, image):
