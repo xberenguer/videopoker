@@ -1,0 +1,1771 @@
+{
+  "schema": 1,
+  "image": "/Users/xyz/Documents/Codex/2026-09-26/car-deals-las-vegas/work/seedsigner-poker/outputs/seedsigner-v0.8.7-poker-v0.4.8-play-plus-pi0.img",
+  "image_size_bytes": 52428800,
+  "sha256": "beccafbc3508b42974c44b1fe5a9f40333cb4225c267fb2b6f542b919f8d52ee",
+  "base_sha256": "67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9",
+  "filesystem": "FAT16",
+  "partition_start_sector": 2048,
+  "partition_sectors": 100352,
+  "preserved_upstream_file_count": 334,
+  "fat_files_sha256": {
+    "bcm2708-rpi-b-plus.dtb": "dabba26871e1b063269bad3b124614ec2682669b453a3a1a92ba462c1774fff7",
+    "bcm2708-rpi-b.dtb": "a5fdfac0171094a1cf5d3ceadbf155ff30cf80e940bfa1d88e5bb0f4c7aeb5db",
+    "bcm2708-rpi-zero-w.dtb": "3bf7bb859963e256677c684b622a7c6cb6d479e2a60af5d6181d1799e1e0f3dd",
+    "bcm2708-rpi-zero.dtb": "d49b3c6abcb5bf64937bac3019fa8ccae2a3544b6055f04a1e8853fa8178d386",
+    "bootcode.bin": "af603ebd97e7b692c30195563f7b25656eb05d57838cf1a715ebb470d1614ce4",
+    "cmdline.txt": "5a41612c934119eaf12c2e0ab085170dd627ee3ef08174c4839c177bda8f1feb",
+    "config.txt": "3963aba6d4580bd53b4d2f6cf8d0e412a4ddb0f3cbd04e5573b8d46a051b41eb",
+    "fixup_x.dat": "692393562d0650f7d1891ba0143ad0500ccf07129947d386d56350e7ca204d16",
+    "overlays/README": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "overlays/act-led.dtbo": "c03eb551455ecb3e314b4d8102d07067da33ac289dd70bfaff205e0297db823f",
+    "overlays/adafruit-st7735r.dtbo": "17f970830c76f7c42c274c4dc40582009358a80051e9a41d04de24adf19d1b0c",
+    "overlays/adafruit18.dtbo": "a3cd3d141bd30a3c61b6cc54489c3747c52668b0e85e003f854a2389af1c72ea",
+    "overlays/adau1977-adc.dtbo": "ac4f9e9fac0feb38aa09c1edeac64c74a5c339147e2ce01e2f6f82bed94e4ce1",
+    "overlays/adau7002-simple.dtbo": "0077f1b7f015ae727387db49d11dc7f78ebec37ba7c35e45c76f1c56821b640a",
+    "overlays/ads1015.dtbo": "451c3ad2f2cfb772dccf5dd1fb6dd202e30e1b3961a61a97e0d5649d7a06f0f3",
+    "overlays/ads1115.dtbo": "fe212e180f9a9ecc31fdf56c9f5837c4b7bcebc054ab4f86903427002bf4060f",
+    "overlays/ads7846.dtbo": "106eb75a2e445488b7761d7ead6786b961a81090b20f0d1c5a479ef5cca144ab",
+    "overlays/adv7282m.dtbo": "2e7eca618a6b317c3050a7d3720c6d5f003d83d7ba6ce09764d2faea1625166b",
+    "overlays/adv728x-m.dtbo": "4bc90b567c7fdb34664b47a0b4b953c33183f260021ddb34b9762757c5dddec5",
+    "overlays/akkordion-iqdacplus.dtbo": "d97c3937882bff38e90eebe1d2298cc99705f1c08d17d2053b2a7e851d5987c5",
+    "overlays/allo-boss-dac-pcm512x-audio.dtbo": "1017108037275d0ea7aabf87dddda6f1e2c3f2e2e706ee1cdf5b5e17a1bb4814",
+    "overlays/allo-boss2-dac-audio.dtbo": "d621fb9ea9a1babcf3cf30be04cc525ff6fd04f0786f93916bd4812b44fae08f",
+    "overlays/allo-digione.dtbo": "513857551d12efc4509ae973c22238681981aff2a3e0a49469d9c44657d5350f",
+    "overlays/allo-katana-dac-audio.dtbo": "ec3b4f337f7e5f13b084d42c04e8523d397798624416573ab0660bf6ba8695d3",
+    "overlays/allo-piano-dac-pcm512x-audio.dtbo": "793c61cd9689608f82dc4caa7aa953d66fbcfe61acdbb3655d4a11b704db7f15",
+    "overlays/allo-piano-dac-plus-pcm512x-audio.dtbo": "e113a8eecbfc5ba5a337156182568736b98f6f63af5f7aa4856fdd2ddf64bfc5",
+    "overlays/anyspi.dtbo": "b37d27d4f2dfa80dd71cadb0271eff01ffa8fd2fb9cb4bf3fc04336fc2ad3dbb",
+    "overlays/apds9960.dtbo": "0567878a5923db6e2e4f73b7db3a6bd1bd6d509005d8a29f05cf6faf5fcad18f",
+    "overlays/applepi-dac.dtbo": "7d17d66c52685c49a56a12ac981a6e17f07eed9e6978999579e8865ab1ab8dc5",
+    "overlays/arducam-64mp.dtbo": "9ed6b1ee12eba431b64efed937cb962826929182de70d52fe4c43781b185cc19",
+    "overlays/arducam-pivariety.dtbo": "5f6677a2e0b673447e93c562567776771dcef448c9c19c4559e460920d6e5cc5",
+    "overlays/at86rf233.dtbo": "9a32aa74b08c621afab689e07645561df3b28a7b36cce566e8f7e55ec53b7ef1",
+    "overlays/audioinjector-addons.dtbo": "25de9708215ff0c22ee6efd31a0e069c22330e3a30f1185da2c1bda7131bcd3f",
+    "overlays/audioinjector-bare-i2s.dtbo": "e5c5140a908e2213b18078efa819bc3d59616981e8ded7ca84aaebec8c996dc6",
+    "overlays/audioinjector-isolated-soundcard.dtbo": "e8b720fb68ce40266d2a9af5f9e823f81aaf50aad6e63ac7dd2a6396f7764c86",
+    "overlays/audioinjector-ultra.dtbo": "0623afdcfcf3e3bdc8c8316ce60a7cd8a83e44093403abd1c885e12e5dd8521f",
+    "overlays/audioinjector-wm8731-audio.dtbo": "2d19b5246502cfd59c1e4d5304fcc0cee2552a65c0e320823dbd0e65a507b254",
+    "overlays/audiosense-pi.dtbo": "51ff2486b0b803f478f24d680337195268d70092d503a2f51baf54b876bffdde",
+    "overlays/audremap.dtbo": "f6736690a19e6979e0d509aecc515d1b40d2146f0a5e9d36cfa52d3c703899a1",
+    "overlays/balena-fin.dtbo": "c9ad16f58cd95dcb8e2417e456133571583cf045a6dc791d4b2227ecdaa62aa6",
+    "overlays/bcm2712d0.dtbo": "ed21003ca15a3938d9e05f412ed18113c83abaefe8e1ca3276e3091273ae2e94",
+    "overlays/camera-mux-2port.dtbo": "114218dfe110bbb1f58ba9292676c9808c7313bda5e656751325064dbb2c0f3a",
+    "overlays/camera-mux-4port.dtbo": "ab7925e82c587d0a6dfa4c44869d012d5d32c1e73dd7454afa7be8b12fea2d18",
+    "overlays/cap1106.dtbo": "fe8d8ca9bd1102849b8090ac3ae0698a1be67af918d3031b26b227e72720684d",
+    "overlays/chipdip-dac.dtbo": "075c127034400847cd49598dc3a8fe2747ff01d8053419193966b23fb7a37803",
+    "overlays/cirrus-wm5102.dtbo": "219e078bf39c5d2ea58e0bea58f8e4f9a83a759c653f4438f17e228f57429093",
+    "overlays/cm-swap-i2c0.dtbo": "85577e524cfb8f650249c7c6ab8406aac9de1cb617827085943f80256080223e",
+    "overlays/cma.dtbo": "7afd322be2b90648ea9c5df4a297bf5588f7b47f6071fad31387f631c9cc7610",
+    "overlays/crystalfontz-cfa050_pi_m.dtbo": "2eca24b607ed16a31b750a2065097c73d5005f149cb2dcf90c308d1e14b43e94",
+    "overlays/cutiepi-panel.dtbo": "24776b0a269b6be2d9f3a32ba6f7bfa7ff7239c6d6ad3b5df519810e634cab3e",
+    "overlays/dacberry400.dtbo": "afc9a1493fd41fa2baf2f3ab75d05f754f152f67035ce390d05f1944d9c5015c",
+    "overlays/dht11.dtbo": "f0c918560113f6da74dbe93c2134b7804718803a9f2a431f6b63ec313e7180fa",
+    "overlays/dionaudio-kiwi.dtbo": "c85f06313952465e3533f71610fcb9f82e55a08d827bbdcf20d9fd366624e571",
+    "overlays/dionaudio-loco-v2.dtbo": "8e78969b4def9d8f37cf878ad1e2c9835b39e7ec3e88943401dbb97c9f6a6083",
+    "overlays/dionaudio-loco.dtbo": "ad2eb06fe150abda18a0243a54d4d16b70e9be989c0922c9f6889174720c1607",
+    "overlays/disable-bt-pi5.dtbo": "aa13a7df374e3289141c04d3e5201e0a5670400b9445107882c726417e681bfb",
+    "overlays/disable-bt.dtbo": "ea69d22dedc607fee75eec57d8a4cc0f0eab93cd75393e61a64c49fbac912d02",
+    "overlays/disable-emmc2.dtbo": "c4e738b4931e62c3fa89b0ccba80cb0d3a4c0c78222afdb1c26d852dec9f45b9",
+    "overlays/disable-wifi-pi5.dtbo": "a7879d76c24469384498c94e6b2284951137b271894f65264003208c681ffd21",
+    "overlays/disable-wifi.dtbo": "86aa3709da415b8be306aacfe2b0261a601e2e0b2523281d5eb72093b379d892",
+    "overlays/dpi18.dtbo": "515902804c74707f83e22af57e6ae04b69bbcb86ede636a42ba3c10c8a688e15",
+    "overlays/dpi18cpadhi.dtbo": "fe4add1a8262fb559dbafda5379d19104ba7023651815fe2c64cf70c959d0978",
+    "overlays/dpi24.dtbo": "576b1019b96811c2a09297395554133edd33951ac22b01c59a39194564d51e68",
+    "overlays/draws.dtbo": "fe65b7f8773dbf3443553b8975986e633fc4f6bfbaf72cff3d90feb2c2467b30",
+    "overlays/dwc-otg.dtbo": "fab3a40aefedcea151cdfeb45bbc30e24e265da6036220b89ad9d7d77d991e70",
+    "overlays/dwc2.dtbo": "3e6f8e33e5749bcb2a5c7808b48123e65e88fc465d64ec16b74d50ffe5037e34",
+    "overlays/edt-ft5406.dtbo": "30b837ef71f91a7a7a18412152eb2b1a64d4d6e928ffb3d5aef5749074779b17",
+    "overlays/enc28j60-spi2.dtbo": "3b39809b1460719ef9ec3dded35a0c0a1222d9a6fa7ff76b022aec62c5279cac",
+    "overlays/enc28j60.dtbo": "a9b96226535f1ef88f28037873e23ddfb446db7b8220eda7597c112c8fbf0469",
+    "overlays/exc3000.dtbo": "0fb65be3d40290fd42e6be89cf86d0f1e5f970d6931403750b2f621807be5019",
+    "overlays/fbtft.dtbo": "f78a3ea72dd1831504e59e6467bc30659e61caa051424d9cba00e3c835c7761c",
+    "overlays/fe-pi-audio.dtbo": "03aaa80c0f501daca9f86700b51c6c1f12282c8d6e38be170f86f85a3bd3cc9a",
+    "overlays/fsm-demo.dtbo": "e76fb032612beb3f59d350d0ee35f1755a1c3663312817cecb50282cedcde0a8",
+    "overlays/gc9a01.dtbo": "ee2f5ef6b87833876861292b4057d13bcb70489b3360323186218d12bf1120af",
+    "overlays/ghost-amp.dtbo": "bf3a0c3564f873f18a003a7f190d2f35545806a99ed1bb46b748991fa2da14d4",
+    "overlays/goodix.dtbo": "77fec08d83a35207ad97a2f1b3137f39d7d194827b65469883d5eccae95aeb25",
+    "overlays/googlevoicehat-soundcard.dtbo": "2e62f2fc07c000b6496cd8eb12a37157d72216d5e2bac8063f0e005341a6b891",
+    "overlays/gpio-charger.dtbo": "032ee345e1ca276691f3dcd680ea65a0e6641439bd7fa849e110e7f72d15c43e",
+    "overlays/gpio-fan.dtbo": "6afc3c9be91f5b1cadc528d329a00648eacb280dfa822283e15c5db88a080fd0",
+    "overlays/gpio-hog.dtbo": "1e352154866fe17e00f10a9202c0bc7100d8deb65b03cd0494c2018c160c762f",
+    "overlays/gpio-ir-tx.dtbo": "002e452a750d34d8061a46a663173dff3f5dc6c9482723ee2d9bb2023513f2b7",
+    "overlays/gpio-ir.dtbo": "08e37cbd9f457b43dc2778d08c77a4ec1a54991db1e28e81472962b798b0eda1",
+    "overlays/gpio-key.dtbo": "d17f7b5631f473e2f1615fc0f1aef3726342599bd2b1fa9308fbb45b0ac6d5b0",
+    "overlays/gpio-led.dtbo": "f2a6730dfa98f90f08d46782c74af9e48db506f83ba91807d8ddc96994a83b58",
+    "overlays/gpio-no-bank0-irq.dtbo": "6d49b87dd2dc439db2bc165db78a461f9c97368ab9d7c3d803c4e83634a96f6e",
+    "overlays/gpio-no-irq.dtbo": "23ed56face6f1ecfd61b4c0bdaa8c013467bf45a188056f1951da134b7100ad6",
+    "overlays/gpio-poweroff.dtbo": "c85fa3d2a22e3c8dd674274b9d1cec804a3c466993b743cd9920716460d9cefd",
+    "overlays/gpio-shutdown.dtbo": "b8acb53c7e6924c8d2e6a86616e66775c701ee4835e9c51d68b8aa0f029664cb",
+    "overlays/hd44780-lcd.dtbo": "de012c3aa1f6dff14eece40a8b98bae439342ff542242d3eac9444033bcfc549",
+    "overlays/hdmi-backlight-hwhack-gpio.dtbo": "e036e093eca7a12dd624ee90a8f58651c73e38cf0bf4c8f78af7ea9d30e444f8",
+    "overlays/hifiberry-amp.dtbo": "f7e999c5ff6f040e66310aecd489419246c96133ed1325abd99af36f01b41271",
+    "overlays/hifiberry-amp100.dtbo": "ac49031c60891cd2873acb6e469da9acbfbce61836d279a4304df19d597d2f3d",
+    "overlays/hifiberry-amp3.dtbo": "65f05acfafc08e5f7f748cbb95d6c2a92cb64baf391167c873093953be07e142",
+    "overlays/hifiberry-amp4pro.dtbo": "8138810b942de8a9d4a5e9ad3e0b9bb577c922c09064f09f6935c6e57da87979",
+    "overlays/hifiberry-dac.dtbo": "a8d754ab27835a6af86bd3f38946e73a95b828fa5f1d393e6a21abcd093ec094",
+    "overlays/hifiberry-dac8x.dtbo": "70be96fcbec270c008a16bd0783ae27298641b91fb32cb051bac139b5a16303d",
+    "overlays/hifiberry-dacplus-pro.dtbo": "0f479301220db7355e42042d73c5e2b76e60b32f6258e6b1a2b76b8d7edc304e",
+    "overlays/hifiberry-dacplus-std.dtbo": "33729e1e6a19f808893356dca8eba045f16a62f2f9340b3f0de733d4a9a6e909",
+    "overlays/hifiberry-dacplus.dtbo": "3291ac66f448e624c28e89d0fec26b79abcf01801232250ec62cc793a69b6c10",
+    "overlays/hifiberry-dacplusadc.dtbo": "3de5c55fb81d53b375399fa90af4bcb53b4c89d80aaeba7b3ba8d7df98752d84",
+    "overlays/hifiberry-dacplusadcpro.dtbo": "689d0e662d7f029ef43bc5e91e42e2295c04e7441f0d72af23e38c970ebe53cd",
+    "overlays/hifiberry-dacplusdsp.dtbo": "82b366455446d401b30ebb067f8a69ba0afb78605645a3d420a5c81addce6d6b",
+    "overlays/hifiberry-dacplushd.dtbo": "fedaf91cdc19cd9149e2e1686ad5599ba14b08c53094ad1c32344a956b573c6a",
+    "overlays/hifiberry-digi-pro.dtbo": "7cd43b4f002f67de6623118d0e81becaabb399341ad97798d441f83633a999b8",
+    "overlays/hifiberry-digi.dtbo": "19a1d8b88cbfd5790718e384d6c0bdd4fd9525c67fb0d58bb98bb530232c2153",
+    "overlays/highperi.dtbo": "6bcdc1026755d484efe5b5cd7783eb06aabf33ab94593dd2844cf2ef8258e067",
+    "overlays/hy28a.dtbo": "4454a0ff516b89d5ed78711cba9ee1ef9fca021842c1b7c7d595a0727c2d0619",
+    "overlays/hy28b-2017.dtbo": "50e111391e9bae3eb2acca0477ee8d5c3cf451b462864c306bc9f7b561dee26e",
+    "overlays/hy28b.dtbo": "908d29d44bb6f29a77209c30b788d13c44ee68f47b2e29a910c53f1562acdf6a",
+    "overlays/i-sabre-q2m.dtbo": "11d6587c207a2988df5d20c89d3ca0807ec29e75f382edcdf6764bacebd55f3b",
+    "overlays/i2c-bcm2708.dtbo": "e223459185561c4fd3cfbb113f08dd4c1a6db22fa7f999d1b44f715ca377c5c4",
+    "overlays/i2c-fan.dtbo": "994f65186f954b5af5fd39b5f2cad2a57d1a0031cb925c36a49f2cb3fad3515f",
+    "overlays/i2c-gpio.dtbo": "6144f5353fb35faba981ff02b328b58438a760206fa81ed622cde9f6eb4c75b7",
+    "overlays/i2c-mux.dtbo": "015cb15b5f105b7025c4f872daed73a111dd1ac5bb7af3974d9383f5d234feeb",
+    "overlays/i2c-pwm-pca9685a.dtbo": "b7b3636c315ef494713173337b64eed6d3ee9ccee73d929e789c7f93524f8dca",
+    "overlays/i2c-rtc-gpio.dtbo": "743fb4abaf7186f58d81a9afdaae1f0d90f3dd9d3cd9ebf010b20b776c619af2",
+    "overlays/i2c-rtc.dtbo": "985913818b4050d8a292d98411cd4b863ad6ea5cefedcffc5a857eee0fcfdb40",
+    "overlays/i2c-sensor.dtbo": "099a073203b3008c791397a944e55bab38d7b10aa794683f2c38125ec394a983",
+    "overlays/i2c0-pi5.dtbo": "9e7d94d78148ab86d9a501f0a40ba52db4cce2b76deafbdb65172ed5c73794a7",
+    "overlays/i2c0.dtbo": "4c69226e5682cb0576648245adad3bcabaa1b3fdebc9bab29f51909b08c59bef",
+    "overlays/i2c1-pi5.dtbo": "a7e56dde4f67c994bd6134da2ef2177e6e6cc37b7383cc04c3c388a01ae1fac5",
+    "overlays/i2c1.dtbo": "440a258262dbc5c8f0e2e4555d3d56666960d0e708f3d5c8e1ff6bdbb4842008",
+    "overlays/i2c2-pi5.dtbo": "000c55473979abebd6f2168a50d8cca04f9d9038c67d22eaab75d1c15e832c23",
+    "overlays/i2c3-pi5.dtbo": "454be8a322ce840483666c5bfd8349df305f0f831d560222fa90ae320370443b",
+    "overlays/i2c3.dtbo": "dd07369fbf8c7800cd2727503bf9676bddc93ac085fff072ea92d0b9af3561c7",
+    "overlays/i2c4.dtbo": "e298225fa78ce6206726fac2a7f068fc097e3b85e5119ca92204b5f5b399992d",
+    "overlays/i2c5.dtbo": "2593b2d97fd5e39c21dbbd8da5df6426fffc020c5f9c5165d462b64815f4beb6",
+    "overlays/i2c6.dtbo": "c9ff9ece973d4aa432426095c75c197c3fe84f4ec006e52fbffaee6ba6a554dd",
+    "overlays/i2s-dac.dtbo": "4f5625af2c88472217448cdc3e04a408535a171e2d987607da02bb824832c43e",
+    "overlays/i2s-gpio28-31.dtbo": "361161d65eb036c9fac245b61e69c81a176663a5ed531fc402d31b9660882933",
+    "overlays/ilitek251x.dtbo": "bc8a11d41aa144d72580dacfa37a1825ecdc8319f8549ef4a91609487447c184",
+    "overlays/imx219.dtbo": "dded1145822d0cd8d28a4641b55f1cfe888ed1098a81d0cc0bad6b74786690c7",
+    "overlays/imx258.dtbo": "36a4ff4bd9866fc4582a6f71a81de650f793ed459d42a2cf3868d90c7c73d9c8",
+    "overlays/imx290.dtbo": "63fe88332ba462787185b48a072ba36e3979dfaab306b7380a1f7de3abdf0961",
+    "overlays/imx296.dtbo": "225269c3cf89297db1f8adcb466f611dcb397da2cf41ba91b0048142bbfb09a1",
+    "overlays/imx327.dtbo": "6876a6fe0c627d428a60192b0cf1b43e5327a1c903c50d16496c870ccb50f1ef",
+    "overlays/imx378.dtbo": "977efdc22a15361da7be445457c8ad58fe62165cf6998ea6080f08c0e0066d4e",
+    "overlays/imx462.dtbo": "63fe88332ba462787185b48a072ba36e3979dfaab306b7380a1f7de3abdf0961",
+    "overlays/imx477.dtbo": "798c8b33494181c329365fb60df5a0e1708e9a73340e8cd2213db3abc374327e",
+    "overlays/imx519.dtbo": "ade070b2ee1df68dfe36158949a588d11b2d36de9a21b2d4ea1b25cc6a093a28",
+    "overlays/imx708.dtbo": "a2094e663c238cf93b9dff1da1e8156199f770ef24b8fd108214aaa2033e6981",
+    "overlays/interludeaudio-analog.dtbo": "42c62a93e94ff624e4e2445b7e1fb011ce8148811a3a210398b80261e7f52f63",
+    "overlays/interludeaudio-digital.dtbo": "7eb7adba045814f244a167147fdbb97b139e1c41b4dc78ff25fc91dadb114a52",
+    "overlays/iqaudio-codec.dtbo": "102fc1ae6df3e89eefa428885f958c7ac8cc32785ec9eb7a5aeee9ab95fa2ef5",
+    "overlays/iqaudio-dac.dtbo": "720cda46aa3d63a2720199ed5b79986566db080f978af80e4ee6edb03d139a11",
+    "overlays/iqaudio-dacplus.dtbo": "84dd4b864c9cc4f6fb702a65ab1cd985588a5134c2b663fec68d50ac137fb313",
+    "overlays/iqaudio-digi-wm8804-audio.dtbo": "242d785711ede54e763f043f646a1d791e9aab9d8c17de7b450df9648039508e",
+    "overlays/iqs550.dtbo": "981b83e3155f24507d3de50de861d449c35eb50f3eb5e3836a2b703a62cd4d53",
+    "overlays/irs1125.dtbo": "abc50d33db748dc7419d7420c474c8bde4eee884202e670cc23959ecfec7cde5",
+    "overlays/jedec-spi-nor.dtbo": "012d82fea2e1921d1c5f6ee4d7723284af0b6ea7df830fe1dc01217d828a3304",
+    "overlays/justboom-both.dtbo": "e4f651d042e60cd77095925bf35fb9f1c4659f68555c337a6cede162f784776a",
+    "overlays/justboom-dac.dtbo": "b196a46030c8d06ddb71bf9f4dcc012003c5bc295121e0b3985d416ab76e04c9",
+    "overlays/justboom-digi.dtbo": "63baf2f5ccc3b1d294699285420b4e1262b48c85a0e1b6af49a07df457285e27",
+    "overlays/ltc294x.dtbo": "d3dc1a64d8c3e3c96538a80e46d5b6149e359a804c7218fbc93a9fe3e49eb856",
+    "overlays/max98357a.dtbo": "b8b1dc5ae8dadd162959fc9d784ea2120a264613d035c02cc3d4d5db9286287c",
+    "overlays/maxtherm.dtbo": "339fbc411a9d277e1b42cecbb7a3d7f701c1d70da8e71285b9bca8beeb447f67",
+    "overlays/mbed-dac.dtbo": "bd464c688b6a3a4c5ebb7334bb8f2f4fe3c5f0c9b13d77f834ff0486e56c2595",
+    "overlays/mcp23017.dtbo": "48c4feba3696f320b55e6e28493f514dbe0afa592d3cfe76b2580deccffb9a2d",
+    "overlays/mcp23s17.dtbo": "84b7ac0d46ad6655a2f0ba8eb3cb7d09493c8f2ce45a22d9fbd6fd507055848e",
+    "overlays/mcp2515-can0.dtbo": "e3ccb45591e7b61b9113249a8e7a5d43a3be8a6d029b22e99b32fae1b39aea79",
+    "overlays/mcp2515-can1.dtbo": "9aa4618ae19e4aa69c5b491075482b0f2adedd64416af8f41edaff3f3fb1637c",
+    "overlays/mcp2515.dtbo": "a25cd44d490160148dd52ec9e64fb106046a315f1c4e105d667e0f874d9beefc",
+    "overlays/mcp251xfd.dtbo": "ee0857747113063347830007a4362314f4019f1310ece19d16a8537f3a1290aa",
+    "overlays/mcp3008.dtbo": "66a8bfbe242b0e328920b6f7a35270de1151c999c9e791b4179a61fb7d552943",
+    "overlays/mcp3202.dtbo": "85760c6f927589a0385f66f310eaea234ac11e811be0d38a5a07da9d64a2e190",
+    "overlays/mcp342x.dtbo": "b8edcc05f48c1570d42527e48d3e8e680a84c069d8d897653735e564e304ab78",
+    "overlays/media-center.dtbo": "46f2a65adb351d1ba3b4e59441b79fb7439c956cc3979cba7e8d449314990a59",
+    "overlays/merus-amp.dtbo": "bb86257e7a9bb0767f7ad59f4682b67c1ed5b6227bbdcebdaf0c8083244ab8b4",
+    "overlays/midi-uart0-pi5.dtbo": "54c5502ab26619b17374871ab080a96860c234ac112f8cf448afe2278cbc929a",
+    "overlays/midi-uart0.dtbo": "d0e16f1fb407b1dc99c851d962544372491106b368c827deaa70934a9f11a520",
+    "overlays/midi-uart1-pi5.dtbo": "4b909d501d32aaf23b2cbf7220fe034caf81c2eae23fd144102ef19920f35ba0",
+    "overlays/midi-uart1.dtbo": "01d5df60a4f66e896c13485a54464c29ac80dc90c5e182d12f6bdf6ffb8baffd",
+    "overlays/midi-uart2-pi5.dtbo": "2e469c8c6cb4ce3692d1d565db43c7a265a57da191d353b67f2c9ff4115c289a",
+    "overlays/midi-uart2.dtbo": "c144e0cbea0326ef9514c517fb576ff2aab9367602d88e6225557eb0cf2fe327",
+    "overlays/midi-uart3-pi5.dtbo": "05f75465c44f888ca996f7ec8d1447bec5f9465bdedf25fb4a8789644085e765",
+    "overlays/midi-uart3.dtbo": "ca80d361b950f7aa711f277de80d3efb52099729408a8b2a50670de1380d1a44",
+    "overlays/midi-uart4-pi5.dtbo": "6b61405668c5e1a8acdb28881f562e0274b2582ec406f441ba41e671c1d3ef9a",
+    "overlays/midi-uart4.dtbo": "4bdb3d8498ecd9dd7efdc3515030c454cc0875ff185f3c0ed9181c37296fe905",
+    "overlays/midi-uart5.dtbo": "66a6a8e71d36d3990094620238639f1e16ad1f27014a7ba8d8e0be207698688b",
+    "overlays/minipitft13.dtbo": "fe92f2a6a728638e8da2c685e197c2392a03278244ec3b17ff85c57ae121bde8",
+    "overlays/miniuart-bt.dtbo": "c38c12945f14ac0c71b609a48c94566b3c323a9cfd39d8cb286799e87e14197e",
+    "overlays/mipi-dbi-spi.dtbo": "6dfdeb89bc7a6598c9694c4df1c272625197bfc3599ea7164662aa1fa8c8acdd",
+    "overlays/mlx90640.dtbo": "c5cb54f99a565eba419a39936a5cc84f5906c4c95460d7cf85cd54e64c1c9997",
+    "overlays/mmc.dtbo": "8c0e8c95aa9c2e4680386740e38ae6d2b6cf4ac401315b6577d878ec06a2d0ad",
+    "overlays/mz61581.dtbo": "00d3ac213793e34adeb60c737594e4f46a4ba11174db3b5ae57d121902103639",
+    "overlays/ov2311.dtbo": "98c9ce512de4778876686464d5e41af23cfd74b8cf9805ef1c8eb2803d712a8e",
+    "overlays/ov5647.dtbo": "fdf4f2bcb6455282ee8977615dc093f9e6cf01558d72d1139fe32e446ae50475",
+    "overlays/ov64a40.dtbo": "ae481562521e588ba45f2991e8da8d3c54e8afaf1cb45a610204e85950aedc5c",
+    "overlays/ov7251.dtbo": "6a8fa099265989f5ca96ce69c9aed877d201ad06b45ffb1d68346ae9db615bcc",
+    "overlays/ov9281.dtbo": "792c0dc62e383f7daf708d807f21c48fdad4ab08e551472b77bacaa43bea6f1e",
+    "overlays/overlay_map.dtb": "9906078016ae1e196bcc0bd3a66d88fe5867a1aa5e9f7063a347baaa6869933f",
+    "overlays/papirus.dtbo": "c901906df2c9111a2b7711d8f6c3a1f7b0d962f85dd6356ecbae602ad4f1198e",
+    "overlays/pca953x.dtbo": "58e43f797c85a339a26c64cdd9d0d3148c3eee2865789bce369744a78997e942",
+    "overlays/pcf857x.dtbo": "05fac959e5d26646ae19cf17272ab61963cfdca2c937673cacd5f156473cc9b3",
+    "overlays/pcie-32bit-dma-pi5.dtbo": "db35c60bb33c8dbbb3fe34bcb8ac318851fdd292ce02cb33ceb225225f78d875",
+    "overlays/pcie-32bit-dma.dtbo": "f7b6364633e1162aa2f19e96aefb8848e6db823695e732861d84d13c4fd25c54",
+    "overlays/pibell.dtbo": "9f8bef1fc517b7293a81801ed5b1331530a048f61126bd07bf2c675f22fc2e47",
+    "overlays/pifacedigital.dtbo": "99e9928765c3270e7a534577efe76c80fdddb069684deefbef1ef35427793524",
+    "overlays/pifi-40.dtbo": "d78d5469ee0968abd4751b0a7ea747015eef895236935b215d6bafe90faa3ea2",
+    "overlays/pifi-dac-hd.dtbo": "5f202287b1a3899ed707ee11848d46f8e2530552665553ede611f9665cdd177b",
+    "overlays/pifi-dac-zero.dtbo": "4866446ae3a879b79db5c05c19de90cee69cd11cd6907d57ffc44d61c1cc5472",
+    "overlays/pifi-mini-210.dtbo": "2412a0cee58ab3bba5841acb5e3029eea748083f3bbfec640cf23c590b18bb3a",
+    "overlays/piglow.dtbo": "432152b4cf7e5d2ac226485f0196e0f3773184ffe4cd896af9283698d9fd30e8",
+    "overlays/piscreen.dtbo": "96d542d535dd2b686f6b3a31bd49b7232d8a61c07e4799e9f43517b6a76f61b1",
+    "overlays/piscreen2r.dtbo": "19d2c148a3df36aecfe6d51af9efb8724565fcdc72ac52f74f240b88689fd18d",
+    "overlays/pisound-pi5.dtbo": "d0a491370b12f473f14b6bcd0c7bdc19ff32a6b050f861887161de9a1e861085",
+    "overlays/pisound.dtbo": "ca7a0af777478fb3477093292fe509645ab8c30cce9da4c9dbc731e9278bbbe9",
+    "overlays/pitft22.dtbo": "a2e88e005ef247e374a6435bc45a8c858f3e5470646e419a5aec56dde111ed19",
+    "overlays/pitft28-capacitive.dtbo": "f682113af3ba08721727bd44c3517208269bafc20e23f8efbd24cd585f44ec8a",
+    "overlays/pitft28-resistive.dtbo": "b808057a25647498f22b14e4b8209f64997e5b8f9bee27c73eb5b67aafac067a",
+    "overlays/pitft35-resistive.dtbo": "a5ef62d3c4940e54e27b3af71302e6642285c96914d11a83295966ec36301ca9",
+    "overlays/pps-gpio.dtbo": "f6c6b0d193d0e1744f8f2a367550bebcfb844829294a9a5e5503c266cf8b30cf",
+    "overlays/proto-codec.dtbo": "1ec997e22f82880c2540cec822da3d96cebc0a1aebd8626481000ff8d140a754",
+    "overlays/pwm-2chan.dtbo": "0639648a38cff7deae03a5d14f7dc389ca6c3a96083a8f4aa09202522692d74d",
+    "overlays/pwm-ir-tx.dtbo": "732c4f86027bd8cf3a32e7871e6635c56e90b1392fde6da9b5cf01564ab08228",
+    "overlays/pwm.dtbo": "4f26ae4ebc7b2caad4518d89c5a326d38052fdd3eeb20668a67499e004cd504a",
+    "overlays/pwm1.dtbo": "3b071bb81613444c17a2149dd8c725ada8fe0d5bb75b65c315ba5573e0de8157",
+    "overlays/qca7000-uart0.dtbo": "471581154294b6b7fda3c3c8df5f69c1006d6e874d62eb39ccc06c3a6591c185",
+    "overlays/qca7000.dtbo": "07b46ae20493eb96ee41b12ede8bf61069671a9327883a1feec8bf9c17006c75",
+    "overlays/ramoops-pi4.dtbo": "bd7d40db75409907567a66341e1fb37acabf1ba1a614726b84e6a043446ca7ce",
+    "overlays/ramoops.dtbo": "cdfaebcc22a918987280d9084478503d740af146f50f9db9546f462d33a09ef7",
+    "overlays/rotary-encoder.dtbo": "da2eacfdf3f76d26c62af56796c533db35289197724d45aee77acd914f949578",
+    "overlays/rpi-backlight.dtbo": "2b716d465875fc61299b161a588e2454b62d31eccb2af8eb59df531a29d43de1",
+    "overlays/rpi-codeczero.dtbo": "6cdf1bd1919315e15de9db7fac642c412d8caa875a73d63dc7a60e8c08c20e84",
+    "overlays/rpi-dacplus.dtbo": "b364764add0676c06ca0ca9a2008bd97f55d6959692ec5bf1c330316bc0a48e3",
+    "overlays/rpi-dacpro.dtbo": "8dd7ec061304a64a7db548f23ec18183d053c0efec322a5b44a0fb97a626ae4d",
+    "overlays/rpi-digiampplus.dtbo": "1bb5f32ee1c6f91ad5c68361ecd3ed58fad7a85cf87a89f9392fd142e2994f79",
+    "overlays/rpi-ft5406.dtbo": "3c11ba601b55ce8b53b3de59a781b99a24338a58bf300fdbce8b6cc286f7056f",
+    "overlays/rpi-poe-plus.dtbo": "86c735d19bdbc6675ac28ba47dd5a28c235be0f7466fc9c8d092a97e618daf72",
+    "overlays/rpi-poe.dtbo": "45e740115b710c084415fe37022957fe3140f90da4dc8006f3436697efb043da",
+    "overlays/rpi-sense-v2.dtbo": "7ffb323f4f0a2fff3c0e46a22aaa74960bb01e9d05f48fd288f0ea2aff0c502e",
+    "overlays/rpi-sense.dtbo": "b861eec04104a5f818cff010bd8cd52717d332b699fe0efd83a82b4c2ed366f0",
+    "overlays/rpi-tv.dtbo": "07c04333708e77f46b9e92318910f3b19fca6a40f5b20c09598f0e59a6b64ec9",
+    "overlays/rra-digidac1-wm8741-audio.dtbo": "52b96ff9eecfc1ba516b4e40be34e3dd720ad650db6e8594ba64fd7c3b1153fc",
+    "overlays/sainsmart18.dtbo": "86131853851e68c31c09016cac2605e0f1948dd426ae49a8bb02d3d663c3fcaf",
+    "overlays/sc16is750-i2c.dtbo": "aba337eb4f7b4f54339bb226e477b3019d2c463266516b02f9c3c3170632a94c",
+    "overlays/sc16is752-i2c.dtbo": "348ee199a3ff7fc821b1a0142effa858e44c168381aec10307f33cbc740387f4",
+    "overlays/sc16is752-spi0.dtbo": "90610b61e03f3bcc8de5237900869377bbdf23563f1363ab7b1cbadd6877fb78",
+    "overlays/sc16is752-spi1.dtbo": "f7c160929083f1b130982d68f02b12eef301ed74ed7fc43f6e62038e5c80afae",
+    "overlays/sdhost.dtbo": "627057749f3272857859d8ee289351e91f24fa4a70460cb1712d146060337f98",
+    "overlays/sdio-pi5.dtbo": "3e0ee3b4dc6236d076d8672dec33c4edab961c62df55eca9a1d332bbc2a7f795",
+    "overlays/sdio.dtbo": "99bdc66432f096e8afdf56b3176ff138aad1cd97e451fe1a9dad085585ca9966",
+    "overlays/seeed-can-fd-hat-v1.dtbo": "165b9fed11f9a8200731940c2b912b2c68c29baca33a91c16c3aa05885514f6a",
+    "overlays/seeed-can-fd-hat-v2.dtbo": "5a6ce5f4253beed17b3a2580284e1d158a25591d4e553711bccbe1cd72a9bab0",
+    "overlays/sh1106-spi.dtbo": "547426907dfd8367ddd94e46baedd6b80e33c3c01d023eae49790a038646aafa",
+    "overlays/si446x-spi0.dtbo": "64677342cf4cfc57a030bd5aea28c032e8d82d2972009670a547f2808d5a264d",
+    "overlays/smi-dev.dtbo": "d03d2546ed9ecf91895d070bbd770b8dca19bb78d58f5f31bb011169e7a1ca28",
+    "overlays/smi-nand.dtbo": "13298e563b5fe6ef0beff54953801f6d4e1eb8af0bc3aede9746d680ad04d60c",
+    "overlays/smi.dtbo": "31813d85a1338fe9792bc9cce608cf30ea038c551bf5998a1e90584090584827",
+    "overlays/spi-gpio35-39.dtbo": "6ef4e7e3aaf2efa4eb9f1e2c72e735904e28796de5c2fd35a964557f5397a177",
+    "overlays/spi-gpio40-45.dtbo": "4432748ea19e6113d5a73cd8e21c7917ca36161ea338e8e40c1cf2c8389b8e72",
+    "overlays/spi-rtc.dtbo": "f1f0a4e6607a6aa42bc27329d8875e0416deb0777432690cd3aa29ebadeaf61c",
+    "overlays/spi0-0cs.dtbo": "01340ab9d04daa52c867964f50aa0632991023f40fc581ff6452764857010619",
+    "overlays/spi0-1cs.dtbo": "6f5bb9e4a73a7f1bebff621d0cc3132b0b9361bef56bf5bbcdacf047f98ffd4b",
+    "overlays/spi0-2cs.dtbo": "15375a1faaf5b06b52d4cf05326bbff2083997d5f95fed0096fe088d53087563",
+    "overlays/spi1-1cs.dtbo": "240db024743ae18c513d7e3f58390894307b9c28c5166e315ba9b7a089b98012",
+    "overlays/spi1-2cs.dtbo": "c7aa07ecfea45221340ee8fb0737baed131a10918514882c582de1759d7dfc92",
+    "overlays/spi1-3cs.dtbo": "12fd1af68fdc95701bb476e356e34f91fd722c50bd60a536eb06c6e40cf0042c",
+    "overlays/spi2-1cs-pi5.dtbo": "662343b4e00f7cd78d597f716ed3be156236a43535bf6b75dc9a6987347be33a",
+    "overlays/spi2-1cs.dtbo": "119dbc707396f96b2755cbdd8d126c67b4ac857aeeec4e30f6e4dcd77ed4c895",
+    "overlays/spi2-2cs-pi5.dtbo": "174f3d5bb3d8c23b284d88f25e20b065fba8c6a0f6d2f91456163ec05eb2fd76",
+    "overlays/spi2-2cs.dtbo": "65c0a5850af49a43a1a8f38bb6a5c6e9a9ac790f8cdf92cf959d8630aafd3df8",
+    "overlays/spi2-3cs.dtbo": "7b818d839bf8963a117b4c53c22fe0a259757f68147195a774a2418ad2cf4278",
+    "overlays/spi3-1cs-pi5.dtbo": "9e03078e15dfa34dfcf9f9e486ede4d5a0b3925aa4623c24bc93a1e78e96278a",
+    "overlays/spi3-1cs.dtbo": "a5110dc8adeed30f63288bf675599a75198b2c31779a400f08f3384dba1557d1",
+    "overlays/spi3-2cs-pi5.dtbo": "45a8ad124e1c4a11f814896f7ca6fa84408489dc0bd0ec946bbbc44dad91e87c",
+    "overlays/spi3-2cs.dtbo": "44199ed646d78ea0b6da6ad52d1cfbe3998fc8fe4d2bbdda494d29e73e470d3a",
+    "overlays/spi4-1cs.dtbo": "2c85776f743994b8931eb403248721eec5500e3a5a78895828e7177664894262",
+    "overlays/spi4-2cs.dtbo": "e41a8ab1215d8f71a6693c4fb079b8f741f855642554dd4061a082cdf1215cae",
+    "overlays/spi5-1cs-pi5.dtbo": "15987dea33807d2b9d7fa2a721d93621bd7a0e8f2ffded3ad2924d402c239d22",
+    "overlays/spi5-1cs.dtbo": "a3fd9fa2abdd6cdb598d196c3632b3ae275645fed42921ec2c8905fa7c46f7fc",
+    "overlays/spi5-2cs-pi5.dtbo": "8a41263b0f3a50b65d27614c8f207b4127de6a6cc50f127fbdd48ceda2c5a587",
+    "overlays/spi5-2cs.dtbo": "6d6f8774bc12d940f7dfb09a44888c05382c462fa398d17df44e4d2ef7c110af",
+    "overlays/spi6-1cs.dtbo": "bc56370113e3c5266ec51b82920026bf40b78ce89ed24343844581def882c8b0",
+    "overlays/spi6-2cs.dtbo": "21885b5ca1a55ef03fe3f157630c9ac81e4c8fccfcc24af3e01403cc2da7daa0",
+    "overlays/ssd1306-spi.dtbo": "356fb36b8fbc05350b1d7537450c2aff6738a50af1f23f3d03248360b0957e87",
+    "overlays/ssd1306.dtbo": "faf6e10249efbb46594fb2eb3050785aa5774ca53693ee4af5f9d7e677b71ec6",
+    "overlays/ssd1331-spi.dtbo": "32913bfb0c0d8e1fd98f997361320c02ea6af9f2715af6304f09d96920e47f2e",
+    "overlays/ssd1351-spi.dtbo": "200759fc6100aff2a3a59df11df168f0f49982548c20dc5cb83673a03915c033",
+    "overlays/sunfounder-pironman5.dtbo": "af3cb3338deae9d50c6dbe1b540ce2cf8313b99115543b4a5eedf4e070f66dab",
+    "overlays/superaudioboard.dtbo": "0fd31ae1b5629c1505643308295549933cebe5033e8dd1913c01fc25f416c06c",
+    "overlays/sx150x.dtbo": "593bc20076f701adfc7cb9449013f9f51558fdbe0d35e50a27c43dca0d472818",
+    "overlays/tc358743-audio.dtbo": "47d3163d2363c402f72c52f0298e67d2fba0151a84aeaf8034d3301accc4ddce",
+    "overlays/tc358743.dtbo": "848ef4c1c49d409ab228ec763a15054e7fff99216d9e6e2e207bb59fb6253612",
+    "overlays/tinylcd35.dtbo": "aca3cfac57114695f9b2afa1d3c7dc43133f4a16c77cd360a375d36b74841e28",
+    "overlays/tpm-slb9670.dtbo": "69606575e5e586d690719744c682b57c2b57bb8c89dc606190f88954d47b1483",
+    "overlays/tpm-slb9673.dtbo": "0d103e7eaf9a68060fa218c31e6415aa58d47e861467e2eedb186dfed14017e3",
+    "overlays/uart0-pi5.dtbo": "65faf0bd5cb5f0a0612dcd012d870e9f2723fde8a640004837107c446469c6be",
+    "overlays/uart0.dtbo": "426e6f5d0a2291b4ae6c2d4fec91ca5d67e3c6b8aad072e3d7461463f494e82f",
+    "overlays/uart1-pi5.dtbo": "311d6a61ac66ae561c46f9eafdece73164943169bb9584d467429be190d0f289",
+    "overlays/uart1.dtbo": "aa1b2d0c4f47767ed3df1d9e27b6e29cc5c4dcc3a9439d4dac006bf700418d80",
+    "overlays/uart2-pi5.dtbo": "f304c5e194bbeadd5fb90715241d5639c608bc418725a13069dad0a7abf7ecd1",
+    "overlays/uart2.dtbo": "ab5ad4490a2ca3ab1eea693ded5a310816f573df86359cb40e6381f39ebeb47d",
+    "overlays/uart3-pi5.dtbo": "a7acee744b991f85057712ba2c0e2e75ea08906f5c53e7ad0c13aba39af80156",
+    "overlays/uart3.dtbo": "af6f894d7af6fcd19fb979454aee7ce4d73e41b9f89e020a8cff4ec7e9e974f4",
+    "overlays/uart4-pi5.dtbo": "0908b03b4941736203b22850bff37aca8959fd4dbf44a82714a1f995f7932435",
+    "overlays/uart4.dtbo": "899b56566a25788f1269d177b839cb60cdf22f0b6d257183c4f2af3da38f8aef",
+    "overlays/uart5.dtbo": "21ffe78c8ebe59d0dbbce97d0e6e7f12015c9d5de04788f3b2f15c9633679dbc",
+    "overlays/udrc.dtbo": "a42094d94399c2b2ade4286db451ed4465261aa1874340336bbb47da2ab2fd1f",
+    "overlays/ugreen-dabboard.dtbo": "84220735639e96d3202dece3126d99a113d3843e08c45e3a3aa8e1df1780bcfb",
+    "overlays/upstream-pi4.dtbo": "2a5c9d8c47cb4679fa3aeb8f009ce71411ddd729e653ff6e3202bc0d5f4ebd79",
+    "overlays/upstream.dtbo": "6426a552b9f48782f374c19f5082029ff39ecf4f219f651de258546562275e3c",
+    "overlays/vc4-fkms-v3d-pi4.dtbo": "eae7ebead84e86c3d287453ccfe443560c28f53189d6afa657a7f1d084c77c32",
+    "overlays/vc4-fkms-v3d.dtbo": "28cb0536449dc907d1300a195ba0be9087d4f47f125c456e2394ab91157d0754",
+    "overlays/vc4-kms-dpi-generic.dtbo": "fb916b432f356f29fbced35ef7e7f0a45e33680390da9559ff087f5f9af0146b",
+    "overlays/vc4-kms-dpi-hyperpixel2r.dtbo": "45be26e934ec5b5de9241fef8a9b218e2c92f178877b210698343e0fcd75e751",
+    "overlays/vc4-kms-dpi-hyperpixel4.dtbo": "81b92a48d00a6e44ad971920cfcfe069f123432041c0e5b06a3c70b02410a286",
+    "overlays/vc4-kms-dpi-hyperpixel4sq.dtbo": "1a73ab8297cc352b4493258954eb16236a2fce6085f12321fd114438d6d3d91a",
+    "overlays/vc4-kms-dpi-panel.dtbo": "1e8b8bfdbc778a2e3b74e9db34d6e716e3e62093b838eb1adb49d6b78b6b83aa",
+    "overlays/vc4-kms-dsi-7inch.dtbo": "f94a8c3c9b0941b37193e29c30bb8be944282078a5fcbcec9c8663f29052f5d9",
+    "overlays/vc4-kms-dsi-generic.dtbo": "e77e9db5988705d6a08e64a4943d07d5da36d502ff1bab4840af16671719cd64",
+    "overlays/vc4-kms-dsi-ili9881-5inch.dtbo": "27e5161dc77673b18386874376339a215c7b1c7cf007e81ef7f64495d3bc6194",
+    "overlays/vc4-kms-dsi-ili9881-7inch.dtbo": "1913a5b7e256c5fa888a484965e33fc5e13082a76997bbcb9d3097fceb126c31",
+    "overlays/vc4-kms-dsi-lt070me05000-v2.dtbo": "f56d9f00705f617b4f5d8aff743ccc0025eba28e7acbe2d77e7770b9a05eccd4",
+    "overlays/vc4-kms-dsi-lt070me05000.dtbo": "542b56a643523900226a1f28d6ee0e132bbfd72c91374a9227513dcd2be490b1",
+    "overlays/vc4-kms-dsi-waveshare-panel.dtbo": "c35b52ebef6fa401590e011e330ca09bf6530965bbaf5e8a2c665ef212d670d6",
+    "overlays/vc4-kms-kippah-7inch.dtbo": "5d73a115b6280642a25691b39ffc4dfc673997023504c24331e1f9ae97114230",
+    "overlays/vc4-kms-v3d-pi4.dtbo": "155ec071f26a8d45c4524ee00c5037ad7ceb8cc81d221640b9d9d7177c416ddf",
+    "overlays/vc4-kms-v3d-pi5.dtbo": "871f20841446b060a4b90f2961ac3968ece09c29117efb3b79aa4ce577aacc31",
+    "overlays/vc4-kms-v3d.dtbo": "a28591cf7daaa1f740351c8ea8e8586e9041dcab7e912fb58186d2b4d8469e56",
+    "overlays/vc4-kms-vga666.dtbo": "7e725cc1fa2cc571f64c1d2cbc663ad4fda12fd00c30b1f1bd32df6d5613cfd0",
+    "overlays/vga666.dtbo": "0a1114fbbf6fd4f34c95fac26ffb71438ff801b46c575f4ca566f8de8f036ec8",
+    "overlays/vl805.dtbo": "6e85ffe23e63f96b7125a469b7157bdcc48230e307065747a845cc7dc952e434",
+    "overlays/w1-gpio-pi5.dtbo": "3d2372c30a6b5f3d67b7ac8723372a00652f70422bed5c9ca9407ee5cc43343c",
+    "overlays/w1-gpio-pullup-pi5.dtbo": "cfb3ff2140326857d63294c8f97872f4ed26aacec748dd1366a87a8d979f399e",
+    "overlays/w1-gpio-pullup.dtbo": "a0414dbe921539de9e0060667a4bf93416d3a00cc6d9116924caf456d2c448e0",
+    "overlays/w1-gpio.dtbo": "cb2c36f9ae4a8fca087b40bb0c29fe67fdda2a7f546ceb97c3c189f1fae1ac5c",
+    "overlays/w5500.dtbo": "d361f2a11dcb83304535f9aadbbd6da1bc4172201fd80e5b1f12c20b0565f13e",
+    "overlays/watterott-display.dtbo": "e64f92719f55aba1b1494735ddce5634175ad07b01789510b12f7d7442486e08",
+    "overlays/waveshare-can-fd-hat-mode-a.dtbo": "af98c4b650081b6b8507762bdfe7e2b00530a6b5ccf26b4fbbcbcefebf202abd",
+    "overlays/waveshare-can-fd-hat-mode-b.dtbo": "3b12faa480bbbc9b6922e9e75000d19c3843424512e673ab97b5a927e31403ac",
+    "overlays/wittypi.dtbo": "6db58b2093cee11014b347de9b4a51688aca3b2a3bd84b5959d68a340dec88a2",
+    "overlays/wm8960-soundcard.dtbo": "47c1d1030ad3f6800af0fde0becde5e15e0cb7ccde78b2b6fd25ebf544e4a8a0",
+    "poker-overlay.cpio": "667604b58b947cd24a205dbc5f9426bdcffacffdf770edad8cc0ca6f6fba0294",
+    "settings.json": "b279ec2f3c7c1f16a58b6cdcd682b68b5596df0f12ac1a8393a115d9f21ad5f3",
+    "start_x.elf": "6f72a3fda8cbdacb340676e18a8468b9edd89458173b5ecf3c12b00c147dce40",
+    "zImage": "58fed3fe472937318a7b4585cdb707f301f2a9cc4955d08cfb4143a48e979bd9"
+  },
+  "overlay_sha256": "667604b58b947cd24a205dbc5f9426bdcffacffdf770edad8cc0ca6f6fba0294",
+  "overlay_size_bytes": 7368704,
+  "overlay_entries": {
+    "opt": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "start.sh": {
+      "mode": 33261,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 75,
+      "sha256": "8c85aa9edfcf9cfeff3dfeeed420d4eac6ba6ede3652e9e4f126eb523b389245"
+    },
+    "opt/dino": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/LICENSE": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    "opt/dino/NOTICE": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1705,
+      "sha256": "6049d93c145411f730ad7ef61d8d067ce1d2c5ce08019ab71f059f2b5a6da6e0"
+    },
+    "opt/dino/THIRD-PARTY-ASSETS.txt": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1442,
+      "sha256": "8aa6da5ca6f61ab7acff36942cc2c8d2d7d762a4f0d5653a5f7373f29bc36848"
+    },
+    "opt/dino/assets": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/hardware.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6304,
+      "sha256": "ba276c72b852fcb9dcd8b679e0381ff4e403e20d1f05fcb51e186eee72554422"
+    },
+    "opt/dino/launcher.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 20842,
+      "sha256": "5184b0d5e71d83f163e84474164c1a2f1972fdab4ca85ab4c4d2929cb40fd487"
+    },
+    "opt/dino/poker_engine.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15600,
+      "sha256": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d"
+    },
+    "opt/dino/poker_strategy.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 12246,
+      "sha256": "5c98988fbeca991f85904d32ce9c3b7731055d733dd833942667e0b6683a2539"
+    },
+    "opt/dino/poker_ui.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 62014,
+      "sha256": "5cac7b05f99e9b1a02e72d33dd0fb15d8617a35b300b758570b783a8b83734c2"
+    },
+    "opt/dino/strategy": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/strategy/strategy.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6429,
+      "sha256": "997c119917a280e373f7ca949b77b3f9f9f0709333a7812d809d44dd1cea46a4"
+    },
+    "opt/dino/strategy/subset_counts.dat": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4449110,
+      "sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2"
+    },
+    "opt/dino/assets/videopoker/backgrounds": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/badges": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/cards": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/fonts": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/gui": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/help": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/manifest.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 704859,
+      "sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a"
+    },
+    "opt/dino/assets/videopoker/multipliers": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/wins": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/backgrounds/uxbg.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 61289,
+      "sha256": "87542200e80e91318c778736995a0ca0d339afba0e0327b8df45ddff9d85d952"
+    },
+    "opt/dino/assets/videopoker/backgrounds/uxgamebg.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 21207,
+      "sha256": "6076bde1f5ff95425ebb6e6e6c742cdad6c2ce19ac908cdcbb56ea3227fbb6f8"
+    },
+    "opt/dino/assets/videopoker/backgrounds/uxpaytablebg.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10159,
+      "sha256": "1fa96cfa9467d40c622d4279980255445b2df8bdcfd4b7be89220dad221a8ff9"
+    },
+    "opt/dino/assets/videopoker/badges/active0.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11690,
+      "sha256": "f3811a62c5b80424d2b1d3032660bea37064edba50f30cf9e170b9bd2b8a79d3"
+    },
+    "opt/dino/assets/videopoker/badges/active1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 12734,
+      "sha256": "f016300858b82ec3c22e6506cb5eaf8cb78aa13492c589c7e18ebb7f1642827f"
+    },
+    "opt/dino/assets/videopoker/badges/active10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11690,
+      "sha256": "f3811a62c5b80424d2b1d3032660bea37064edba50f30cf9e170b9bd2b8a79d3"
+    },
+    "opt/dino/assets/videopoker/badges/active11.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11689,
+      "sha256": "089bdae9fabc610ebf105aba5f807c084e9a8909b02deafba7448708df74bbaf"
+    },
+    "opt/dino/assets/videopoker/badges/active12.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11690,
+      "sha256": "f3811a62c5b80424d2b1d3032660bea37064edba50f30cf9e170b9bd2b8a79d3"
+    },
+    "opt/dino/assets/videopoker/badges/active2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13265,
+      "sha256": "43457fcdd9eefc37bf65dfae9340d86ce5def24210cd4476312196e111183f45"
+    },
+    "opt/dino/assets/videopoker/badges/active3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13516,
+      "sha256": "90706ab54b7e47ea5868832e7123040b1ecef21a9365dcbf6b5fe850caab104d"
+    },
+    "opt/dino/assets/videopoker/badges/active4.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13666,
+      "sha256": "0213fbe9d4bd9fe42558da3150538c70ca26070c18f840ea6126dbd9c0eb69dd"
+    },
+    "opt/dino/assets/videopoker/badges/active5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13879,
+      "sha256": "1fec0c056cbb8ab375797006575bda7988149d6b3fa99f53e7ba172c4c4e4898"
+    },
+    "opt/dino/assets/videopoker/badges/active6.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13666,
+      "sha256": "0213fbe9d4bd9fe42558da3150538c70ca26070c18f840ea6126dbd9c0eb69dd"
+    },
+    "opt/dino/assets/videopoker/badges/active7.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13516,
+      "sha256": "90706ab54b7e47ea5868832e7123040b1ecef21a9365dcbf6b5fe850caab104d"
+    },
+    "opt/dino/assets/videopoker/badges/active8.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13265,
+      "sha256": "43457fcdd9eefc37bf65dfae9340d86ce5def24210cd4476312196e111183f45"
+    },
+    "opt/dino/assets/videopoker/badges/active9.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 12734,
+      "sha256": "f016300858b82ec3c22e6506cb5eaf8cb78aa13492c589c7e18ebb7f1642827f"
+    },
+    "opt/dino/assets/videopoker/badges/inactive0.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 8888,
+      "sha256": "da83c1fc1c6421d6d1c986b3cd971f6c9db0b3cc5556e6ae76d8b8b7012f7564"
+    },
+    "opt/dino/assets/videopoker/badges/inactive1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10291,
+      "sha256": "c518297c209705b065005a677613a30937fc1c5fe91ddf90b08de4ee0d6653fc"
+    },
+    "opt/dino/assets/videopoker/badges/inactive2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10443,
+      "sha256": "9c8dda1cac3efb61cb64803e227b578e11004a567709ee54f03f4e841cf89137"
+    },
+    "opt/dino/assets/videopoker/badges/inactive3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10436,
+      "sha256": "7ef051bdea484cb08693a809f4feb52fe5a7507838c0782a22f8ae793c509402"
+    },
+    "opt/dino/assets/videopoker/badges/inactive4.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 9877,
+      "sha256": "5a7a686b8f27d3c11ecd577a5cd3dd3e6c3a7044ac18a2ad34116356b15ac556"
+    },
+    "opt/dino/assets/videopoker/badges/inactive5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 8888,
+      "sha256": "da83c1fc1c6421d6d1c986b3cd971f6c9db0b3cc5556e6ae76d8b8b7012f7564"
+    },
+    "opt/dino/assets/videopoker/badges/inactive6.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 8888,
+      "sha256": "da83c1fc1c6421d6d1c986b3cd971f6c9db0b3cc5556e6ae76d8b8b7012f7564"
+    },
+    "opt/dino/assets/videopoker/cards/0.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4395,
+      "sha256": "de9acda4bccd761fd4993f25dd09b7c29be68212e0b2bcfcf554e3512b99ef20"
+    },
+    "opt/dino/assets/videopoker/cards/1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4268,
+      "sha256": "13618c490503e9c97fbcc6624cc2aa08d1825852820180b6d1831baea1593d1c"
+    },
+    "opt/dino/assets/videopoker/cards/10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 14530,
+      "sha256": "f5968d5d745be939d6e396196c63d8ff7f8dbcaba74b829b32f9915f4624f2bf"
+    },
+    "opt/dino/assets/videopoker/cards/11.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15097,
+      "sha256": "eb492987103d12bae551a5771c6bbf85108dc6bb9ff5b19eeeb03b3032d0626c"
+    },
+    "opt/dino/assets/videopoker/cards/12.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15153,
+      "sha256": "89bd5edecba1ac1db354a6ea729c67290cb75d89cc218dd5b980e014d1fee44c"
+    },
+    "opt/dino/assets/videopoker/cards/13.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4921,
+      "sha256": "2bfce7f0a01ff0eb44451bb748dc49ec5ebc86f9854dae1ff4355c9b96ca1fd8"
+    },
+    "opt/dino/assets/videopoker/cards/14.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4779,
+      "sha256": "6ec5e71fd8543ff5f7233f2894315cf6c9f90292faa5112f566ef4227a560080"
+    },
+    "opt/dino/assets/videopoker/cards/15.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4840,
+      "sha256": "4024388333b83087a1313795036bf57ded3658ef85e70e5c2790a0c919132e50"
+    },
+    "opt/dino/assets/videopoker/cards/16.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4670,
+      "sha256": "4aab47a04614b0c5e272ac388e408dae2cafdae0f9b03183ed9ffed192c46a71"
+    },
+    "opt/dino/assets/videopoker/cards/17.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4926,
+      "sha256": "7a6091a0db32bd22f4f0e1ba5ee44d0ae318a5d7f1a9fa054340a296bc0a1a74"
+    },
+    "opt/dino/assets/videopoker/cards/18.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4618,
+      "sha256": "9d8c654509ae6ac1ef48440580bfd107a802990c5209ce1c3d478c35fbf77d9a"
+    },
+    "opt/dino/assets/videopoker/cards/19.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4909,
+      "sha256": "76e45d1a8c5bd9b09d9226b5e8a0b8cf149d93954d51dded85ed33676372fa7f"
+    },
+    "opt/dino/assets/videopoker/cards/2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4311,
+      "sha256": "720419ec103d0a8f45ba72b6832522bf828d337989e047a7476882ab2cc760d1"
+    },
+    "opt/dino/assets/videopoker/cards/20.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4947,
+      "sha256": "0fe588c09ccc82ff3568ba289e11bd43fdef8537a9077575572f13da3659b9b3"
+    },
+    "opt/dino/assets/videopoker/cards/21.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4797,
+      "sha256": "185df775cb94bb46043af57f7725baa1049dba7117144bc714546c922ab62a6e"
+    },
+    "opt/dino/assets/videopoker/cards/22.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11977,
+      "sha256": "f507714d2c47f260cd35413d88b898b07e3aa11b07a3758c23ef9f82c8181f00"
+    },
+    "opt/dino/assets/videopoker/cards/23.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 14914,
+      "sha256": "45808f5ac5e89a8551bf04a1a59b22326b9b7823ddc4324c9e337587baec46a4"
+    },
+    "opt/dino/assets/videopoker/cards/24.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15655,
+      "sha256": "3c218f82d7d6f6845fc4d649d9f0629250ab5d003a0f2753e44f95f9327f3100"
+    },
+    "opt/dino/assets/videopoker/cards/25.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15652,
+      "sha256": "5b520562f56bd66fc68f54512b902b395f545966103f3fc996b9db8767d2b42f"
+    },
+    "opt/dino/assets/videopoker/cards/26.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6482,
+      "sha256": "f32df76e4420a91a9bf88282727908efffc0695e394ebbd6ecdd7006dbdf19a0"
+    },
+    "opt/dino/assets/videopoker/cards/27.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6153,
+      "sha256": "d2f9f717aece44557be6862e45c24fc573ecbc656c939af5420342d447a7288a"
+    },
+    "opt/dino/assets/videopoker/cards/28.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6175,
+      "sha256": "e754c4b41f5c56874705c30b829129e24544cb31ea23559d7e6745cd0e1e4ad4"
+    },
+    "opt/dino/assets/videopoker/cards/29.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6049,
+      "sha256": "c1107dee930fd11d042ba9d2657efcf7cad264062ea541448c220570dfce70e7"
+    },
+    "opt/dino/assets/videopoker/cards/3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4181,
+      "sha256": "82a4445826c2d7a26c38a500ca86b085974c815ea4a10da47e3ce1107b137f40"
+    },
+    "opt/dino/assets/videopoker/cards/30.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6410,
+      "sha256": "426265fb512faf8db4cfa3df97ee1fb65f299a426940679e7a27aa30acf2b7fb"
+    },
+    "opt/dino/assets/videopoker/cards/31.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5930,
+      "sha256": "3f15bed1e7b2b941170fd567fbce53a20925067b2896ac8c6e3a7d5a18592d59"
+    },
+    "opt/dino/assets/videopoker/cards/32.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6530,
+      "sha256": "2adc84d7fcac91119ed8400e97af6cab67493e798cfa9ad786a51f8f2b25fe4d"
+    },
+    "opt/dino/assets/videopoker/cards/33.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6444,
+      "sha256": "21c097449d30d0dd158a0d1655615c0026d4f8bdd579ffbb7f9a0b2ec4ec6e67"
+    },
+    "opt/dino/assets/videopoker/cards/34.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6183,
+      "sha256": "34081122ffc867ce42c38a0bfa027f159291055069b3d7184289299e5437c06a"
+    },
+    "opt/dino/assets/videopoker/cards/35.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 12094,
+      "sha256": "e81d2e8d27ceba85c42ba5d6aeb7db84a509bbbb5541e432e1954a9e6409d1e5"
+    },
+    "opt/dino/assets/videopoker/cards/36.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 16156,
+      "sha256": "05ba74edacc4273cd247b530a53714055818463f89afb6391d01ec1297d975be"
+    },
+    "opt/dino/assets/videopoker/cards/37.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 16447,
+      "sha256": "3edc2d672b73fd09a5c2e24884023ec5f75f56066f3f1d13d0e25e770a4cb877"
+    },
+    "opt/dino/assets/videopoker/cards/38.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 17131,
+      "sha256": "5bd34b2be47df895f4c1ed6e8e3e6629a604c9f98f3904a73eeb8f95b556df35"
+    },
+    "opt/dino/assets/videopoker/cards/39.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5977,
+      "sha256": "e582a9302a4f1869b2a0e8f9fe234f693bcec1ec2e9e4f10bb97bfa4c9c56b50"
+    },
+    "opt/dino/assets/videopoker/cards/4.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4411,
+      "sha256": "46f314da7911c563ac07afa8cd881c2aa1e9e6a481873836e81cd08a4eb36ce1"
+    },
+    "opt/dino/assets/videopoker/cards/40.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5659,
+      "sha256": "ea245fafb633a838e5c5b38dbe50d303f1a64e06e0b4b28653bc6eea19cd46d3"
+    },
+    "opt/dino/assets/videopoker/cards/41.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5720,
+      "sha256": "7d3fe8c929b49c587c6315a9b258da44b59eaf3b6ae101d252c45cc874bb72dc"
+    },
+    "opt/dino/assets/videopoker/cards/42.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5548,
+      "sha256": "028a95a1b60d57e22666b39e85fbccb3d9d6c5c8635089d0ec17e2855bd91139"
+    },
+    "opt/dino/assets/videopoker/cards/43.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5867,
+      "sha256": "1ef7f84f581e98c9c705860fafdc5819c940f4ccce6c8a2564de12f57afbb574"
+    },
+    "opt/dino/assets/videopoker/cards/44.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5429,
+      "sha256": "dba62fd47e1e80aaf6925599b8cf1d1ebe4301885ca70ddc4d9d26e2ad902359"
+    },
+    "opt/dino/assets/videopoker/cards/45.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6049,
+      "sha256": "0fba12f56364506baf346febb4607ec7e91fcb0a45b6173428bcd75596cba3d3"
+    },
+    "opt/dino/assets/videopoker/cards/46.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5905,
+      "sha256": "104dd8c99ea481eae3c53c129d7e2a15b1b37be2cfb157725ca64a2d2c9dcf35"
+    },
+    "opt/dino/assets/videopoker/cards/47.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5698,
+      "sha256": "069d9fb18b471634e5149ee048f32136744383b1d42441b16871ca7907d674d7"
+    },
+    "opt/dino/assets/videopoker/cards/48.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11803,
+      "sha256": "3e29b2904926ae7f7cf761941ad1b4c46827d6160431cc45c7581302a100254a"
+    },
+    "opt/dino/assets/videopoker/cards/49.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15305,
+      "sha256": "526b3e10d21f5d2d2026ef0e487168ab7d59175ce4292424d5e9d5c59ce0fa87"
+    },
+    "opt/dino/assets/videopoker/cards/5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4080,
+      "sha256": "af583229d33253027bebccf939d8b904230def12f2c7ccb679b497a31a12b64c"
+    },
+    "opt/dino/assets/videopoker/cards/50.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15956,
+      "sha256": "6a0b6c71348e29c656f1427f45d28ae68156127bbec5c3c5eb75dd8734c0e7c2"
+    },
+    "opt/dino/assets/videopoker/cards/51.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 16506,
+      "sha256": "2869b3bfc7a4f075339ad4ac49ff9784c9001a8fb7f0df1c60c72c30e4f89c37"
+    },
+    "opt/dino/assets/videopoker/cards/6.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4382,
+      "sha256": "aaa3208c3f9a1849bf063f66571ce867afa629031c92d7fab72b343ce4012d69"
+    },
+    "opt/dino/assets/videopoker/cards/7.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4425,
+      "sha256": "ced7132e44237447493519dc183695140a992a91bfcea494ef367413af4d5424"
+    },
+    "opt/dino/assets/videopoker/cards/8.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4292,
+      "sha256": "813b700c3e90ba7d9eff11a2c5029be3e3bddd9dd88f9f1d10363710ab1f9a73"
+    },
+    "opt/dino/assets/videopoker/cards/9.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11674,
+      "sha256": "0233e432dad51973a20bd82d21618de64eea619763c7ae4fa3c63dbbbce36603"
+    },
+    "opt/dino/assets/videopoker/cards/Back.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 36505,
+      "sha256": "7d26de76baa92b6701c0d741a6c08133ce3382ae66bf2e44b506525e141710e3"
+    },
+    "opt/dino/assets/videopoker/cards/Back_Disabled.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11097,
+      "sha256": "cd44134d1dbe7284c142ce336f9d683de78ac644abac3f45947afb1c18ec4954"
+    },
+    "opt/dino/assets/videopoker/fonts/arial-bold.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 498250,
+      "sha256": "c7bf3ae9acb57cf298c3522a2e11c29eca05bf50f635554aac7bf5a1f596b181"
+    },
+    "opt/dino/assets/videopoker/fonts/arial-regular.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 490824,
+      "sha256": "271f146256e9bde6fc3488aaf3d1b5f04e7c030db7f206e95ac5b7f418f29f2b"
+    },
+    "opt/dino/assets/videopoker/gui/BetMax.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6552,
+      "sha256": "9c6cec81963a0cccdd464c9d74281fb75d4228de0b9ab7049b5a8598ba8b60de"
+    },
+    "opt/dino/assets/videopoker/gui/BetMaxDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5850,
+      "sha256": "ad4f3313fcd2c0baabacaaa9260992451cfbbba8d8304c2c082975e8a84bb1ba"
+    },
+    "opt/dino/assets/videopoker/gui/BetPerHand.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6533,
+      "sha256": "97dec0e5955b3eb6ad0e55b931af01fbd7ec31eacc50b3342343aca7b429e347"
+    },
+    "opt/dino/assets/videopoker/gui/BetPerHandDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6093,
+      "sha256": "b43c047f5529fdf03d49666bee5fd8b4a3d243d9ed1604930e53dd9205b17e92"
+    },
+    "opt/dino/assets/videopoker/gui/Deal.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5477,
+      "sha256": "57a18a8f8743ebaa3795a5bab54d34b633bf6b1f90e8e13cfdc07032ec51803b"
+    },
+    "opt/dino/assets/videopoker/gui/DealDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5169,
+      "sha256": "8944082766261d5c1327ade9adec357f8d245178741586be269661b131bfd6f7"
+    },
+    "opt/dino/assets/videopoker/gui/Draw.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6067,
+      "sha256": "4e680b95956697046aafa92a6bac67e7ef12bba75b679ea5da77b1c1c7ebddce"
+    },
+    "opt/dino/assets/videopoker/gui/DrawDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5687,
+      "sha256": "6aec5fbb154390cab73f7c4b86d576262e0732516878e8d5c16ee0bbaeeee6ce"
+    },
+    "opt/dino/assets/videopoker/gui/MoreGames.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 7205,
+      "sha256": "425524acbb92ed5490eac106e9c1e5339b3128c92497683a3d8231b8fbd3efb9"
+    },
+    "opt/dino/assets/videopoker/gui/MoreGamesDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6622,
+      "sha256": "07abc33aa2a0bcfd5cc334a879e825f2958237845a8e4c937a0f8ac772555b24"
+    },
+    "opt/dino/assets/videopoker/gui/SeePaysHelp.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6610,
+      "sha256": "70cb14011cad80fcf895458e94d56f1c86c97405e6f702d712072a050136358c"
+    },
+    "opt/dino/assets/videopoker/gui/SeePaysHelpDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6326,
+      "sha256": "e8bb97de50fc227ca28f7615ad7c70c562c491fbc3d5b40ab7357f31a8c13639"
+    },
+    "opt/dino/assets/videopoker/gui/SelectHands.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 7079,
+      "sha256": "4478b64acb07d74dfe7f45ab514739b0bc69b721b24e2092fa4b431c3a3b1ec2"
+    },
+    "opt/dino/assets/videopoker/gui/SelectHandsDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6524,
+      "sha256": "257d6b54f68f5b5331cc76a19408b164b2d508dedf0445682ab25ba5f7e91858"
+    },
+    "opt/dino/assets/videopoker/gui/Speed01.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11142,
+      "sha256": "582cc6a80aa6a16d70820715abd0854988875121d154e168ba4dcb4ed3c7a0fa"
+    },
+    "opt/dino/assets/videopoker/gui/Speed02.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10979,
+      "sha256": "60e91deeab402405d2697b39bfaee44113cdfdf7480e2af6fba963e3a66d1a48"
+    },
+    "opt/dino/assets/videopoker/gui/Speed03.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10952,
+      "sha256": "781208300fe167012f2c02975bed9202870655f54fc89743ac7f98d38fb1fad0"
+    },
+    "opt/dino/assets/videopoker/gui/SpeedDim.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11917,
+      "sha256": "f17bf5ba1c9a124acd08919762242e75955617b4848bee75f838b9348f142baa"
+    },
+    "opt/dino/assets/videopoker/gui/hold.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 233,
+      "sha256": "387b59f7d0208b12af477c576127802d6cb8e60f28cc3a04c10d8bf14b76be2b"
+    },
+    "opt/dino/assets/videopoker/gui/speaker_0.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 894,
+      "sha256": "681f47b6314ce62d48159da85bb3c1290ffb4de8394b653b9247304d12294cce"
+    },
+    "opt/dino/assets/videopoker/gui/speaker_1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 673,
+      "sha256": "2aa155a1db398222c8e4960bb7291514c6e1f22771b64b05252d1240dea15ad2"
+    },
+    "opt/dino/assets/videopoker/gui/speaker_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 813,
+      "sha256": "73e09b8f27b536b36b159f6cfda221c52672b4d8cab4481400dac8fd59748291"
+    },
+    "opt/dino/assets/videopoker/gui/speaker_3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 980,
+      "sha256": "ff711c626fe823fe8b2e784c135483a6e9b18c41d4bd73c331087c1f8efcaff2"
+    },
+    "opt/dino/assets/videopoker/help/buttons": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/help/helpdraw1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 12954,
+      "sha256": "b92cb46e490d12a13e66baef57eeed5abf434b4c066b1762fc6a7f94d3a012b3"
+    },
+    "opt/dino/assets/videopoker/help/helpdraw2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5781,
+      "sha256": "1dea62563b48aea0f8b4a896a3515532f4c41e22df5f2f9e27e82c96146351b9"
+    },
+    "opt/dino/assets/videopoker/help/helpscreen1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 17306,
+      "sha256": "842dee63b728cabca0f3dfca86ea736bb68d4e99e290c579d7e983149fe892f5"
+    },
+    "opt/dino/assets/videopoker/help/helpscreen2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 15282,
+      "sha256": "822555ed57993d606b64ced6fd2f1da9798ab32bca6b76df9aea03c0ecc36109"
+    },
+    "opt/dino/assets/videopoker/help/helpscreen3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 16283,
+      "sha256": "d6bd8ef58804c4a4cb994fcbe162dbecf5c8727a80efd31eadd93a7ad963bc1b"
+    },
+    "opt/dino/assets/videopoker/help/helpscreen4.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6256,
+      "sha256": "36b2fd99628622b7a93c6ac972f4e8517eb466ffc0b3eaafe92211da608f609f"
+    },
+    "opt/dino/assets/videopoker/help/shared": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/multipliers/10x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2024,
+      "sha256": "5ccecb64eb4e8d18d5016032d397ac57fdc8473f987f9b86eb3bc4d0b1cbec46"
+    },
+    "opt/dino/assets/videopoker/multipliers/10x_full_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 3012,
+      "sha256": "461abd76553881f44bc1f4a27c9f4e5a1cf7a7cdd990cf54edebc8ab919f376c"
+    },
+    "opt/dino/assets/videopoker/multipliers/10x_trans_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1518,
+      "sha256": "92183cc47079d15437d64aeb8feae40645f20939c8ea6dcc50e86f8159fcbb1b"
+    },
+    "opt/dino/assets/videopoker/multipliers/12x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2354,
+      "sha256": "c2a64ca558fe7fab2cf1870e3dea6b200c4f29c1b129e353ae210e79d96e1e2c"
+    },
+    "opt/dino/assets/videopoker/multipliers/12x_full_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 3074,
+      "sha256": "9eb637c6b31be28c7919141061e81ab893f674c387f5cb5187ba29e6f78820e6"
+    },
+    "opt/dino/assets/videopoker/multipliers/12x_trans_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1888,
+      "sha256": "46f1dcb12f345241f4238205e788914faadb5d6a48971318345490bb3c960419"
+    },
+    "opt/dino/assets/videopoker/multipliers/2x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1587,
+      "sha256": "2d61e30901008ebe1124e4a60cf9aa38535f58be1b68beebbd9d83622b26051e"
+    },
+    "opt/dino/assets/videopoker/multipliers/2x_trans_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1636,
+      "sha256": "a8e3c2fab4f0d9e166a7e9b7dbe52cf2f6c9279e94ab7b3ed804ada8b335ba7f"
+    },
+    "opt/dino/assets/videopoker/multipliers/3x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1536,
+      "sha256": "b224580e34aff7d1afb3315ef7eef8b8a870217a1b84873764e74eb3cbb8f66c"
+    },
+    "opt/dino/assets/videopoker/multipliers/3x_trans_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1672,
+      "sha256": "4ec10f199963710d91913f5d3c838f2a7584cef194bd0f25e119832116f8612a"
+    },
+    "opt/dino/assets/videopoker/multipliers/4x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1354,
+      "sha256": "ed1dc06da7f2a1be40d0ad3ceb1ab24cef4132be264cdf787bbfc2fe99a31c19"
+    },
+    "opt/dino/assets/videopoker/multipliers/4x_trans_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1414,
+      "sha256": "953e79b88f5ad3142da76a6033166f1cd8b130eaf57c9d02fbd835779ae8811b"
+    },
+    "opt/dino/assets/videopoker/multipliers/8x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2171,
+      "sha256": "24b7005b76d9ef1434d524d8def3e296ca256a8e989ae90c6b081137e65d209b"
+    },
+    "opt/dino/assets/videopoker/multipliers/8x_trans_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1620,
+      "sha256": "3b8cf1b01438aa6adbb4643e122c16808ee26c60a09f88f3b08406bad56c12df"
+    },
+    "opt/dino/assets/videopoker/multipliers/nexthand.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1047,
+      "sha256": "959a7fe6006b6fddc2a9055c19ad6857ba618d9b5d7cc87d33bb66b9a38e0818"
+    },
+    "opt/dino/assets/videopoker/wins/payline1.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 244,
+      "sha256": "a5948d133b247cf4fd772a3aa59ef682eafd61884d7bcc4ec0c54a00ec649361"
+    },
+    "opt/dino/assets/videopoker/wins/payline10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 253,
+      "sha256": "27fa9f9e58503ed5b95d957880bdf69250c4a9148b638c90c02de6b0401a8cbf"
+    },
+    "opt/dino/assets/videopoker/wins/payline11.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 232,
+      "sha256": "1afca21174a0d89d905e3bfffe78ba6414a530e309d883cac38a713937fa0f3a"
+    },
+    "opt/dino/assets/videopoker/wins/payline12.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 247,
+      "sha256": "aa903e1a18035016385ff51bca702efc86b15a97e0c46cc4735094a6c103f94f"
+    },
+    "opt/dino/assets/videopoker/wins/payline13.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 233,
+      "sha256": "f87d57b3b0ef42668a11344c7cd8a7981d8dfabfd71b5e68255f8b182c2829c6"
+    },
+    "opt/dino/assets/videopoker/wins/payline14.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 256,
+      "sha256": "43fc7f0e12cd40e21caa8f8b4cfc261729d34a7be6906455c1976bb6ccb9e139"
+    },
+    "opt/dino/assets/videopoker/wins/payline15.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 253,
+      "sha256": "e2ca1563bd36c9776018bda2065b4d6a4d253b92669253dbf1ea119bbaa03c4d"
+    },
+    "opt/dino/assets/videopoker/wins/payline16.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 253,
+      "sha256": "4eeaeb49adbe4a180b64dd92f4e1d3f82c22e64db4c786139e09b5a037ab7692"
+    },
+    "opt/dino/assets/videopoker/wins/payline2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 257,
+      "sha256": "762eacbc36da7c77d883cebbf5a37ccf96ad3ab1d5ed180a73937dc137e66586"
+    },
+    "opt/dino/assets/videopoker/wins/payline3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 255,
+      "sha256": "75ab32cea166b081f76865129108d0b11b3365bfdaeb00cf52dd65eb4c6f1d20"
+    },
+    "opt/dino/assets/videopoker/wins/payline4.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 253,
+      "sha256": "a55127b089cda762fa46cd703e303913a8e9d578785673099170c91a25c77422"
+    },
+    "opt/dino/assets/videopoker/wins/payline5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 249,
+      "sha256": "76ae59a6037a271a83b4b9de0607dc49f42b378fc1d81631049f4d908bc1d56c"
+    },
+    "opt/dino/assets/videopoker/wins/payline6.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 255,
+      "sha256": "438f7a1827029c79fc01fce0bc928b44a4353c971ee7e482f8e83ebfa2d0a90c"
+    },
+    "opt/dino/assets/videopoker/wins/payline7.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 232,
+      "sha256": "5dd8deb52dfff79541644531c80b2d40db96d1761d4db30ef8ff0a4d44ceac4b"
+    },
+    "opt/dino/assets/videopoker/wins/payline8.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 233,
+      "sha256": "333d2414d6e73f5c9023704128e21d57fbc6db75b93979ebb1cb57bc1b655c3c"
+    },
+    "opt/dino/assets/videopoker/wins/payline9.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 255,
+      "sha256": "870835e93016e71d47eea544ec230f8df25c08ce17539caec7051ccc450d8218"
+    },
+    "opt/dino/assets/videopoker/help/buttons/betdown.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2146,
+      "sha256": "2d1233df37dc26d5c009efce1ec52f2001ad66bf7fe43dc4718eb47f5d669cdc"
+    },
+    "opt/dino/assets/videopoker/help/buttons/betup.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1836,
+      "sha256": "59967baa239fa57d3462753c24384860130994d578636d0ffc474d2bc78449b7"
+    },
+    "opt/dino/assets/videopoker/help/buttons/help.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1742,
+      "sha256": "70e7f2dc9bc145e406b3cb56301c29f5614748ba7fbec993a179fa419f025d84"
+    },
+    "opt/dino/assets/videopoker/help/buttons/return.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2384,
+      "sha256": "56fbb2e20fc9450c318f1e4829dd4003258e944d6d7ff6faa5d6c14b5e527db9"
+    },
+    "opt/dino/assets/videopoker/help/shared/exit-help.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 432,
+      "sha256": "bb4b43162bff99cb0011974eeb25dc3273ccfa82dd20b6919b38aceae8f5bf0f"
+    },
+    "opt/dino/assets/videopoker/help/shared/next-page.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 486,
+      "sha256": "74c7943f237540eae14498288394880e757563bd5f019c1e94668089d8a56286"
+    },
+    "opt/dino/assets/videopoker/help/shared/prev-page.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1183,
+      "sha256": "da0379581162e9f6caac8014c4a87b91f632496f11b75bea5afd5e8c39b4ccc0"
+    }
+  },
+  "hardware_tested": false,
+  "physical_device_written": false,
+  "project": "SeedSigner Poker",
+  "project_version": "0.4.8",
+  "visual_assets": {
+    "manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
+    "asset_count": 146,
+    "manifest_bytes": 704859,
+    "glyph_atlas_count": 2,
+    "png_count": 146,
+    "font_count": 0,
+    "asset_bytes": 2042767,
+    "decoded_rgba_budget_bytes": 27924948,
+    "sequence_count": 2,
+    "artwork_rights": "Third-party artwork retains its source rights; not granted by project GPL"
+  },
+  "strategy_assets": {
+    "table_sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2",
+    "table_bytes": 4449110,
+    "metadata_sha256": "997c119917a280e373f7ca949b77b3f9f9f0709333a7812d809d44dd1cea46a4",
+    "states": 107,
+    "bellman_span": 3.512923285597935e-11
+  },
+  "base_seedsigner_version": "0.8.7",
+  "target": "Pi Zero 1.3 / Plus-compatible Play ST7789 320x240",
+  "game_state_persistence": "RAM only; reset on reboot",
+  "emulator_or_rom_included": false,
+  "reproducibility": {
+    "cpio_mtime": 1672531200,
+    "cpio_owner": "0:0",
+    "entry_order": "parent-before-child, sorted",
+    "modified_fat_timestamps": "2023-01-01T00:00:00Z"
+  }
+}

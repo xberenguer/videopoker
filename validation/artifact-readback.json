@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "image": "/Users/xyz/Documents/Codex/2026-09-26/car-deals-las-vegas/work/seedsigner-poker/outputs/seedsigner-v0.8.7-poker-v0.4.1-play-plus-pi0.img",
+  "image": "/Users/xyz/Documents/Codex/2026-09-26/car-deals-las-vegas/work/seedsigner-poker/outputs/seedsigner-v0.8.7-poker-v0.4.8-play-plus-pi0.img",
   "image_size_bytes": 52428800,
-  "sha256": "e10ebaba7be2847b39389e9db5f057060d219a3429e2308c6932cdd1b0a4a508",
+  "sha256": "beccafbc3508b42974c44b1fe5a9f40333cb4225c267fb2b6f542b919f8d52ee",
   "base_sha256": "67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9",
   "filesystem": "FAT16",
   "partition_start_sector": 2048,
@@ -342,13 +342,13 @@
     "overlays/waveshare-can-fd-hat-mode-b.dtbo": "3b12faa480bbbc9b6922e9e75000d19c3843424512e673ab97b5a927e31403ac",
     "overlays/wittypi.dtbo": "6db58b2093cee11014b347de9b4a51688aca3b2a3bd84b5959d68a340dec88a2",
     "overlays/wm8960-soundcard.dtbo": "47c1d1030ad3f6800af0fde0becde5e15e0cb7ccde78b2b6fd25ebf544e4a8a0",
-    "poker-overlay.cpio": "909d11f5acc088608237c43caee98ff51452b0289d7763fcbaa38af01c0a7e72",
+    "poker-overlay.cpio": "667604b58b947cd24a205dbc5f9426bdcffacffdf770edad8cc0ca6f6fba0294",
     "settings.json": "b279ec2f3c7c1f16a58b6cdcd682b68b5596df0f12ac1a8393a115d9f21ad5f3",
     "start_x.elf": "6f72a3fda8cbdacb340676e18a8468b9edd89458173b5ecf3c12b00c147dce40",
     "zImage": "58fed3fe472937318a7b4585cdb707f301f2a9cc4955d08cfb4143a48e979bd9"
   },
-  "overlay_sha256": "909d11f5acc088608237c43caee98ff51452b0289d7763fcbaa38af01c0a7e72",
-  "overlay_size_bytes": 7357440,
+  "overlay_sha256": "667604b58b947cd24a205dbc5f9426bdcffacffdf770edad8cc0ca6f6fba0294",
+  "overlay_size_bytes": 7368704,
   "overlay_entries": {
     "opt": {
       "mode": 16877,
@@ -388,7 +388,7 @@
       "gid": 0,
       "mtime": 1672531200,
       "size": 1705,
-      "sha256": "901515f281091d360f374a4ee58f43a4e4f7c74170002e234b229456a8b94ffc"
+      "sha256": "6049d93c145411f730ad7ef61d8d067ce1d2c5ce08019ab71f059f2b5a6da6e0"
     },
     "opt/dino/THIRD-PARTY-ASSETS.txt": {
       "mode": 33188,
@@ -419,8 +419,8 @@
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 17358,
-      "sha256": "b7603fb723382e995fda155d551bda35097bf7df113e0437f4eca170905f22c7"
+      "size": 20842,
+      "sha256": "5184b0d5e71d83f163e84474164c1a2f1972fdab4ca85ab4c4d2929cb40fd487"
     },
     "opt/dino/poker_engine.py": {
       "mode": 33188,
@@ -443,8 +443,8 @@
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 54440,
-      "sha256": "258baf71e8585cbb42eafedb9317873f5d18d569a1419862f132faaeef60ba3d"
+      "size": 62014,
+      "sha256": "5cac7b05f99e9b1a02e72d33dd0fb15d8617a35b300b758570b783a8b83734c2"
     },
     "opt/dino/strategy": {
       "mode": 16877,
@@ -1738,7 +1738,7 @@
   "hardware_tested": false,
   "physical_device_written": false,
   "project": "SeedSigner Poker",
-  "project_version": "0.4.1",
+  "project_version": "0.4.8",
   "visual_assets": {
     "manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
     "asset_count": 146,
@@ -1761,11 +1761,5 @@
   "base_seedsigner_version": "0.8.7",
   "target": "Pi Zero 1.3 / Plus-compatible Play ST7789 320x240",
   "game_state_persistence": "RAM only; reset on reboot",
-  "emulator_or_rom_included": false,
-  "reproducibility": {
-    "cpio_mtime": 1672531200,
-    "cpio_owner": "0:0",
-    "entry_order": "parent-before-child, sorted",
-    "modified_fat_timestamps": "2023-01-01T00:00:00Z"
-  }
+  "emulator_or_rom_included": false
 }

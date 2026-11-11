@@ -3,7 +3,7 @@
   "mode": "strategy-and-ui-functional-only",
   "python": "3.12.10 (main, Apr 22 2025, 18:36:40) [GCC 13.3.0]",
   "pillow": "10.3.0",
-  "version": "0.4.1",
+  "version": "0.4.8",
   "machine": "armv6l",
   "native_resolution": [
     320,
@@ -155,13 +155,15 @@
     "single_hint_mask": 15,
     "hint_preserved_session": true,
     "held_up_hint_solid_red_until_release": true,
+    "hint_hold_delay_seconds": 0.3,
+    "hint_invisible_before_hold_delay_even_with_ready_advice": true,
     "release_removes_all_advice_pixels": true,
-    "autoplay_normal_renderer_with_small_top_left_a_only": true,
+    "autoplay_normal_renderer_with_small_footer_a_only": true,
     "paced_autoplay_fake_clock_checks": {
       "consider": 3,
       "draw": 3,
       "result": 2,
-      "one_card_per_update": 682
+      "one_card_per_update": 545
     },
     "autoplay_stage_timeline": [
       {
@@ -171,90 +173,120 @@
         "completed_rounds": 0
       },
       {
-        "time": 10.1,
+        "time": 10.6,
         "stage": "select",
         "phase": "hold",
         "completed_rounds": 0
       },
       {
-        "time": 13.35,
+        "time": 12.6,
         "stage": "draw",
         "phase": "hold",
         "completed_rounds": 0
       },
       {
-        "time": 15.35,
+        "time": 13.1,
         "stage": "result-animation",
         "phase": "result",
         "completed_rounds": 1
       },
       {
-        "time": 15.4,
+        "time": 13.9,
         "stage": "result",
         "phase": "result",
         "completed_rounds": 1
       },
       {
-        "time": 19.4,
+        "time": 16.4,
         "stage": "consider",
         "phase": "hold",
         "completed_rounds": 1
       },
       {
-        "time": 25.45,
+        "time": 22.9,
         "stage": "select",
         "phase": "hold",
         "completed_rounds": 1
+      },
+      {
+        "time": 24.9,
+        "stage": "draw",
+        "phase": "hold",
+        "completed_rounds": 1
+      },
+      {
+        "time": 25.4,
+        "stage": "result-animation",
+        "phase": "result",
+        "completed_rounds": 2
+      },
+      {
+        "time": 26.2,
+        "stage": "result",
+        "phase": "result",
+        "completed_rounds": 2
       },
       {
         "time": 28.7,
-        "stage": "draw",
-        "phase": "hold",
-        "completed_rounds": 1
-      },
-      {
-        "time": 30.7,
-        "stage": "result-animation",
-        "phase": "result",
-        "completed_rounds": 2
-      },
-      {
-        "time": 30.75,
-        "stage": "result",
-        "phase": "result",
-        "completed_rounds": 2
-      },
-      {
-        "time": 34.8,
         "stage": "consider",
         "phase": "hold",
         "completed_rounds": 2
       },
       {
-        "time": 40.9,
+        "time": 35.25,
         "stage": "select",
         "phase": "hold",
         "completed_rounds": 2
       },
       {
-        "time": 44.4,
+        "time": 37.5,
         "stage": "draw",
         "phase": "hold",
         "completed_rounds": 2
       },
       {
-        "time": 46.45,
+        "time": 38.05,
         "stage": "result-animation",
         "phase": "result",
         "completed_rounds": 3
       }
     ],
-    "pacing_seconds": {
-      "consider": 6.0,
-      "per_card_selection": 0.65,
-      "before_draw": 2.0,
-      "result": 4.0
-    },
+    "pacing_profiles": [
+      {
+        "name": "slow",
+        "consider": 6.0,
+        "select": 0.4,
+        "draw": 0.5,
+        "result": 2.5,
+        "animation": 0.1
+      },
+      {
+        "name": "medium",
+        "consider": 3.2,
+        "select": 0.24,
+        "draw": 0.28,
+        "result": 1.35,
+        "animation": 0.065
+      },
+      {
+        "name": "fast",
+        "consider": 1.6,
+        "select": 0.12,
+        "draw": 0.15,
+        "result": 0.8,
+        "animation": 0.04
+      }
+    ],
+    "double_up_speed_cycle_keeps_hand_and_autoplay": [
+      1,
+      2,
+      0
+    ],
+    "triple_up_toggles_auto_both_directions_without_speed_change": true,
+    "manual_double_up_sets_best_holds_without_draw_or_spend": true,
+    "held_up_during_auto_does_not_change_speed": true,
+    "medium_one_chevron_fast_two_chevrons": true,
+    "small_filled_triangles_medium_left_fast_adds_right": true,
     "manual_pause_preserved_state": true,
     "three_captured_up_edges_060_apart_never_auto": true,
     "three_captured_up_edges_020_apart_with_100_dispatch_gap_activate": true,
@@ -295,6 +327,16 @@
       ],
       "mode": "RGB"
     },
+    "manual-best-hold": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
     "autoplay": {
       "phase": "hold",
       "autoplay": true,
@@ -318,11 +360,12 @@
   },
   "autoplay_rounds_checked": 3,
   "png_sha256": {
-    "autoplay.png": "ae34cba2902bf74c435f577498bff15ee41910edfc9beb25c05e2b8fd7600d3d",
-    "hint-on.png": "bbd10f3fdfea18e5ccd80c6d8beebdc0c316d880fc895c013299458b9e8a911c",
+    "autoplay.png": "e21b2e674812626a7c62f83973b9fc6f1f676491c9d80a22dae3fd47022bf2a6",
+    "hint-on.png": "a91cd2c9359f4bb413d56e6845c159068f5fd1c280b90aae8a1402d1dde5438b",
     "hold.png": "04e51ef5631f51815a3bacf0fdccfe31f5b9726223912e6cd074350157e3c575",
+    "manual-best-hold.png": "209ba549e0fb4d7204ac848b701a66af79ac17f63476a9e40581b88c5d1f6ae2",
     "ready.png": "2979b24f7eb66dd6aa2bb193b6afa72b0eb9f005d0120975c92d7bcbbcfe8831",
-    "result.png": "ed5908543f02104784b85de15a5940a598a6d1cacce5e873f2c22be04ed8efa5"
+    "result.png": "f43ff4c3b2ba3017ef11ef21160621495d7066043dca10312344580c14699d3d"
   },
   "input_wall_clock_qualification": "NOT CLAIMED",
   "full_probe_timing_report_replaced": false,
@@ -333,7 +376,7 @@
   "physical_buttons_tested": false,
   "camera_or_signing_tested": false,
   "production_rng_path_tested": false,
-  "duration_seconds": 8.041,
+  "duration_seconds": 7.47,
   "guest_png_readback_verified": true,
   "qemu_only_dtb_changes": {
     "/soc/watchdog@7e100000": "disabled",
@@ -344,7 +387,7 @@
   "probe_mode": "strategy-and-ui-functional-only",
   "diagnostic_clock": "virtual-instruction-clock; no wall-clock qualification",
   "production_dtb_modified": false,
-  "production_image_sha256": "e10ebaba7be2847b39389e9db5f057060d219a3429e2308c6932cdd1b0a4a508",
+  "production_image_sha256": "beccafbc3508b42974c44b1fe5a9f40333cb4225c267fb2b6f542b919f8d52ee",
   "qemu_only_dtb_sha256": "c7f851ff2da226f072fad7df58eb9882f51c779504113244a5f7e4cab498e175",
   "qemu_termination": "Stopped after completed guest marker or bounded timeout",
   "marker_polling": "Lightweight mtools mtype; full FAT decode only after completion",
