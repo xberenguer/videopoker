@@ -3,11 +3,14 @@
 ## 0.4.0
 
 - Make both middle buttons hold/unhold and confirm; after completed results, either middle deals the next hand. DOWN is Deal/Draw, with animation skip guards.
-- Add single-UP best-hold advice with flashing red card borders and double-UP autoplay.
+- Make UP a held peek: solid red recommended-card borders while pressed, immediate clearing on release, and no hint text or explanation screens. Keep double-UP autoplay.
+- Pace autoplay with six seconds of consideration, left-to-right card selection every 0.65 seconds, two seconds before Draw and four seconds of results. Use only ordinary yellow focus and HELD tags, with no auto labels or red hints.
 - Evaluate all 32 holds from exhaustive replacement-deck category counts. Ten-hand feature advice includes current multipliers and numerically solved continuation values for the next multiplier board.
 - Pause autoplay before manual input, the reserved SeedSigner entry gesture, insufficient credits, entropy wait or unavailable advice. Never refill credits automatically.
 - Run advice in a cancellable worker loaded on first use; require shutdown before signer handoff.
 - Preserve the evaluator, payouts, reference artwork, independent physical-input sampling and stock SeedSigner controls.
+
+Validation:185 functional host checks passed with no failures, errors or skips. Stock ARMv6 functional emulation passed three paced autoplay rounds and held-peek/release pixel checks using virtual instruction and presentation clocks. Wall-clock input timing and physical-device timing remain unqualified.
 
 Numerical strategy checks use floating-point arithmetic, not a formal interval proof. Software and emulated checks do not qualify physical boot, speed, camera scanning or signing; see the release reports and technical guide.
 
