@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "version": "0.3.2",
+  "scope": "Application-generated screenshots, not physical-device photographs; enlarged without inventing pixels",
+  "capture_tool": "scripts/render_previews.py",
+  "screenshots": [
+    {
+      "file": "docs/screenshots/ready.png",
+      "caption": "Ready to deal",
+      "sha256": "cb3e1d0569d004910d6fcb5fce93d1ec9f7b1fa9fc5db598f440b96930a41cb8",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "2979b24f7eb66dd6aa2bb193b6afa72b0eb9f005d0120975c92d7bcbbcfe8831",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/hold.png",
+      "caption": "Select cards and hold",
+      "sha256": "b97b02b943a7c47e783ae7372a940af24b7e50cab1c6fc38986594108730417b",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "e60adcbfce62202bb2c4e78e4e8e544efff0252e1198e3aa6c1b1ba1b71defcc",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/result.png",
+      "caption": "Ten-hand draw results",
+      "sha256": "beb49eb954193e2e5333b30a19a15736441d30446bf3c0cec22eb61141342fce",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "a1011f0a43a1feca03c34b9337da5f0ebb5c578aa85dc16a084be9c1a35c6688",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/multiplier-result.png",
+      "caption": "Next-hand multipliers",
+      "sha256": "a049d3908a6c2a2cf414bf7e0889779dee4d152816c74b753bb7bed6502c162f",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "c68b298c90481d24f6cea528bad491da866a0587c27c3e33d74531e5724f4737",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/gold-controls.png",
+      "caption": "Bottom-row control selection",
+      "sha256": "2c8a76d5b65b6635e63baf7cfccaecb2ca34a2474917a7d27d71c7df72159630",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "496e8832ba179757e28358be4437a6a50d18a2d23dddbe00556309fcdedccd41",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/paytable-bonus.png",
+      "caption": "9/6 paytable and multiplier schedule",
+      "sha256": "83678e0e0dc2d36bd13a2670910e5364ee32ec7d57b791c4aba74f8c2a50318b",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "87527b395d4aea8b2644d9272aebc512e621a44c62c145cc911a0fe24e310d50",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/inspect.png",
+      "caption": "Individual hand inspection",
+      "sha256": "56fa6a0c4ec0c7dd9a3b8ce2a6238dc8ab58d080df56d151d444b4b6772e3597",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "3c4dd6c4a4a6dffa7ad2bcfd30edd805eeb693926f3e80bcdfced0478ecd7904",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    },
+    {
+      "file": "docs/screenshots/help-1.png",
+      "caption": "Built-in help",
+      "sha256": "af89b1b234673232d4149cb2841c99d7537c05a852e3f2ea4cfd7672c4060ff1",
+      "dimensions": [
+        1280,
+        960
+      ],
+      "native_dimensions": [
+        320,
+        240
+      ],
+      "native_capture_sha256": "b51958bc83f66d05faf822e40cfab7c89915b977028251c5513d4d39d64f752b",
+      "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
+    }
+  ],
+  "ui_sha256": "23068de55a15f32239043286c7afcd2aa6d767c0252c7c3e43b4863fc89cc2ee",
+  "engine_sha256": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d",
+  "asset_manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
+  "count": 8
+}
