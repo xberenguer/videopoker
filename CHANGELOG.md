@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.8
+
+- Delay red hints until UP has been held continuously for 0.30 seconds. Brief double/triple taps show no red; release immediately clears hints.
+- Includes the v0.4.7 manual best holds, double-tap autoplay speed selection, triple-tap toggle, footer A and filled speed triangles.
+
+Validation: 205 functional host checks passed. Stock ARMv6 functional emulation passed the delayed red hint, real-advisor best holds and three autoplay rounds. Virtual clocks do not qualify physical timing; no SD card was written.
+
+## 0.4.7
+
+- Triple-tap UP to toggle autoplay on or off. During autoplay, double-tap UP for the next speed; holding UP no longer changes speed. Other buttons stop autoplay without another action.
+- Double-tap UP in manual play to set the exact best holds without drawing or spending credits. Hold UP for solid-red hints only while physically held.
+- Resolve double/triple tap overlap using captured button timestamps, so a third tap cancels the double-tap prefix. Cancel pending advice when another manual action changes the board.
+- Add separately tuned Slow, Medium and Fast autoplay profiles, with nominal rounds of 12.3, 6.9 and 3.7 seconds including animations.
+- Move A beside the speaker and add small filled left/right speed triangles for Medium/Fast.
+- Preserve the ten-hand 9/6 DDB rules, strategy data, production randomness and stock SeedSigner base.
+
+Validation: 202 functional host checks passed. Stock ARMv6 functional emulation passed real-advisor manual best holds, three autoplay rounds, double-tap speed selection, triple-tap ON/OFF, and cancellation. Virtual clocks do not qualify physical timing, camera scanning or signing. No SD card was written for this release.
+
 ## 0.4.1
 
 - Start autoplay with three quick UP clicks instead of two, using captured button timestamps and at most 350 ms between adjacent clicks.
