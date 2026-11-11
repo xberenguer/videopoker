@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+- Make both middle buttons hold/unhold and confirm; after completed results, either middle deals the next hand. DOWN is Deal/Draw, with animation skip guards.
+- Add single-UP best-hold advice with flashing red card borders and double-UP autoplay.
+- Evaluate all 32 holds from exhaustive replacement-deck category counts. Ten-hand feature advice includes current multipliers and numerically solved continuation values for the next multiplier board.
+- Pause autoplay before manual input, the reserved SeedSigner entry gesture, insufficient credits, entropy wait or unavailable advice. Never refill credits automatically.
+- Run advice in a cancellable worker loaded on first use; require shutdown before signer handoff.
+- Preserve the evaluator, payouts, reference artwork, independent physical-input sampling and stock SeedSigner controls.
+
+Numerical strategy checks use floating-point arithmetic, not a formal interval proof. Software and emulated checks do not qualify physical boot, speed, camera scanning or signing; see the release reports and technical guide.
+
 ## 0.3.2
 
 - Swap poker controls: D-pad center (left middle) deals/draws; right middle holds/confirms.
