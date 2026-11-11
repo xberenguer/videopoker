@@ -209,6 +209,9 @@ try:
             gate = self.router.gate
             return (gate.hold_started is not None or gate.latched or
                     self.router.suppress_until_neutral)
+        @property
+        def pressed_mask(self):
+            return self.router.buttons.stable if self.router.buttons.armed else 0
 
     def runtime_case(name, trace, long_animation=False, production_session=False):
         timeline = [0.0]
@@ -481,16 +484,16 @@ try:
     auto_clock[0] = 2.0
     auto_ui.handle_sampled('UP', 1.10)
     assert auto_ui.autoplay
-    auto_deadline = time.monotonic()+30
+    auto_deadline = time.monotonic()+120
     while auto_game.rounds < 3 and time.monotonic()<auto_deadline:
         auto_clock[0] += .05
-        auto_ui.update()
+        auto_ui.update(auto_clock[0])
         time.sleep(.001)
     assert auto_game.rounds >= 3 and auto_ui.autoplay, auto_game.snapshot()
     auto_ui.pause_autoplay()
     paused = auto_game.snapshot()
     auto_clock[0] += 100
-    auto_ui.update()
+    auto_ui.update(auto_clock[0])
     assert auto_game.snapshot() == paused and not auto_ui.autoplay
     auto_ui.close()
     assert not auto_advisor._thread.is_alive()
@@ -574,7 +577,13 @@ def main():
     parser.add_argument('--image', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--timeout', type=int, default=180)
+    parser.add_argument('--strategy-only', action='store_true',
+                        help='Focused strategy/UI check; does not qualify wall-clock GPIO timing')
+    parser.add_argument('--instruction-clock', action='store_true',
+                        help='Use virtual instruction time for functional-only emulation, never physical timing')
     args = parser.parse_args()
+    if args.instruction_clock and not args.strategy_only:
+        parser.error('--instruction-clock is restricted to the functional-only probe')
     folder = args.output.resolve()
     folder.mkdir(parents=True, exist_ok=False)
     original = args.image.read_bytes()
@@ -585,7 +594,11 @@ def main():
     entries = inspect_newc(fat.files[overlays[0]])
     records = {name:(entry['mode'], entry['content']) for name,entry in entries.items()}
     records['start.sh'] = (stat.S_IFREG|0o755, START)
-    records['opt/dino/arm_probe.py'] = (stat.S_IFREG|0o644, GUEST.encode())
+    probe_guest = GUEST
+    if args.strategy_only:
+        from arm_strategy_probe import GUEST as strategy_guest
+        probe_guest = strategy_guest
+    records['opt/dino/arm_probe.py'] = (stat.S_IFREG|0o644, probe_guest.encode())
     (folder/'probe.cpio').write_bytes(pack_newc(records))
     (folder/'zImage').write_bytes(fat.files['zImage'])
     dtb = folder/'qemu-only-pi-zero.dtb'
@@ -605,6 +618,8 @@ def main():
                '-initrd',str(folder/'probe.cpio'),'-append','console=ttyAMA0,115200 earlyprintk loglevel=7',
                '-drive','file='+str(sd)+',format=raw,if=sd',
                '-nographic','-monitor','none','-nic','none','-no-reboot']
+    if args.instruction_clock:
+        command += ['-accel','tcg,thread=single','-icount','shift=0,sleep=off']
     with (folder/'qemu.log').open('w') as log:
         process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
         deadline = time.monotonic() + args.timeout
@@ -650,6 +665,8 @@ def main():
             raise ValueError('Guest PNG readback failed: '+name)
     report['guest_png_readback_verified'] = bool(report.get('png_sha256'))
     report.update({'qemu_only_dtb_changes':dtb_changes,
+                   'probe_mode':'strategy-and-ui-functional-only' if args.strategy_only else 'full-including-realtime-input',
+                   'diagnostic_clock':'virtual-instruction-clock; no wall-clock qualification' if args.instruction_clock else 'default QEMU clock',
                    'production_dtb_modified':False,
                    'production_image_sha256':hashlib.sha256(original).hexdigest(),
                    'qemu_only_dtb_sha256':hashlib.sha256(dtb.read_bytes()).hexdigest(),

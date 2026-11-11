@@ -67,7 +67,7 @@ def main():
                         'speed': ui.speed, 'animation_active': ui._animation is not None,
                         'autoplay': ui.autoplay, 'autoplay_stage': ui._auto_stage,
                         'hint_mask': ui._advice['mask'] if ui._advice is not None else None,
-                        'hint_flash': ui._hint_flash})
+                        'up_held': ui._up_held, 'hint_visible': ui.hint_visible})
 
     save('ready')
     ui.handle('DOWN'); ui.handle('CENTER')
@@ -133,18 +133,24 @@ def main():
                        advisor=CaptureAdvisor())
     advice_ui.speed = 2
     ui = advice_ui
-    ui.handle('UP'); ui.update(advice_clock())
-    assert ui._hint_flash and ui._advice['mask'] == 7 and not ui.autoplay
+    ui.set_pressed_mask(1); ui.handle('UP'); ui.update(advice_clock())
+    assert ui.hint_visible and ui._advice['mask'] == 7 and not ui.autoplay
     save('hint-on')
-    advice_clock.value += ui.HINT_FLASH_SECONDS+.01
-    ui.update(advice_clock())
-    assert not ui._hint_flash and ui._advice['mask'] == 7
+    ui.set_pressed_mask(0); ui.update(advice_clock())
+    assert not ui.hint_visible and ui._advice is None
     save('hint-off')
+    advice_clock.value += .1
+    ui.set_pressed_mask(1)
     ui.handle('UP')  # Second edge inside the documented double-tap window.
+    ui.set_pressed_mask(0)
     ui.update(advice_clock())
-    advice_clock.value += ui.HINT_FLASH_SECONDS
+    advice_clock.value += ui.AUTO_CONSIDER_SECONDS+.01
     ui.update(advice_clock())
-    assert ui.autoplay and ui._auto_stage == 'show' and ui._hint_flash
+    for _ in range(2):
+        advice_clock.value += ui.AUTO_SELECT_SECONDS+.01
+        ui.update(advice_clock())
+    assert ui.autoplay and ui._auto_stage == 'select' and not ui.hint_visible
+    assert ui.selected_card == 2 and ui.session.held == [True, True, False, False, False]
     save('autoplay')
     advice_capture = {
         'hand': advice_snapshot['initial'], 'mask': exact_advice['mask'],
@@ -152,6 +158,8 @@ def main():
         'basis': 'Actual certified StrategyTable result; injected only for deterministic capture timing',
         'answer': exact_advice,
         'data_sha256': strategy_files,
+        'peek': 'Solid red borders only while UP is physically held; release has no overlay',
+        'autoplay': 'Normal yellow selection and HELD tags; six-second consideration, 0.65-second card steps, two-second draw pause and four-second results',
     }
     ui.close(); ui = original
 
