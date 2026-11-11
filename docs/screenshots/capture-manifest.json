@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "0.4.0",
+  "version": "0.4.1",
   "scope": "Application-generated screenshots, not physical-device photographs; enlarged without inventing pixels",
   "capture_tool": "scripts/render_previews.py",
-  "capture_record": "validation/screenshots-v040/capture-record.json",
+  "capture_record": "validation/screenshots-v041/capture-record.json",
   "payload_sha256": {
     "poker_ui.py": "a2b792b46ffc2e53accbf084e1fe43dabf9057b546d294121e6420643051a93b",
     "poker_engine.py": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d",
@@ -44,7 +44,7 @@
       "subset_counts.dat": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2"
     },
     "peek": "Solid red borders only while UP is physically held; release has no overlay",
-    "autoplay": "Normal yellow selection and HELD tags; six-second consideration, 0.65-second card steps, two-second draw pause and four-second results"
+    "autoplay": "Three UP clicks; normal yellow selection and HELD tags with a small top-left A; any button click stops without another game action. Six-second consideration, 0.65-second card steps, two-second draw pause and four-second results"
   },
   "screenshots": [
     {
@@ -184,8 +184,8 @@
     },
     {
       "file": "docs/screenshots/autoplay.png",
-      "caption": "Human-paced autoplay with ordinary focus and HELD tags",
-      "sha256": "7214bb230e15767b5a5080fe1238ed3adcdad1eabccb0ffad94e5da19359015b",
+      "caption": "Human-paced autoplay with small yellow A indicator, ordinary focus and HELD tags",
+      "sha256": "71481176fe6cce70fac7e1e8d66f88fd18b9e03f95d06fd352107e0b3785efce",
       "dimensions": [
         1280,
         960
@@ -194,7 +194,7 @@
         320,
         240
       ],
-      "native_capture_sha256": "d05a3562efb41b69fc9dbe9f635f5b204f8b16fbe27501fcb040a07fd4b28673",
+      "native_capture_sha256": "8cce5f418d9d581c38bf2c5ff312bc5452d29d26c247faf9589f5e163a846cde",
       "resample": "nearest-neighbor 4x enlargement; exact native pixels preserved"
     }
   ]
