@@ -202,6 +202,19 @@ class SampledStateTests(unittest.TestCase):
         self.assertEqual(service.read_timed(), (False, ()))
         self.assertEqual(service.stats['read_errors'], 1)
 
+    def test_native_event_stream_preserves_press_and_release_times_in_order(self):
+        service, levels = self.run_capture(((0,0),(.081,0),(.100,1),
+                                           (.115,1),(.130,0),(.145,0)))
+        self.assertEqual(service.read_events(), (False, (
+            (.115,'levels',1),(.115,'action','UP'),(.145,'levels',0))))
+        self.assertEqual(service.read_timed(), (False, ()))
+
+    def test_event_stream_fault_discards_actions_and_emits_explicit_neutral_reset(self):
+        service, levels = self.run_capture(((0,0),(.081,0),(.100,1),
+                                           (.115,1),(.130,OSError('GPIO'))))
+        self.assertEqual(service.read_events(), (False, ((.130,'reset',0),)))
+        self.assertEqual(service.read_events(), (False, ()))
+
     def test_synchronous_harness_uses_the_same_debounced_level_contract(self):
         clock, events = Clock(), []
         mask = [0]
@@ -218,6 +231,31 @@ class SampledStateTests(unittest.TestCase):
 
 
 class RuntimeTests(unittest.TestCase):
+    def test_sampled_level_events_reach_ui_in_captured_order_and_reset_pauses_auto(self):
+        clock, events, captured = Clock(), [], []
+        class EventInput:
+            gesture_pending = False
+            def __init__(self, hardware, *, clock): self.calls = 0
+            def __enter__(self): return self
+            def __exit__(self,*args): pass
+            def reset(self): pass
+            def read_events(self):
+                self.calls += 1
+                if self.calls==1: return False, ()
+                if self.calls==2:
+                    return False, ((.002,'levels',1),(.002,'action','UP'),
+                                   (.008,'levels',0),(.009,'reset',0))
+                return True, ()
+            def read_timed(self): raise AssertionError('Release timestamps discarded')
+        class EventUI(FakeUI):
+            def set_pressed_mask_sampled(self,mask,at): captured.append(('levels',mask,at))
+            def handle_sampled(self,action,at): captured.append(('action',action,at))
+            def pause_autoplay(self): captured.append(('pause',)); return True
+        hardware = FakeHardware(clock,lambda t:0,events)
+        launcher.run_poker_gate(lambda:hardware,EventUI,clock,clock.sleep,input_factory=EventInput)
+        self.assertEqual(captured,[('levels',1,.002),('action','UP',.002),
+                                   ('levels',0,.008),('pause',),('levels',0,.009)])
+
     def test_current_levels_are_forwarded_before_actions_and_empty_updates(self):
         clock, events = Clock(), []
         class LevelInput:
