@@ -1,0 +1,22 @@
+{
+  "fresh_build_command": "python3 -B scripts/build_strategy_tables.py --threads 4 --max-iterations 100 --tolerance 1e-10 --output <empty directory>",
+  "same_host_identical_files": {
+    "subset_counts.dat": {
+      "identical": true,
+      "sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2"
+    },
+    "strategy.json": {
+      "identical": true,
+      "sha256": "997c119917a280e373f7ca949b77b3f9f9f0709333a7812d809d44dd1cea46a4"
+    },
+    "bias.json": {
+      "identical": true,
+      "sha256": "130b5f7bec5441034dc709b172332fd243dc9b8fe5d081cca216d78546e32988"
+    },
+    "policy-certificate.json": {
+      "identical": true,
+      "sha256": "9086aa6e0a84ec57bc9e4a567319588fb43016ba287663e2527e1ff576b4a7fd"
+    }
+  },
+  "scope": "Byte-identical fresh builds on the same host with the stated thread count; floating-point bias last digits may vary across architectures/compilers"
+}

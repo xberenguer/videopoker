@@ -1,0 +1,8 @@
+{
+  "initial_hands": 18,
+  "hold_queries_bruteforced": 288,
+  "minimum_held_cards": 3,
+  "all32_histogram_denominator_checks": 576,
+  "oracle": "payload/opt/dino/poker_engine.py evaluate_hand, independent Python combinations",
+  "table_sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2"
+}

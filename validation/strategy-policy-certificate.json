@@ -1,0 +1,15 @@
+{
+  "gain": 99.8663394862666,
+  "return": 0.998663394862666,
+  "stationary_norm_error": 6.661338147750939e-16,
+  "stationary_min_probability": 2.690119915439508e-28,
+  "stationary_residual": 5.584074869169342e-15,
+  "transition_row_error": 7.327471962526033e-15,
+  "poisson_span": 6.959055554034421e-11,
+  "bias_comparison_max_error": 1.9281287677586079e-10,
+  "arithmetic": "long double accumulation; Gaussian elimination policy evaluation",
+  "scope": "Fixed ten-hand ten-credit-per-line ongoing classic Ultimate X9/6 DDB; maximize average expected credits",
+  "numerical_scope": "Exact enumerated category probabilities with IEEE754 numerical continuation solution. Residual bounds use exact arithmetic algebra; floating-point residuals are not a formal interval proof.",
+  "conservative_floating_point_guard_credits_per_round": 1e-08,
+  "tie_loss_tolerance_credits_per_decision": 1e-09
+}

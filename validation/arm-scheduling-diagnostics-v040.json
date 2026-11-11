@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "version": "0.4.0",
+  "status": "UNQUALIFIED",
+  "scope": "Full stock ARM attempt hit the strict input safety guard after simulated functional game/menu flows. The timing assertion is retained; no physical Pi timing conclusion.",
+  "production_image_sha256": "d57e88b769aab5211bd3e776c69c4dad14fd74e13389a81f239f7051d4d15b98",
+  "failure": "Traceback (most recent call last):\n  File \"/opt/dino/arm_probe.py\", line 363, in <module>\n    launcher.main(hardware_factory=BlockingLCDHardware,ui_factory=lambda:threaded_ui,\n  File \"/opt/dino/launcher.py\", line 417, in main\n    run_poker_gate(hardware_factory, ui_factory, clock, sleep, input_factory=input_factory)\n  File \"/opt/dino/launcher.py\", line 381, in run_game_gate\n    sleep(POLL_INTERVAL)\n  File \"/opt/dino/arm_probe.py\", line 357, in threaded_sleep\n    raise AssertionError('Threaded input did not finish explicit gesture: '+repr(diagnostics))\nAssertionError: Threaded input did not finish explicit gesture: {'sampler_stats': {'samples': 215, 'read_errors': 0, 'queue_overflows': 0, 'stale_resets': 0, 'gap_resets': 15, 'max_sample_gap_seconds': 0.7648019999999747}, 'first_present_started': 361.337131, 'actions': [(0.268, 'DOWN')], 'phase': 'hold', 'frames': 7}\n",
+  "last_stage": "threaded-input-starting",
+  "png_sha256": {
+    "entropy-wait-retry.png": "eb6b4b20608cc51167da18a362868363b3e2c7c8e192fd04eaa6dcd2ecd553c4",
+    "gesture-during-animation.png": "bdbf2f557849909b2a9d8ef8cafe44235c8d1afe4020cef9e75030c008533cca",
+    "ready.png": "b76a5f15f7314a242907f73c5a4c7e2c189686d3519c40fce4790989a164ccab",
+    "result.png": "b77cae8351cc7ed6c52922897565e4a47c5357f9e4f58b5bfd6ec6f8aa4a32a0",
+    "animated-result.png": "b0df9160af81bd3463041d479284f82dd6f03962b11bca70f2ece1463a7d241a",
+    "deal.png": "c7cf0fca963c2c8aaceb0500999a5e51c06d3671663f6bd824b51534a5119478",
+    "gesture-in-paytable.png": "dd4ed2bb5506d7b2d25a76153c2e7b4328e0cad6dc4dfc87217f829c1e2255a3",
+    "selected-three-hands.png": "14dfa171ac9cc3fa32168ca7fae153df110b9bb1c6030e7461a6bd950b0afbd3"
+  },
+  "max_observed_sample_gap_seconds": 0.764802,
+  "unchanged_safety_guard_seconds": 0.1,
+  "production_dtb_modified": false,
+  "physical_hardware_tested": false
+}

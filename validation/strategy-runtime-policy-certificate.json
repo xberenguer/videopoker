@@ -1,0 +1,17 @@
+{
+  "feature_queries": 180,
+  "ordinary_base5_queries": 30,
+  "canonical_initial_hands": 30,
+  "multiplier_sums": [
+    10,
+    20,
+    30,
+    50,
+    80,
+    120
+  ],
+  "native_cache_oracle": "32 exhaustive hold probability rows; unpruned tenfold convolution",
+  "maximum_value_difference": 2.2737367544323206e-13,
+  "all_masks_match": true,
+  "scope": "Advice logic only; physical GPIO timing and Pi execution need hardware confirmation"
+}

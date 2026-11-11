@@ -1,0 +1,22 @@
+{
+  "global_category_counts": [
+    4,
+    36,
+    12,
+    36,
+    36,
+    108,
+    432,
+    3744,
+    5108,
+    10200,
+    54912,
+    123552,
+    337920,
+    2062860
+  ],
+  "sum": 2598960,
+  "global_category_count_check": "matched independent combinatorial totals for all14 DDB categories",
+  "file_sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2",
+  "file_bytes": 4449110
+}
