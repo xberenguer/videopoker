@@ -521,7 +521,8 @@ class PokerUI:
     DOWN skips the current presentation and never also starts another deal.
     """
     SPEEDS = (0.13, 0.065, 0.0)
-    DOUBLE_UP_SECONDS = 0.35
+    UP_CLICK_GAP_SECONDS = 0.35
+    AUTOPLAY_UP_CLICKS = 3
     UP_MASK = 1
     AUTO_CONSIDER_SECONDS = 6.0
     AUTO_SELECT_SECONDS = 0.65
@@ -560,6 +561,8 @@ class PokerUI:
         self._up_held = False
         self._hint_failed_key = None
         self._last_up = None
+        self._up_click_count = 0
+        self._peek_blocked_until_release = False
         self._captured_input_at = None
         self.autoplay = False
         self._auto_stage = None
@@ -571,25 +574,28 @@ class PokerUI:
         """Apply current stable GPIO state before dispatching queued edges.
 
         A released UP edge may arrive late after drawing. It can contribute to
-        a sampled-time double press, but can never leave a stale hint visible.
+        a sampled-time triple press, but can never leave a stale hint visible.
         """
         if self._closed:
             return False
         if type(mask) is not int or not 0 <= mask < 256:
             raise ValueError('Invalid pressed button mask')
         held = bool(mask & self.UP_MASK)
+        if not held:
+            self._peek_blocked_until_release = False
         if held == self._up_held:
             return False
         self._up_held = held
         self._hint_failed_key = None
         if not held and not self.autoplay:
-            # Preserve _last_up: a real double tap has a release between edges.
+            # Preserve the click sequence across its physical releases.
             return self._cancel_advice()
         return False
 
     @property
     def hint_visible(self):
-        if (not self._up_held or self.autoplay or self.menu is not None
+        if (not self._up_held or self._peek_blocked_until_release
+                or self.autoplay or self.menu is not None
                 or self.button_focus is not None or self.notice or self._animation is not None
                 or self._advice is None):
             return False
@@ -612,6 +618,11 @@ class PokerUI:
         action = str(action).upper()
         if self._closed or action not in ('LEFT', 'RIGHT', 'UP', 'DOWN', 'CENTER', 'KEY1', 'KEY2', 'KEY3'):
             return False
+        if self.autoplay:
+            # The stop click never also deals, toggles a hold, or opens a menu.
+            self.pause_autoplay()
+            self._peek_blocked_until_release = self._up_held
+            return True
         main_board = self.menu is None and self.button_focus is None
         if main_board and action == 'UP':
             return self._handle_up()
@@ -693,6 +704,7 @@ class PokerUI:
         self.autoplay = False
         self._auto_stage = self._auto_due = self._auto_index = None
         self._last_up = None
+        self._up_click_count = 0
         return self._cancel_advice() or changed
 
     def close(self):
@@ -708,8 +720,10 @@ class PokerUI:
     def _strategy_failed(self):
         failed_key = self._advisor_board or self._advice_key(self.session.snapshot())
         last_up = self._last_up
+        click_count = self._up_click_count
         self.pause_autoplay()
         self._last_up = last_up
+        self._up_click_count = click_count
         # A failed peek stays silent and does not spin up another request every
         # frame. Releasing and pressing UP again permits an explicit retry.
         self._hint_failed_key = failed_key
@@ -717,7 +731,8 @@ class PokerUI:
 
     def _request_hint(self, now):
         state = self.session.snapshot()
-        if state['phase'] != 'hold' or (not self.autoplay and not self._up_held):
+        if state['phase'] != 'hold' or (not self.autoplay and
+                (not self._up_held or self._peek_blocked_until_release)):
             return False
         key = self._advice_key(state)
         if not self.autoplay and key == self._hint_failed_key:
@@ -738,21 +753,20 @@ class PokerUI:
     def _handle_up(self):
         now = self._clock()
         edge_time = now if self._captured_input_at is None else self._captured_input_at
-        double = self._last_up is not None and 0 <= edge_time-self._last_up <= self.DOUBLE_UP_SECONDS
-        self._last_up = None if double else edge_time
-        if double:
-            if self.autoplay:
-                self.pause_autoplay()
-            else:
-                self._clear_notice()
-                self.autoplay = True
-                phase = self.session.snapshot()['phase']
-                self._auto_stage = 'consider' if phase == 'hold' else ('result-animation' if phase == 'result' else 'deal')
-                self._auto_due = None if phase == 'hold' else now
-                self._auto_index = None
-                if phase == 'hold': self._request_hint(now)
-            return True
-        if self.autoplay:
+        consecutive = (self._last_up is not None and
+                       0 <= edge_time-self._last_up <= self.UP_CLICK_GAP_SECONDS)
+        self._up_click_count = self._up_click_count+1 if consecutive else 1
+        self._last_up = edge_time
+        if self._up_click_count == self.AUTOPLAY_UP_CLICKS:
+            self._last_up = None
+            self._up_click_count = 0
+            self._clear_notice()
+            self.autoplay = True
+            phase = self.session.snapshot()['phase']
+            self._auto_stage = 'consider' if phase == 'hold' else ('result-animation' if phase == 'result' else 'deal')
+            self._auto_due = None if phase == 'hold' else now
+            self._auto_index = None
+            if phase == 'hold': self._request_hint(now)
             return True
         if self._animation is None and self.notice is None:
             return self._request_hint(now)
@@ -1039,6 +1053,11 @@ class PokerUI:
                       'Cards and credits are unchanged.' if self._entropy_notice else
                       'K3: GAME CONTROLS')
             self.renderer.center(d, 160, 127, detail, 10, MUTED)
+        if self.autoplay:
+            # Native LCD pixels in the unused margin, clear of cards/multipliers.
+            d = ImageDraw.Draw(image)
+            self.renderer.text(d, (6, 12), 'A', 11, (0, 0, 0), True)
+            self.renderer.text(d, (5, 11), 'A', 11, GOLD, True)
         return image
 
     def _draw_advice(self, image):

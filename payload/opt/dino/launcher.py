@@ -367,7 +367,7 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                             if getattr(inputs, "gesture_pending", False):
                                 pause = getattr(ui, "pause_autoplay", None)
                                 if callable(pause):
-                                    pause()
+                                    dirty = bool(pause()) or dirty
                             pressed_mask = getattr(inputs, "pressed_mask", None)
                             set_pressed_mask = getattr(ui, "set_pressed_mask", None)
                             if pressed_mask is not None and callable(set_pressed_mask):
