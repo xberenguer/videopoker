@@ -1,0 +1,30 @@
+SeedSigner Poker 0.3.1
+
+This independent, offline game's original program code and hardware integration
+are GPL-2.0-or-later. See LICENSE. Corresponding source and build instructions
+accompany the distributed image. The runtime is adapted from the earlier
+SeedSigner Dino launcher and uses the original SeedSigner ST7789/GPIO driver.
+
+Stock SeedSigner 0.8.7, its operating-system components and its fonts retain their
+original notices and licenses. The visual asset directory contains card and GUI
+artwork from the public VideoPoker.com asset service and rasterized Arial glyphs.
+Those images, marks and font-derived bitmaps retain their owners' rights and are
+not relicensed under this project's GPL. See THIRD-PARTY-ASSETS.txt and the asset
+manifest for per-file sources, hashes and conversions. No raw font outlines,
+commercial gameplay source, game ROM, emulator or network service is included.
+The independently written game uses virtual credits only.
+There is no money-in, cash-out, account, networking or game-state persistence.
+
+The poker interface and SeedSigner share one OS. The entry gesture is an interface
+gate, not authentication or a security isolation boundary. Physical boot, display,
+button, camera and signing tests on the actual target device remain necessary.
+
+This is a local independent build, not official IGT, Action Gaming,
+VideoPoker.com, BitKit or SeedSigner software. No public publication was performed.
+
+Stock software source:
+  https://github.com/SeedSigner/seedsigner/tree/0.8.7
+  https://github.com/SeedSigner/seedsigner-os
+Complete stock OS corresponding-source archive:
+  https://github.com/xberenguer/seedsigner-dino/releases/download/v0.1.1-beta/seedsigner-v0.8.7-os-corresponding-source.tar.gz
+  SHA-256 20751b5076b6b309928bd650f9846d2481f16a5f5d85943071b285abc246f6c6

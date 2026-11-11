@@ -1,0 +1,19 @@
+# Local environments and caches
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+# Images and local build/diagnostic outputs
+*.img
+*.cpio
+*.dtb
+*.log
+outputs/
+validation/repro/
+validation/reference/
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
