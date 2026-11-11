@@ -1,0 +1,765 @@
+"""Offline 320x240 poker interface with private local reference artwork.
+
+Only declared bitmap graphics and rasterized glyphs are loaded. No vendor game
+code, network requests, account access or persistent financial state is used.
+"""
+import json
+import math
+import time
+from collections import OrderedDict
+from pathlib import Path
+
+from PIL import Image, ImageChops, ImageDraw
+from poker_engine import CATEGORIES, PAYOUTS, MULTIPLIERS, RandomNotReady
+
+WIDTH, HEIGHT = 320, 240
+BG = (11, 0, 107)
+GOLD = (255, 255, 0)
+WHITE = (255, 255, 255)
+RED = (185, 8, 12)
+INK = (9, 10, 18)
+MUTED = (194, 194, 214)
+GREEN = (73, 252, 79)
+BLUE = (18, 70, 155)
+LABELS = {
+    'royal_flush': 'ROYAL FLUSH', 'straight_flush': 'STRAIGHT FLUSH',
+    'four_aces_kicker': '4 ACES W/ 2,3,4', 'four_234_kicker': '4 2s,3s,4s W/ A,2,3,4',
+    'four_aces': '4 ACES', 'four_234': '4 2s,3s,4s', 'four_5k': '4 5s THRU Ks',
+    'full_house': 'FULL HOUSE', 'flush': 'FLUSH', 'straight': 'STRAIGHT',
+    'three_kind': '3 OF A KIND', 'two_pair': '2 PAIR',
+    'high_pair': 'JACKS OR BETTER', 'nothing': 'NO WIN',
+}
+# The displayed schedule is the engine's own schedule, not a second math table.
+PAYS = tuple((key, PAYOUTS[key], MULTIPLIERS[key]) for key in CATEGORIES)
+BUTTONS = ('SEE PAYS/HELP', 'MORE GAMES', 'SPEED', 'SELECT HANDS',
+           'BET PER HAND', 'BET MAX', 'DEAL')
+OPTIONS = ('PAYTABLE', 'BONUS BET', 'NEW SESSION', 'CONTROLS', 'RETURN')
+
+
+def _short_number(value):
+    value = int(value)
+    if abs(value) < 1_000_000:
+        return str(value)
+    return ('%.1fM' % (value / 1_000_000)).replace('.0M', 'M')
+
+
+def _font_directory():
+    return Path('/opt/src/seedsigner/resources/fonts')
+
+
+class Renderer:
+    """Private local bitmap renderer, composed at the reference's 640x480 size.
+
+    Runtime artwork and Arial glyph pixels are declared in the checked manifest.
+    All caches belong to this instance so the launcher can release them on exit.
+    There is no runtime HTTP, vendor game code, font binary or account access.
+    """
+    SOURCE_SIZE = (640, 480)
+    HANDS = ((103, 268, 433, 120), (74, 174, 137, 80), (284, 174, 137, 80),
+             (496, 174, 137, 80), (74, 86, 137, 80), (284, 86, 137, 80),
+             (496, 86, 137, 80), (74, 0, 137, 80), (284, 0, 137, 80), (496, 0, 137, 80))
+    BUTTON_X = (0, 92, 184, 275, 367, 459, 551)
+    WIN_ART = dict(zip(CATEGORIES[:-1], (3, 9, 4, 2, 2, 5, 10, 11, 12, 13, 14, 15, 16)))
+    RESULT_LABELS = {
+        'royal_flush': 'Royal Flush', 'straight_flush': 'Straight Flush',
+        'four_aces_kicker': '4 Aces w/2,3,4', 'four_234_kicker': '4 2s,3s,4s w/Ace,2,3,4',
+        'four_aces': '4 Aces', 'four_234': '4 2s,3s,4s', 'four_5k': '4 5s thru Ks',
+        'full_house': 'Full House', 'flush': 'Flush', 'straight': 'Straight',
+        'three_kind': '3 of a Kind', 'two_pair': '2 Pair', 'high_pair': 'Jacks or Better', 'nothing': '',
+    }
+
+    PAY_LABELS = {'four_aces_kicker': '4 ACES W/ 2,3,4',
+                  'four_234_kicker': '4 2S,3S,4S W/ ACE 2,3,4'}
+
+    def __init__(self, font_dir=None, asset_dir=None):
+        # font_dir remains accepted for compatibility; runtime uses no TTF files.
+        self.asset_dir = Path(asset_dir) if asset_dir else Path(__file__).resolve().parent/'assets/videopoker'
+        self.manifest = json.loads((self.asset_dir/'manifest.json').read_text())
+        if self.manifest.get('schema') != 1:
+            raise ValueError('Unsupported artwork manifest')
+        self.assets, self.scaled, self.text_cache, self.glyph_cache = {}, {}, OrderedDict(), {}
+        self.fonts = self.manifest['glyph_atlases']
+        for item in self.manifest['assets']:
+            name = item['path']
+            relative = Path(name)
+            if relative.is_absolute() or '..' in relative.parts or relative.suffix != '.png':
+                raise ValueError('Invalid artwork path')
+            with Image.open(self.asset_dir/relative) as opened:
+                if opened.format != 'PNG' or opened.size != (item['width'], item['height']):
+                    raise ValueError('Invalid artwork dimensions')
+                # Glyphs only need a single alpha channel rather than four copies.
+                self.assets[name] = opened.convert('RGBA').getchannel('A') if item['role'].startswith('glyph-atlas') else opened.convert('RGBA')
+        self.card_cache = {}
+        self.background = self.assets['backgrounds/uxgamebg.png'].convert('RGB')
+        # One normal board and one native frame, replaced on any board change.
+        # Badge ticks must not compose all fifty cards again on the Pi Zero.
+        self._normal_key = None
+        self._normal_board = None
+        self._normal_native = None
+        self._normal_badge = None
+        # Build the complete finite set of card and control resizes once, not per frame.
+        for name in ['cards/'+str(i)+'.png' for i in range(52)]+['cards/Back.png', 'cards/Back_Disabled.png']:
+            for size in ((83, 119), (56, 80)):
+                self.sprite(name, size)
+        for name in self.assets:
+            if name.startswith('gui/') and name not in ('gui/hold.png',) and not name.startswith('gui/speaker_'):
+                self.sprite(name, (86, 30))
+        for number in (2, 3, 4, 8, 10, 12):
+            name = 'multipliers/'+str(number)+'x_2.png'
+            asset = self.assets[name]
+            for height in (16, 24):
+                self.sprite(name, (int(round(asset.width*height/asset.height)), height))
+        self.sprite('multipliers/nexthand.png', (25, 16))
+        for number in self.WIN_ART.values():
+            self.sprite('wins/payline'+str(number)+'.png', (130, 35))
+
+    def sprite(self, name, size=None):
+        image = self.assets[name]
+        if size is None or image.size == size:
+            return image
+        key = (name, tuple(size))
+        if key not in self.scaled:
+            self.scaled[key] = image.resize(size, getattr(Image, 'Resampling', Image).BILINEAR)
+        return self.scaled[key]
+
+    def paste(self, image, name, xy, size=None, opacity=1.0):
+        asset = self.sprite(name, size)
+        if opacity != 1.0:
+            key = ('opacity', name, size, opacity)
+            if key not in self.scaled:
+                adjusted = asset.copy()
+                adjusted.putalpha(asset.getchannel('A').point(lambda a: int(a*opacity)))
+                self.scaled[key] = adjusted
+            asset = self.scaled[key]
+        image.paste(asset, (int(round(xy[0])), int(round(xy[1]))), asset)
+
+    def _text_run(self, text, size, bold=False):
+        text = ''.join(c if 32 <= ord(c) <= 126 else '?' for c in str(text))
+        style = 'bold' if bold else 'regular'
+        sizes = self.fonts[style]['sizes']
+        size_key = min(sizes, key=lambda k: abs(float(k)-float(size)))
+        cache_key = (text, size_key, style)
+        if cache_key in self.text_cache:
+            self.text_cache.move_to_end(cache_key)
+            return self.text_cache[cache_key]
+        data = sizes[size_key]
+        glyphs, pairs = data['glyphs'], data.get('kerning', {})
+        cursor, places = 0.0, []
+        min_x = min_y = 0
+        max_x = max_y = 1
+        previous = ''
+        for char in text:
+            cursor += pairs.get(previous+char, 0.0)
+            glyph = glyphs[char]
+            x = int(round(cursor+glyph['bearing_x']))
+            y = int(glyph['bearing_y'])
+            min_x, min_y = min(min_x, x), min(min_y, y)
+            max_x, max_y = max(max_x, x+glyph['width']), max(max_y, y+glyph['height'])
+            places.append((char, x, y))
+            cursor += glyph['advance']
+            previous = char
+        mask = Image.new('L', (max_x-min_x, max_y-min_y), 0)
+        atlas = self.assets[self.fonts[style]['path']]
+        for char, x, y in places:
+            glyph = glyphs[char]
+            key = (style, size_key, char)
+            if key not in self.glyph_cache:
+                gx, gy = glyph['x'], glyph['y']
+                self.glyph_cache[key] = atlas.crop((gx, gy, gx+glyph['width'], gy+glyph['height']))
+            glyph_mask = self.glyph_cache[key]
+            box = (x-min_x, y-min_y, x-min_x+glyph_mask.width, y-min_y+glyph_mask.height)
+            # Kerning can overlap glyph rectangles. Preserve prior coverage as
+            # FreeType does, rather than erasing it with the next glyph's zeros.
+            mask.paste(ImageChops.lighter(mask.crop(box), glyph_mask), (box[0], box[1]))
+        result = (mask, float(cursor), min_x, min_y)
+        self.text_cache[cache_key] = result
+        if len(self.text_cache) > 512:
+            self.text_cache.popitem(last=False)
+        return result
+
+    def text(self, draw, xy, text, size=11, fill=WHITE, bold=False):
+        mask, _, _, _ = self._text_run(text, size, bold)
+        draw.bitmap((int(round(xy[0])), int(round(xy[1]))), mask, fill=fill)
+
+    def right(self, draw, right, y, text, size=11, fill=WHITE, bold=False):
+        mask, _, _, _ = self._text_run(text, size, bold)
+        self.text(draw, (right-mask.width, y), text, size, fill, bold)
+
+    def center(self, draw, center, y, text, size=11, fill=WHITE, bold=False):
+        mask, _, _, _ = self._text_run(text, size, bold)
+        self.text(draw, (center-mask.width/2, y), text, size, fill, bold)
+
+    def canvas_text(self, draw, x, y, text, size, fill=WHITE, bold=False, align='left'):
+        # Fabric's top origin puts its alphabetic baseline one font-size below top.
+        mask, advance, bx, by = self._text_run(text, size, bold)
+        left = x-advance if align == 'right' else x-advance/2 if align == 'center' else x
+        self.text(draw, (left+bx, y+float(size)+by), text, size, fill, bold)
+
+    @staticmethod
+    def source_card(card):
+        if type(card) is not int or not 0 <= card < 52:
+            raise ValueError('Card outside the 52-card deck')
+        # Visually verified public deck: spades, clubs, hearts, diamonds.
+        return (1, 3, 2, 0)[card//13]*13+card%13
+
+    def card(self, card, width, height, held=False, selected=False, mini=False, disabled=False):
+        # Focus/hold states never alter the exact face pixels.
+        name = 'cards/'+str(self.source_card(card))+'.png' if card is not None else 'cards/Back_Disabled.png' if disabled else 'cards/Back.png'
+        return self.sprite(name, (width, height))
+
+    def fitted_label(self, image, box, label, size=8, fill=INK, bold=True):
+        x0, y0, x1, y1 = box
+        aw, ah = x1-x0+1, y1-y0+1
+        if aw < 1 or ah < 1: raise ValueError('Label bounds must have positive area')
+        mask = self._text_run(label, size, bold)[0]
+        if mask.width > aw or mask.height > ah:
+            mask = mask.resize((min(aw, mask.width), min(ah, mask.height)), getattr(Image, 'Resampling', Image).LANCZOS)
+        left, top = x0+(aw-mask.width)//2, y0+(ah-mask.height)//2
+        image.paste(fill, (left, top, left+mask.width, top+mask.height), mask)
+        return left, top, left+mask.width-1, top+mask.height-1
+
+    def pill(self, image, box, label, focused=False, disabled=False, size=8):
+        # Offline-only utility dialogs; the casino controls below use real sprites.
+        x0, y0, x1, y1 = box
+        d = ImageDraw.Draw(image)
+        d.rounded_rectangle(box, radius=6, fill=(132, 132, 143), outline=WHITE if focused else (162, 168, 186), width=1)
+        d.rounded_rectangle((x0+2, y0+2, x1-2, y1-2), radius=4, fill=(214, 174, 13) if not disabled else (101, 98, 86))
+        return self.fitted_label(image, (x0+4, y0+3, x1-4, y1-3), label, size, INK, True)
+
+    def multiplier(self, image, index, current, following, opacity=1.0):
+        x, y, width, height = self.HANDS[index]
+        if following > 1:
+            self.paste(image, 'multipliers/nexthand.png', (x-66, y+2), (25, 16), opacity)
+            name = 'multipliers/'+str(following)+'x_2.png'
+            asset = self.assets[name]
+            size = (int(round(asset.width*16/asset.height)), 16)
+            self.paste(image, name, (x-3-size[0], y+2), size, opacity)
+        if current > 1:
+            name = 'multipliers/'+str(current)+'x_2.png'
+            asset = self.assets[name]
+            size = (int(round(asset.width*24/asset.height)), 24)
+            self.paste(image, name, (x-3-size[0], y+height-29), size, opacity)
+
+    def win_indicator(self, image, index, result):
+        category = result.get('category')
+        if not result.get('payout') or category not in self.WIN_ART: return
+        x, y, width, height = self.HANDS[index]
+        cx, cy = x+width/2, y+.65*height
+        self.paste(image, 'wins/payline'+str(self.WIN_ART[category])+'.png', (cx-65, cy-14), (130, 35))
+        draw = ImageDraw.Draw(image)
+        self.canvas_text(draw, cx, cy-4-11*.99/2, self.RESULT_LABELS[category], 11, WHITE, align='center')
+        multiplier = int(result.get('multiplier', 1))
+        payout = str(result['payout'])
+        if multiplier > 1: payout = '%s X %s = %s' % (multiplier, result['base_payout'], result['payout'])
+        self.canvas_text(draw, cx, cy+9-10*.99/2, payout, 10, (254, 254, 0), True, 'center')
+
+    @staticmethod
+    def _freeze(value):
+        """Detach the cache key from every mutable level of an engine snapshot."""
+        if isinstance(value, dict):
+            return tuple((key, Renderer._freeze(value[key])) for key in sorted(value))
+        if isinstance(value, (list, tuple)):
+            return tuple(Renderer._freeze(item) for item in value)
+        return value
+
+    def _board_for(self, snapshot, selected_card, selected_hand):
+        # Focus is a crisp native overlay. Moving it does not change any art.
+        key = self._freeze({key: value for key, value in snapshot.items()
+                            if key not in ('_badge_frame', '_button_focus')})
+        if key != self._normal_key:
+            self._normal_board = self._render_board(snapshot, selected_card, selected_hand)
+            self._normal_key = key
+            self._normal_native = None
+            self._normal_badge = None
+        return self._normal_board
+
+    def _badge_name(self, snapshot):
+        sequence = self.manifest['sequences']['active' if snapshot.get('feature', True) else 'inactive']
+        return sequence['frames'][int(snapshot.get('_badge_frame', 0)) % len(sequence['frames'])]
+
+    def render_source_uncached(self, snapshot, selected_card=0, selected_hand=0, menu=None):
+        """Full logical composition, retained as the pixel-equivalence oracle."""
+        if menu and menu.get('page') == 'paytable': return self.render_paytable_source(snapshot, menu)
+        if menu and menu.get('page') == 'controls': return self.render_help_source(snapshot, menu)
+        image = self._render_board(snapshot, selected_card, selected_hand)
+        self.paste(image, self._badge_name(snapshot), (541, 257))
+        return image
+
+    def render_source(self, snapshot, selected_card=0, selected_hand=0, menu=None):
+        if menu and menu.get('page') in ('paytable', 'controls'):
+            return self.render_source_uncached(snapshot, selected_card, selected_hand, menu)
+        image = self._board_for(snapshot, selected_card, selected_hand).copy()
+        self.paste(image, self._badge_name(snapshot), (541, 257))
+        return image
+
+    def _render_board(self, snapshot, selected_card=0, selected_hand=0):
+        """Compose everything except the isolated, animated badge rectangle."""
+        image = self.background.copy()
+        draw = ImageDraw.Draw(image)
+        phase = snapshot.get('phase', 'ready')
+        initial, held = snapshot.get('initial') or [], snapshot.get('held') or [False]*5
+        hands, results = snapshot.get('hands') or [], snapshot.get('results') or []
+        next_x = snapshot.get('multipliers') or [1]*10
+        current_x = snapshot.get('active_multipliers') or [1]*10
+        reveal, deal_reveal = int(snapshot.get('_reveal', 5)), int(snapshot.get('_deal_reveal', 5))
+        active = int(snapshot.get('round_num_hands', snapshot.get('num_hands', 10))) if phase in ('hold', 'result') else int(snapshot.get('num_hands', 10))
+        for index, (x, y, width, height) in enumerate(self.HANDS):
+            enabled = index < active
+            if phase == 'result' and index < len(hands):
+                cards = [card if n < reveal or held[n] else None for n, card in enumerate(hands[index])]
+            elif phase == 'hold' and len(initial) == 5 and enabled:
+                cards = [card if (n < deal_reveal if index == 0 else held[n]) else None for n, card in enumerate(initial)]
+            else: cards = [None]*5
+            size, step = ((83, 119), 87) if index == 0 else ((56, 80), 20)
+            for n, card in enumerate(cards):
+                asset = self.card(card, *size, disabled=not enabled)
+                image.paste(asset, (x+n*step, y), asset)
+            following = int(next_x[index]) if phase == 'ready' or (phase == 'result' and reveal == 5) else 1
+            current = int(current_x[index]) if phase != 'ready' and enabled else 1
+            self.multiplier(image, index, current, following, 1.0 if enabled else .6)
+            if enabled and phase == 'result' and reveal == 5 and index < len(results):
+                self.win_indicator(image, index, results[index])
+        for n, is_held in enumerate(held):
+            if is_held and phase in ('hold', 'result'):
+                self.paste(image, 'gui/hold.png', (103+41+87*n-24, 375))
+        total_win = int(snapshot.get('total_win', 0)) if phase == 'result' else 0
+        if total_win:
+            self.canvas_text(draw, 106, 410, _short_number(total_win), 15, (255, 255, 0), True, 'right')
+        self.canvas_text(draw, 167, 410, _short_number(snapshot.get('total_bet', 100)), 15, (255, 255, 0), True, 'right')
+        self.canvas_text(draw, 630, 412, _short_number(snapshot.get('credits', 10000)), 16, (255, 255, 0), True, 'right')
+        self.canvas_text(draw, 322, 422, snapshot.get('num_hands', 10), 15, (255, 255, 0), True, 'center')
+        self.canvas_text(draw, 413, 422, snapshot.get('bet_per_hand', 10), 15, (255, 255, 0), True, 'center')
+        self.paste(image, 'gui/speaker_3.png', (457, 405))
+        insufficient = int(snapshot.get('credits', 0)) < int(snapshot.get('total_bet', 100))
+        names = ('SeePaysHelp', 'MoreGames', 'Speed%02d' % (int(snapshot.get('_speed', 1))+1), 'SelectHands', 'BetPerHand', 'BetMax', 'Draw' if phase == 'hold' else 'Deal')
+        for i, name in enumerate(names):
+            disabled = ((phase == 'hold' and i in (3, 4, 5)) or (i == 3 and snapshot.get('bet_per_hand', 10) != 1) or (i == 5 and (insufficient or int(snapshot.get('credits', 0)) <= 0)) or (i == 6 and phase != 'hold' and insufficient))
+            name = ('SpeedDim' if i == 2 else name+'Dim') if disabled else name
+            self.paste(image, 'gui/'+name+'.png', (self.BUTTON_X[i], 437), (86, 30))
+        self.canvas_text(draw, 318, 466, 'Double Dbl Bonus', 11, WHITE, align='center')
+        if phase == 'result' and reveal == 5:
+            self.canvas_text(draw, 15, 467, 'Game Over', 10, WHITE)
+        return image
+
+    def render(self, snapshot, selected_card=0, selected_hand=0, menu=None):
+        if menu and menu.get('page') not in ('paytable', 'controls'):
+            image = Image.new('RGB', (WIDTH, HEIGHT), BG)
+            self.render_menu(image, snapshot, menu)
+            return image
+        lanczos = getattr(Image, 'Resampling', Image).LANCZOS
+        if menu:
+            source = self.render_source(snapshot, selected_card, selected_hand, menu)
+            return source.resize((WIDTH, HEIGHT), lanczos).convert('RGB')
+        board = self._board_for(snapshot, selected_card, selected_hand)
+        badge = self._badge_name(snapshot)
+        if self._normal_native is None:
+            source = board.copy()
+            self.paste(source, badge, (541, 257))
+            self._normal_native = source.resize((WIDTH, HEIGHT), lanczos).convert('RGB')
+        elif badge != self._normal_badge:
+            # Downsampling by two gives LANCZOS a six-source-pixel support.
+            # The dirty native rectangle includes that halo; the source crop
+            # includes a second halo so its own filter edge cannot affect it.
+            # Even crop coordinates keep the original half-pixel sampling grid.
+            source_box = (528, 244, 640, 396)
+            patch = board.crop(source_box)
+            self.paste(patch, badge, (541-source_box[0], 257-source_box[1]))
+            patch = patch.resize((56, 76), lanczos)
+            self._normal_native.paste(patch.crop((3, 3, 56, 73)), (267, 125))
+        self._normal_badge = badge
+        # The caller may draw notices or otherwise mutate its returned frame.
+        image = self._normal_native.copy()
+        self._draw_focus(image, snapshot, selected_card)
+        return image
+
+    def render_uncached(self, snapshot, selected_card=0, selected_hand=0, menu=None):
+        """Full native composition for cache and filtering equivalence checks."""
+        if menu and menu.get('page') not in ('paytable', 'controls'):
+            image = Image.new('RGB', (WIDTH, HEIGHT), BG)
+            self.render_menu(image, snapshot, menu)
+            return image
+        source = self.render_source_uncached(snapshot, selected_card, selected_hand, menu)
+        image = source.resize((WIDTH, HEIGHT), getattr(Image, 'Resampling', Image).LANCZOS).convert('RGB')
+        if not menu:
+            self._draw_focus(image, snapshot, selected_card)
+        return image
+
+    def _draw_focus(self, image, snapshot, selected_card):
+        """High-contrast hardware focus, deliberately drawn after downsampling."""
+        draw = ImageDraw.Draw(image)
+        focus = snapshot.get('_button_focus')
+        if focus is not None:
+            index = max(0, min(6, int(focus)))
+            left = int(math.floor(self.BUTTON_X[index]/2.0))
+            right = int(math.ceil((self.BUTTON_X[index]+86)/2.0))-1
+            footer = image.crop((0, 233, WIDTH, HEIGHT))
+            draw.rounded_rectangle((left-1, 217, right+1, 233), radius=6,
+                                   outline=(0, 0, 0), width=3)
+            draw.rounded_rectangle((left, 218, right, 232), radius=5,
+                                   outline=WHITE, width=2)
+            # The footer is immediately adjacent to the controls. Preserve its
+            # caption and antialiasing exactly instead of painting a halo on it.
+            image.paste(footer, (0, 233))
+        elif snapshot.get('phase') == 'hold':
+            index = max(0, min(4, int(selected_card)))
+            source_left = 103+87*index
+            left = int(math.floor(source_left/2.0))
+            right = int(math.ceil((source_left+83)/2.0))-1
+            center = int(round((source_left+41)/2.0))
+            held = snapshot.get('held') or [False]*5
+            # The real HELD tag overlaps the card's bottom edge. Keep its native
+            # pixels and filtering halo unobscured by the new focus ring.
+            held_box = (center-15, 184, center+15, 202) if held[index] else None
+            held_pixels = image.crop(held_box) if held_box else None
+            draw.rounded_rectangle((left-2, 131, right+2, 196), radius=3,
+                                   outline=(0, 0, 0), width=4)
+            draw.rounded_rectangle((left-1, 132, right+1, 195), radius=2,
+                                   outline=GOLD, width=2)
+            draw.polygon(((center-6, 124), (center+6, 124), (center, 133)), fill=(0, 0, 0))
+            draw.polygon(((center-5, 125), (center+5, 125), (center, 132)), fill=GOLD)
+            draw.line((left+4, 132, right-4, 132), fill=WHITE, width=1)
+            if held_pixels is not None:
+                image.paste(held_pixels, held_box[:2])
+
+    def render_help_source(self, snapshot, menu):
+        image = Image.new('RGB', self.SOURCE_SIZE, (0, 0, 160))
+        holding = snapshot.get('phase') == 'hold'
+        count = 2 if holding else 4
+        index = max(0, min(count-1, int(menu.get('index', 0))))
+        self.paste(image, 'help/'+('helpdraw' if holding else 'helpscreen')+str(index+1)+'.png', (20, 24))
+        if index > 0: self.paste(image, 'help/shared/prev-page.png', (260, 382))
+        if index < count-1: self.paste(image, 'help/shared/next-page.png', (370, 382))
+        self.paste(image, 'help/shared/exit-help.png', (480, 382))
+        return image
+
+    def render_paytable_source(self, snapshot, menu):
+        image = self.assets['backgrounds/uxpaytablebg.png'].convert('RGB')
+        draw = ImageDraw.Draw(image)
+        bet = int(menu.get('bet', 1))
+        if bet not in (1, 2, 3, 4, 5, 10): bet = 1
+        columns = ((225, 74), (297, 74), (369, 74), (441, 74), (514, 122))
+        for n, (left, width) in enumerate(columns, 1):
+            draw.rectangle((left+2, 1, left+width-5, 188), fill=(176, 0, 0) if n == min(bet, 5) else (0, 1, 68))
+        draw.rectangle((374, 198, 490, 385), fill=(176, 0, 0) if bet == 10 else (0, 1, 68))
+        size, step = 13.076923, 13.076923+13.076923/13
+        for row, (category, pay, multiplier) in enumerate(PAYS[:-1]):
+            label = self.PAY_LABELS.get(category, self.RESULT_LABELS[category].upper())
+            bold = self._text_run(label, size, True)[1] <= 214
+            label_width = self._text_run(label, size, bold)[1]
+            dots = max(0, int(math.ceil((219-label_width)/self._text_run('.', size, True)[1]))-1)
+            label += '.'*dots
+            self.canvas_text(draw, 6.5, 2.3+row*step, label, size, (255, 255, 0), bold)
+            self.canvas_text(draw, 149.5, 199+row*step, label, size, (255, 255, 0), bold)
+            for coin, right in enumerate((291, 363, 435, 507, 631), 1):
+                award = (800 if coin == 5 else 250)*coin if category == 'royal_flush' else pay*coin
+                self.canvas_text(draw, right, 2.3+row*step, award, size, (255, 255, 0), True, 'right')
+            self.canvas_text(draw, 487, 199+row*step, str(multiplier)+'X', size, (255, 255, 0), True, 'right')
+        self.canvas_text(draw, 314, 410, 'BET', 19, WHITE, True)
+        self.canvas_text(draw, 357, 410, bet, 19, WHITE, True)
+        self.paste(image, 'help/buttons/help.png', (1, 440))
+        if bet > 1: self.paste(image, 'help/buttons/betdown.png', (341, 440))
+        if bet < 10: self.paste(image, 'help/buttons/betup.png', (440, 440))
+        self.paste(image, 'help/buttons/return.png', (548, 440))
+        return image
+
+    def render_menu(self, image, snapshot, menu):
+        d = ImageDraw.Draw(image)
+        page = menu.get('page', 'options')
+        d.rectangle((0, 0, 319, 239), fill=BG)
+        d.rounded_rectangle((8, 12, 312, 219), radius=3, fill=(0, 0, 0), outline=(175, 175, 190), width=2)
+        title = {'controls': 'POKER HELP', 'reset_confirm': 'NEW SESSION?',
+                 'more_games': 'DOUBLE DOUBLE BONUS', 'hands': 'SELECT HANDS',
+                 'options': 'GAME OPTIONS', 'inspect': 'RESULT DETAILS'}.get(page, 'POKER HELP')
+        d.rectangle((70, 13, 250, 29), fill=(175, 175, 180))
+        self.center(d, 160, 16, title, 12, INK, True)
+        if page == 'inspect':
+            index = max(0, min(9, int(menu.get('index', 0))))
+            results = snapshot.get('results') or []
+            hands = snapshot.get('hands') or []
+            self.center(d, 160, 42, 'HAND '+str(index+1), 14, GOLD, True)
+            if index < len(hands):
+                for i, card in enumerate(hands[index]):
+                    image.paste(self.card(card, 49, 69), (21+i*57, 67))
+            if index < len(results):
+                result = results[index]
+                self.center(d, 160, 146, LABELS.get(result.get('category'), ''), 14, GOLD, True)
+                self.center(d, 160, 167, 'WIN '+str(result.get('payout', 0))+'  NOW '+str(result.get('multiplier', 1))+'X  NEXT '+str(result.get('next_multiplier', 1))+'X', 11, WHITE, True)
+            self.center(d, 160, 196, 'UP/DOWN HAND   K3 RETURN', 11, MUTED)
+        elif page == 'reset_confirm':
+            self.center(d, 160, 66, 'Reset free credits and clear multipliers?', 12, WHITE)
+            self.center(d, 160, 92, 'D-PAD CENTER: NEW SESSION', 13, GOLD, True)
+            self.center(d, 160, 119, 'RIGHT MIDDLE: ADD 10,000', 12, GREEN, True)
+            self.center(d, 160, 149, 'K3: RETURN TO GAME', 12, WHITE)
+        elif page == 'more_games':
+            self.center(d, 160, 64, '9/6 DOUBLE DOUBLE BONUS', 15, GOLD, True)
+            self.center(d, 160, 94, 'This build contains this game only.', 12, WHITE)
+            self.pill(image, (79, 126, 241, 149), 'ADD 10,000 CREDITS', True, size=11)
+            self.center(d, 160, 171, 'EITHER CENTER: add credits, keep X', 10, WHITE)
+            self.center(d, 160, 193, 'K3: RETURN TO GAME', 10, MUTED)
+        elif page == 'hands':
+            self.center(d, 160, 70, '10 HANDS SELECTED', 19, GOLD, True)
+            self.center(d, 160, 104, 'Nine upper hands plus the base hand.', 11, WHITE)
+            self.center(d, 160, 139, 'This image is configured for Ten Play.', 11, WHITE)
+            self.center(d, 160, 190, 'K3: RETURN TO GAME', 11, MUTED)
+        else:
+            index = int(menu.get('index', 0)) % len(OPTIONS)
+            for row, option in enumerate(OPTIONS):
+                y = 46+row*26
+                if option == 'BONUS BET':
+                    option += ': ' + ('ON' if snapshot.get('feature', True) else 'OFF')
+                    if snapshot.get('phase') == 'hold': option += ' (IN HAND)'
+                self.pill(image, (24, y, 296, y+21), option, focused=(row == index), size=12)
+            self.center(d, 160, 184, 'OFF collects earned X; earns no new X.', 10, MUTED)
+            self.center(d, 160, 202, 'UP/DN SELECT  RIGHT MID OPEN  K3 BACK', 10, WHITE)
+
+
+
+class PokerUI:
+    """Debounced action controller with short, nonblocking visual sequences.
+
+    The engine settles atomically; animation only presents detached snapshots.
+    D-PAD CENTER skips the current presentation and never also starts another deal.
+    """
+    SPEEDS = (0.13, 0.065, 0.0)
+
+    def __init__(self, session=None, width=WIDTH, height=HEIGHT, font_dir=None, clock=time.monotonic):
+        if (width, height) != (WIDTH, HEIGHT):
+            raise ValueError('Poker requires the Play/Plus 320x240 display')
+        if session is None:
+            from poker_engine import Session
+            session = Session()
+        self.session = session
+        self.renderer = Renderer(font_dir)
+        self.selected_card = 0
+        self.selected_hand = 0
+        self.menu = None
+        self.notice = None
+        self._credit_notice = False
+        self._entropy_notice = False
+        self._retry_max_bet = False
+        self.button_focus = None
+        self.speed = 1
+        self.pay_preview_bet = 1
+        self._clock = clock
+        self._animation = None
+        self._visual = None
+        self._last_stage = None
+        self._badge_started = self._clock()
+        self._badge_feature = bool(self.session.snapshot()['feature'])
+        self._badge_frame = 0
+
+    def handle(self, action):
+        action = str(action).upper()
+        if action not in ('LEFT', 'RIGHT', 'UP', 'DOWN', 'CENTER', 'KEY1', 'KEY2', 'KEY3'):
+            return False
+        if self.notice and action == 'KEY2' and self._credit_notice:
+            self.session.add_credits()
+            self.notice = None
+            self._credit_notice = False
+            return True
+        if self.notice and action == 'KEY2' and self._entropy_notice:
+            retry_max_bet = self._retry_max_bet
+            self.notice = None
+            self._entropy_notice = False
+            self._retry_max_bet = False
+            self._play(max_bet=retry_max_bet)
+            return True
+        self.notice = None
+        self._credit_notice = self._entropy_notice = False
+        self._retry_max_bet = False
+        if self._animation is not None:
+            if action in ('CENTER', 'KEY1', 'KEY2', 'KEY3'):
+                self._finish_animation()
+                if action == 'KEY3': self.button_focus = 0
+            return True
+        if self.menu is not None:
+            return self._menu_action(action)
+        if self.button_focus is not None:
+            if action == 'KEY3':
+                self.button_focus = None
+            elif action in ('LEFT', 'UP', 'RIGHT', 'DOWN'):
+                self.button_focus = (self.button_focus + (-1 if action in ('LEFT', 'UP') else 1)) % len(BUTTONS)
+            elif action in ('CENTER', 'KEY1', 'KEY2'):
+                return self._button_action(self.button_focus)
+            return True
+        if action == 'KEY3':
+            self.button_focus = 0
+        elif action in ('LEFT', 'RIGHT'):
+            self.selected_card = (self.selected_card + (-1 if action == 'LEFT' else 1)) % 5
+        elif action in ('UP', 'DOWN'):
+            state = self.session.snapshot()
+            count = int(state.get('round_num_hands', state.get('num_hands', 10))) if state['phase'] in ('hold', 'result') else int(state.get('num_hands', 10))
+            self.selected_hand = (self.selected_hand + (-1 if action == 'UP' else 1)) % count
+        elif action in ('CENTER', 'KEY1'):
+            if self.session.snapshot()['phase'] == 'hold':
+                self.session.toggle_hold(self.selected_card)
+            elif self.session.snapshot()['phase'] == 'result':
+                self.menu = {'page': 'inspect', 'index': self.selected_hand}
+        elif action == 'KEY2':
+            self._play()
+        return True
+
+    handle_action = handle
+
+    def _play(self, max_bet=False):
+        before = self.session.snapshot()
+        try:
+            if before['phase'] == 'hold':
+                if max_bet: return False
+                self.session.draw()
+                kind = 'draw'
+            else:
+                if max_bet:
+                    self.session.bet_max()
+                else:
+                    self.session.deal()
+                self.selected_card = self.selected_hand = 0
+                kind = 'deal'
+            after = self.session.snapshot()
+            self.button_focus = None
+            if after['phase'] in ('hold', 'result') and self.SPEEDS[self.speed] > 0:
+                self._animation = {'kind': kind, 'before': before, 'after': after,
+                                   'started': self._clock(), 'interval': self.SPEEDS[self.speed]}
+                self._last_stage = None
+                self.update(self._clock())
+        except RandomNotReady:
+            self.notice = 'Shuffling is getting ready'
+            self._entropy_notice = True
+            self._credit_notice = False
+            self._retry_max_bet = max_bet
+        except ValueError as error:
+            self.notice = str(error)
+            self._entropy_notice = False
+            self._credit_notice = 'credit' in self.notice.lower()
+        return True
+
+    def _button_action(self, index):
+        phase = self.session.snapshot()['phase']
+        if index == 0:
+            self.menu = {'page': 'paytable', 'bet': self.pay_preview_bet}
+        elif index == 1:
+            self.menu = {'page': 'more_games', 'index': 0}
+        elif index == 2:
+            self.speed = (self.speed+1) % len(self.SPEEDS)
+        elif index == 3 and phase != 'hold' and self.session.snapshot()['bet_per_hand'] == 1:
+            self.session.cycle_num_hands()
+            self.selected_hand = min(self.selected_hand, self.session.snapshot()['num_hands']-1)
+        elif index == 4 and phase != 'hold':
+            self.session.cycle_bet_per_hand()
+        elif index == 5 and phase != 'hold':
+            state = self.session.snapshot()
+            if state['credits'] > 0 and state['credits'] >= state['total_bet']:
+                return self._play(max_bet=True)
+        elif index == 6:
+            return self._play()
+        return True
+
+    def _menu_action(self, action):
+        page = self.menu['page']
+        if action == 'KEY3':
+            self.menu = None
+        elif page == 'paytable':
+            if action in ('LEFT', 'RIGHT', 'UP', 'DOWN'):
+                choices = (1, 2, 3, 4, 5, 10)
+                index = choices.index(self.menu['bet'])
+                index = max(0, min(len(choices)-1, index + (-1 if action in ('LEFT', 'DOWN') else 1)))
+                self.menu['bet'] = self.pay_preview_bet = choices[index]
+            elif action in ('CENTER', 'KEY1'):
+                self.menu = {'page': 'controls', 'index': 0}
+            elif action == 'KEY2':
+                self.menu = None
+        elif page == 'controls':
+            if action in ('LEFT', 'RIGHT', 'UP', 'DOWN', 'CENTER', 'KEY1', 'KEY2'):
+                count = 2 if self.session.snapshot()['phase'] == 'hold' else 4
+                delta = -1 if action in ('LEFT', 'UP') else 1
+                self.menu['index'] = max(0, min(count-1, int(self.menu.get('index', 0))+delta))
+        elif page == 'inspect':
+            if action in ('UP', 'DOWN', 'LEFT', 'RIGHT'):
+                self.menu['index'] = (int(self.menu['index']) + (-1 if action in ('UP', 'LEFT') else 1)) % len(self.session.snapshot()['hands'])
+                self.selected_hand = self.menu['index']
+        elif page == 'more_games' and action in ('CENTER', 'KEY1', 'KEY2'):
+            self.session.add_credits()
+            self.menu = None
+        elif page == 'reset_confirm':
+            if action == 'KEY2':
+                self.session.reset()
+                self.selected_card = self.selected_hand = 0
+                self.menu = None
+            elif action in ('CENTER', 'KEY1'):
+                self.session.add_credits()
+                self.menu = None
+        elif page == 'options':
+            if action in ('UP', 'DOWN'):
+                self.menu['index'] = (self.menu['index'] + (-1 if action == 'UP' else 1)) % len(OPTIONS)
+            elif action in ('CENTER', 'KEY1', 'KEY2'):
+                index = self.menu['index']
+                if index == 0: self.menu = {'page': 'paytable', 'bet': self.pay_preview_bet}
+                elif index == 1 and self.session.snapshot()['phase'] != 'hold': self.session.set_feature(not self.session.snapshot()['feature'])
+                elif index == 2: self.menu = {'page': 'reset_confirm', 'index': 0}
+                elif index == 3: self.menu = {'page': 'controls', 'index': 0}
+                elif index == 4: self.menu = None
+        return True
+
+    def _finish_animation(self):
+        self._animation = None
+        self._visual = None
+        self._last_stage = None
+
+    def update(self, now):
+        feature = bool(self.session.snapshot()['feature'])
+        feature_changed = feature != self._badge_feature
+        if feature_changed:
+            self._badge_started = now
+            self._badge_feature = feature
+        sequence = self.renderer.manifest['sequences']['active' if feature else 'inactive']
+        frame = int(max(0.0, now-self._badge_started)/(sequence['duration_ms']/1000.0)+1e-8) % len(sequence['frames'])
+        badge_dirty = feature_changed or frame != self._badge_frame
+        self._badge_frame = frame
+        badge_dirty = badge_dirty and self.menu is None
+        if self._animation is None:
+            return badge_dirty
+        animation = self._animation
+        elapsed = max(0.0, now-animation['started'])
+        interval = animation['interval']
+        after = animation['after']
+        card_stage = min(5, int(elapsed/interval)+1)
+        rollup = min(1.0, max(0.0, (elapsed-5*interval)/(3*interval)))
+        is_result = after['phase'] == 'result'
+        total_duration = 5*interval + (3*interval if is_result else 0)
+        if elapsed >= total_duration:
+            self._finish_animation()
+            return True
+        stage_key = (card_stage, int(rollup*12))
+        if stage_key == self._last_stage:
+            return badge_dirty
+        self._last_stage = stage_key
+        visual = dict(after)
+        if animation['kind'] == 'deal' and not is_result:
+            visual['_deal_reveal'] = card_stage
+        else:
+            # A dealt royal settles automatically, but still reveals and rolls up.
+            if animation['kind'] == 'deal' and card_stage < 5:
+                visual['held'] = [False]*5
+            visual['_reveal'] = card_stage
+            total = int(after.get('total_win', 0))
+            count = int(total*rollup) if card_stage == 5 else 0
+            visual['total_win'] = count
+            visual['credits'] = int(after['credits'])-total+count
+        self._visual = visual
+        return True
+
+    def render(self):
+        snapshot = dict(self._visual if self._visual is not None else self.session.snapshot())
+        snapshot['_button_focus'] = self.button_focus
+        snapshot['_speed'] = self.speed
+        snapshot['_badge_frame'] = self._badge_frame
+        image = self.renderer.render(snapshot, self.selected_card, self.selected_hand, self.menu)
+        if self.notice:
+            d = ImageDraw.Draw(image)
+            d.rounded_rectangle((8, 76, 312, 154), radius=4, fill=(0, 0, 0), outline=GOLD, width=2)
+            self.renderer.center(d, 160, 88, self.notice[:48], 10, GOLD, True)
+            self.renderer.center(d, 160, 107, 'D-PAD CENTER: ADD 10,000' if self._credit_notice else 'D-PAD CENTER: RETRY', 11, WHITE, True)
+            detail = ('Existing multipliers are kept.' if self._credit_notice else
+                      'Cards and credits are unchanged.' if self._entropy_notice else 'K3: GAME CONTROLS')
+            self.renderer.center(d, 160, 127, detail, 10, MUTED)
+        return image

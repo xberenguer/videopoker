@@ -1,0 +1,26 @@
+Third-party visual assets - SeedSigner Poker 0.3.0
+
+The files declared in assets/videopoker/manifest.json are separate from this
+project's original GPL-2.0-or-later program code. Their inclusion does not grant
+a new license to the artwork, trademarks, or font-derived images.
+
+Card and interface artwork
+  Source website: https://www.videopoker.com/play/?game=69&title=Ultimate+X+Poker
+  Public card resources: https://media.vidpok.com/shared_images/cards/
+  Public game resources: https://media.vidpok.com/games/UltimateX/images/
+  VideoPoker.com, Action Gaming and IGT names, artwork and marks retain the
+  rights of their respective owners. This project claims no affiliation.
+
+The manifest records each original URL and file hash, the runtime PNG hash,
+dimensions, and any lossless GIF-frame conversion. Runtime image files retain
+the source artwork; no proprietary gameplay JavaScript is included.
+
+Arial glyph images
+  Source: Arial.ttf and Arial Bold.ttf installed with macOS, identified by
+  local file URI and SHA-256 in the manifest. These are rasterized ASCII glyph
+  atlases for this local build. Raw TTF/OTF/WOFF files are not included.
+  The original font and glyph rights are not relicensed by this project.
+
+All game logic, integration and build tools remain independently written.
+This artifact was prepared for the requesting user's local testing; it was
+not publicly published or represented as an official vendor release.
