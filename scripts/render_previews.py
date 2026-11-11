@@ -141,8 +141,11 @@ def main():
     save('hint-off')
     advice_clock.value += .1
     ui.set_pressed_mask(1)
-    ui.handle('UP')  # Second edge inside the documented double-tap window.
+    ui.handle('UP')  # Second click is still manual peek mode.
     ui.set_pressed_mask(0)
+    assert not ui.autoplay
+    advice_clock.value += .1
+    ui.set_pressed_mask(1); ui.handle('UP'); ui.set_pressed_mask(0)
     ui.update(advice_clock())
     advice_clock.value += ui.AUTO_CONSIDER_SECONDS+.01
     ui.update(advice_clock())
@@ -159,7 +162,7 @@ def main():
         'answer': exact_advice,
         'data_sha256': strategy_files,
         'peek': 'Solid red borders only while UP is physically held; release has no overlay',
-        'autoplay': 'Normal yellow selection and HELD tags; six-second consideration, 0.65-second card steps, two-second draw pause and four-second results',
+        'autoplay': 'Three UP clicks; normal yellow selection and HELD tags with a small top-left A; any button click stops without another game action. Six-second consideration, 0.65-second card steps, two-second draw pause and four-second results',
     }
     ui.close(); ui = original
 
@@ -191,7 +194,7 @@ def main():
     if manifest_sha != hashlib.sha256((asset_dir/'manifest.json').read_bytes()).hexdigest() or artwork_hashes() != declared_hashes:
         raise RuntimeError('Artwork changed during capture; regenerate against frozen assets')
     (args.output/'capture-record.json').write_text(json.dumps({
-        'version': '0.4.0',
+        'version': '0.4.1',
         'scope': 'deterministic actual application renders; no physical-device claim',
         'artwork': 'private local publicly served reference bitmaps and rasterized installed Arial glyphs',
         'ui_sha256': ui_sha,

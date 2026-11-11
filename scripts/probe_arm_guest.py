@@ -64,7 +64,7 @@ try:
         'left_dpad_center':{'physical_board_pin':33, 'logical_action':'CENTER', 'role':'Hold / Confirm; next deal on results'},
         'right_middle':{'physical_board_pin':38, 'logical_action':'KEY2', 'role':'Hold / Confirm; next deal on results'},
         'dpad_down':{'physical_board_pin':35, 'logical_action':'DOWN', 'role':'Deal / Draw'},
-        'dpad_up':{'physical_board_pin':31, 'logical_action':'UP', 'role':'Hint; double press toggles autoplay'},
+        'dpad_up':{'physical_board_pin':31, 'logical_action':'UP', 'role':'Hold for hint; three clicks start autoplay; any click stops'},
         'outer_chord_board_pins':[40,36],
         'outer_chord_unchanged':True,
         'scope':'Production PlusHardware.read_mask with simulated GPIO levels in stock ARM Python; no physical GPIO exercised',
@@ -483,6 +483,9 @@ try:
     auto_ui.handle_sampled('UP', .90)
     auto_clock[0] = 2.0
     auto_ui.handle_sampled('UP', 1.10)
+    assert not auto_ui.autoplay
+    auto_clock[0] = 3.0
+    auto_ui.handle_sampled('UP', 1.30)
     assert auto_ui.autoplay
     auto_deadline = time.monotonic()+120
     while auto_game.rounds < 3 and time.monotonic()<auto_deadline:
@@ -499,7 +502,7 @@ try:
     assert not auto_advisor._thread.is_alive()
     strategy_result = {'status':'PASS','cases':strategy_cases,
         'autoplay_rounds':auto_game.rounds,'manual_pause_preserved_state':True,
-        'up_double_tap_uses_captured_edge_time':True,
+        'up_triple_click_uses_captured_edge_time':True,
         'worker_stopped_before_signer_boundary':True,
         'bellman_span':strategy_table.certificate,
         'table_sha256':hashlib.sha256(strategy_table.raw).hexdigest(),
@@ -507,7 +510,7 @@ try:
         'total_emulated_seconds':round(time.monotonic()-strategy_start,3)}
     stage('strategy-autoplay-complete')
     report={'status':'PASS','python':sys.version,'pillow':PIL.__version__,
-            'version':'0.4.0','visual_assets':asset_proof,
+            'version':'0.4.1','visual_assets':asset_proof,
             'physical_control_mapping':physical_control_mapping,
             'machine':os.uname().machine,'rounds_checked':107,
             'engine_rounds_checked':102,'runtime_rounds_checked':2,

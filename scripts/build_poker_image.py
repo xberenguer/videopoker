@@ -27,7 +27,7 @@ OVERLAY_NAME = "poker-overlay.cpio"
 INITRAMFS_LINE = "initramfs poker-overlay.cpio followkernel"
 SETTINGS = {"persistent_settings": "E", "display_config": "st7789_320x240"}
 EXECUTABLES = {"start.sh"}
-PROJECT_VERSION = "0.4.0"
+PROJECT_VERSION = "0.4.1"
 
 
 def sha(data):

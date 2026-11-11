@@ -18,6 +18,7 @@ def stage(name):
 try:
     stage('strategy-functional-python-entered')
     import PIL
+    from PIL import ImageChops
     from poker_engine import Session
     from poker_strategy import StrategyAdvisor, StrategyTable, _round
     from poker_ui import PokerUI
@@ -115,6 +116,14 @@ try:
                         'autoplay':ui.autoplay,'hint_visible':ui.hint_visible,
                         'native_resolution':[320,240],'mode':image.mode}
 
+    def assert_auto_indicator(ui):
+        image, normal = ui.render(), plain_render(ui)
+        bounds = ImageChops.difference(image, normal).getbbox()
+        assert bounds is not None and bounds[0]>=4 and bounds[1]>=10 and bounds[2]<=17 and bounds[3]<=24
+        assert (255,255,0) in set(image.crop((4,10,17,24)).getdata())
+        image.paste(normal.crop((4,10,17,24)), (4,10))
+        assert image.tobytes() == normal.tobytes(), 'Only the small A may differ during autoplay'
+
     # The production advisor runs asynchronously. Only presentation time is
     # synthetic; fixture outcomes come from explicitly injected random.Random.
     manual_clock = [0.0]
@@ -172,33 +181,25 @@ try:
     auto_ui = PokerUI(session=auto_game,clock=lambda:auto_clock[0],advisor=auto_advisor)
     stage('auto-after-ui')
     auto_ui.speed = 2
-    # Two captured edges .60s apart are separate hint requests, never autoplay.
-    auto_ui.set_pressed_mask(1)
-    auto_ui.handle_sampled('UP',0.0)
-    auto_ui.set_pressed_mask(0)
-    auto_clock[0] = .05
-    auto_ui.update(auto_clock[0])
-    auto_clock[0] = .60
-    auto_ui.set_pressed_mask(1)
-    auto_ui.handle_sampled('UP',.60)
-    auto_ui.set_pressed_mask(0)
-    auto_clock[0] = .65
-    auto_ui.update(auto_clock[0])
+    # Separate captured clicks never become an activation when drained together.
+    for captured in (0.0,.60,1.20):
+        auto_clock[0] = captured+.05
+        auto_ui.set_pressed_mask(1)
+        auto_ui.handle_sampled('UP',captured)
+        auto_ui.set_pressed_mask(0)
+        auto_ui.update(auto_clock[0])
     assert not auto_ui.autoplay and auto_game.snapshot()['phase'] == 'ready'
     assert auto_game.credits == 10000
     auto_ui.pause_autoplay()
-    # Two captured edges .20s apart activate autoplay even when presentation
+    # Three captured clicks .20s apart activate autoplay even when presentation
     # dispatch timestamps are a full second apart. This checks logical time
     # propagation, not wall-clock sampler performance or physical GPIO.
-    auto_clock[0] = 1.0
-    auto_ui.set_pressed_mask(1)
-    auto_ui.handle_sampled('UP',.90)
-    auto_ui.set_pressed_mask(0)
-    auto_clock[0] = 1.05
-    auto_ui.update(auto_clock[0])
-    auto_clock[0] = 2.0
-    auto_ui.set_pressed_mask(1)
-    auto_ui.handle_sampled('UP',1.10)
+    for index,captured in enumerate((1.50,1.70,1.90)):
+        auto_clock[0] = 2.0+index
+        auto_ui.set_pressed_mask(1)
+        auto_ui.handle_sampled('UP',captured)
+        auto_ui.set_pressed_mask(0)
+        if index<2: assert not auto_ui.autoplay
     assert auto_ui.autoplay
     auto_ui.set_pressed_mask(0)
     assert not auto_ui.hint_visible
@@ -241,11 +242,11 @@ try:
             assert sum(a != b for a,b in zip(current['held'],previous['held'])) <= 1
             pacing_checks['one_card_per_update'] += 1
         if current_stage in ('select','draw') and any(current['held']) and not captured_autoplay:
-            assert auto_ui.render().tobytes() == plain_render(auto_ui).tobytes()
+            assert_auto_indicator(auto_ui)
             capture(auto_ui,'autoplay')
             captured_autoplay = True
         if phase == 'result' and not captured_result:
-            assert auto_ui.render().tobytes() == plain_render(auto_ui).tobytes()
+            assert_auto_indicator(auto_ui)
             capture(auto_ui,'result')
             captured_result = True
         previous, previous_stage = current, current_stage
@@ -258,8 +259,11 @@ try:
     assert auto_ui.AUTO_SELECT_SECONDS == .65
     assert auto_ui.AUTO_HOLD_SECONDS == 2.0
     assert auto_ui.AUTO_RESULT_SECONDS == 4.0
-    auto_ui.pause_autoplay()
     paused = auto_game.snapshot()
+    selected = auto_ui.selected_card
+    auto_ui.handle('LEFT')
+    assert not auto_ui.autoplay and auto_ui.selected_card == selected
+    assert auto_ui.render().tobytes() == plain_render(auto_ui).tobytes()
     auto_clock[0] += 100
     auto_ui.update(auto_clock[0])
     assert auto_game.snapshot() == paused and not auto_ui.autoplay
@@ -270,7 +274,7 @@ try:
     assert set(frames) == {'ready','hold','hint-on','autoplay','result'}
     report = {
         'status':'PASS','mode':'strategy-and-ui-functional-only',
-        'python':sys.version,'pillow':PIL.__version__,'version':'0.4.0',
+        'python':sys.version,'pillow':PIL.__version__,'version':'0.4.1',
         'machine':os.uname().machine,'native_resolution':[320,240],
         'strategy_and_autoplay':{
             'status':'PASS','known_cases':cases,'known_mask_cases':len(known),
@@ -278,13 +282,14 @@ try:
             'single_hint_mask':hint_mask,'hint_preserved_session':True,
             'held_up_hint_solid_red_until_release':True,
             'release_removes_all_advice_pixels':True,
-            'autoplay_plain_renderer_no_advice_or_status':True,
+            'autoplay_normal_renderer_with_small_top_left_a_only':True,
             'paced_autoplay_fake_clock_checks':pacing_checks,
             'autoplay_stage_timeline':timeline,
             'pacing_seconds':{'consider':6.0,'per_card_selection':.65,'before_draw':2.0,'result':4.0},
             'manual_pause_preserved_state':True,
-            'captured_up_edges_060_apart_never_auto':True,
-            'captured_up_edges_020_apart_with_100_dispatch_gap_activate':True,
+            'three_captured_up_edges_060_apart_never_auto':True,
+            'three_captured_up_edges_020_apart_with_100_dispatch_gap_activate':True,
+            'stop_key_consumed_without_game_action':True,
             'both_advisor_workers_joined':True,
             'table_sha256':hashlib.sha256(table.raw).hexdigest(),
             'bellman_span':table.certificate,
