@@ -105,7 +105,7 @@ try:
     def plain_render(ui):
         state = dict(ui._visual if ui._visual is not None else ui.session.snapshot())
         state['_button_focus'] = ui.button_focus
-        state['_speed'] = ui.speed
+        state['_speed'] = ui.autoplay_speed if ui.autoplay else ui.speed
         state['_badge_frame'] = ui._badge_frame
         return ui.renderer.render(state, ui.selected_card, ui.selected_hand, ui.menu)
     def capture(ui, name):
@@ -119,10 +119,18 @@ try:
     def assert_auto_indicator(ui):
         image, normal = ui.render(), plain_render(ui)
         bounds = ImageChops.difference(image, normal).getbbox()
-        assert bounds is not None and bounds[0]>=4 and bounds[1]>=10 and bounds[2]<=17 and bounds[3]<=24
-        assert (255,255,0) in set(image.crop((4,10,17,24)).getdata())
-        image.paste(normal.crop((4,10,17,24)), (4,10))
-        assert image.tobytes() == normal.tobytes(), 'Only the small A may differ during autoplay'
+        assert bounds is not None and bounds[0]>=246 and bounds[1]>=205 and bounds[2]<=262 and bounds[3]<=217
+        assert (255,255,0) in set(image.crop((246,205,262,217)).getdata())
+        icon_count = list(image.crop((256,207,262,214)).getdata()).count((255,255,0))
+        assert (icon_count>0) == bool(ui.autoplay_speed)
+        if ui.autoplay_speed:
+            assert image.getpixel((257,209))[0]>128 and image.getpixel((257,210))[0]>128
+            assert (255,255,0) not in set(image.crop((256,207,262,208)).getdata())
+            assert (255,255,0) not in set(image.crop((256,212,262,214)).getdata())
+            if ui.autoplay_speed==1:
+                assert (255,255,0) not in set(image.crop((259,208,262,212)).getdata())
+        image.paste(normal.crop((246,205,262,217)), (246,205))
+        assert image.tobytes() == normal.tobytes(), 'Only the A and speed icon may differ during autoplay'
 
     # The production advisor runs asynchronously. Only presentation time is
     # synthetic; fixture outcomes come from explicitly injected random.Random.
@@ -149,7 +157,11 @@ try:
         manual_ui.update(manual_clock[0])
         assert not manual_ui.notice, manual_ui.notice
         time.sleep(.005)
-    assert manual_ui._advice is not None and manual_ui.hint_visible
+    assert manual_ui._advice is not None and not manual_ui.hint_visible
+    assert manual_ui.render().tobytes() == plain_render(manual_ui).tobytes()
+    manual_clock[0] += PokerUI.HINT_HOLD_SECONDS+.001
+    manual_ui.update(manual_clock[0])
+    assert manual_ui.hint_visible
     assert manual_game.snapshot() == before_hint, 'A hint must not alter held cards or game state'
     capture(manual_ui,'hint-on')
     hint_mask = manual_ui._advice['mask']
@@ -168,6 +180,22 @@ try:
     assert manual_ui._advisor_token is None and manual_ui._advice is None
     assert manual_ui.render().tobytes() == plain_render(manual_ui).tobytes()
     assert manual_game.snapshot() == before_hint
+    # Manual double-tap uses the same production advisor, never Deal/Draw.
+    manual_clock[0] += .5
+    for _ in range(2):
+        manual_ui.set_pressed_mask(1); manual_ui.handle('UP'); manual_ui.set_pressed_mask(0)
+        manual_clock[0] += .1
+    assert manual_game.snapshot()==before_hint and not manual_ui.autoplay
+    manual_clock[0] += manual_ui.UP_CLICK_GAP_SECONDS+manual_ui.UP_TAP_COMMIT_GRACE_SECONDS+.01
+    deadline = time.monotonic()+90
+    while time.monotonic()<deadline:
+        manual_ui.update(manual_clock[0])
+        if manual_ui._manual_hold_key is None and manual_ui._manual_up_due is None: break
+        time.sleep(.005)
+    assert manual_game.held==[bool(hint_mask & (1<<i)) for i in range(5)]
+    after_best_hold=manual_game.snapshot(); after_best_hold['held']=before_hint['held']
+    assert after_best_hold==before_hint and not manual_ui.autoplay
+    capture(manual_ui,'manual-best-hold')
     manual_ui.close()
     assert not manual_advisor._thread.is_alive()
     stage('strategy-functional-hint-render-complete')
@@ -230,13 +258,13 @@ try:
             draw_started = auto_clock[0]
         if phase == 'result' and previous['phase'] == 'hold':
             assert draw_started is not None
-            assert auto_clock[0]-draw_started >= 2.0-1e-7
+            assert auto_clock[0]-draw_started >= .5-1e-7
             pacing_checks['draw'] += 1
         if current_stage == 'result' and previous_stage != 'result':
             result_started = auto_clock[0]
         if phase == 'hold' and previous['phase'] == 'result':
             assert result_started is not None
-            assert auto_clock[0]-result_started >= 4.0-1e-7
+            assert auto_clock[0]-result_started >= 2.5-1e-7
             pacing_checks['result'] += 1
         if phase == previous['phase'] == 'hold' and current['initial'] == previous['initial']:
             assert sum(a != b for a,b in zip(current['held'],previous['held'])) <= 1
@@ -256,36 +284,72 @@ try:
     assert pacing_checks['consider'] >= 3 and pacing_checks['draw'] >= 3
     assert pacing_checks['result'] >= 2 and pacing_checks['one_card_per_update'] > 0
     assert auto_ui.AUTO_CONSIDER_SECONDS == 6.0
-    assert auto_ui.AUTO_SELECT_SECONDS == .65
-    assert auto_ui.AUTO_HOLD_SECONDS == 2.0
-    assert auto_ui.AUTO_RESULT_SECONDS == 4.0
-    paused = auto_game.snapshot()
-    selected = auto_ui.selected_card
+    assert auto_ui.AUTO_SELECT_SECONDS == .4
+    assert auto_ui.AUTO_HOLD_SECONDS == .5
+    assert auto_ui.AUTO_RESULT_SECONDS == 2.5
+    speed_double_checks=[]
+    for expected in (1,2,0):
+        frozen=auto_game.snapshot(); previous_speed=auto_ui.autoplay_speed
+        for _ in range(2):
+            auto_ui.set_pressed_mask(1);auto_ui.handle('UP');auto_ui.set_pressed_mask(0)
+            auto_clock[0] += .1
+        assert auto_ui.autoplay and auto_ui.autoplay_speed==previous_speed
+        auto_clock[0] += auto_ui.UP_CLICK_GAP_SECONDS+auto_ui.UP_TAP_COMMIT_GRACE_SECONDS+.01
+        auto_ui.update(auto_clock[0])
+        assert auto_ui.autoplay and auto_ui.autoplay_speed==expected
+        assert auto_game.snapshot()==frozen and not auto_ui.hint_visible
+        assert_auto_indicator(auto_ui)
+        speed_double_checks.append(expected)
+    # Holding a single UP cannot select a pace.
+    auto_ui.set_pressed_mask(1);auto_ui.handle('UP')
+    auto_clock[0] += 2
+    auto_ui.update(auto_clock[0]);auto_ui.set_pressed_mask(0)
+    assert auto_ui.autoplay and auto_ui.autoplay_speed==0
+    paused=auto_game.snapshot();selected=auto_ui.selected_card
+    for index in range(3):
+        auto_clock[0] += .1
+        auto_ui.set_pressed_mask(1);auto_ui.handle('UP');auto_ui.set_pressed_mask(0)
+        assert auto_ui.autoplay_speed==0
+        if index<2: assert auto_ui.autoplay
+    assert not auto_ui.autoplay and auto_game.snapshot()==paused
+    for index in range(3):
+        auto_clock[0] += .1
+        auto_ui.set_pressed_mask(1);auto_ui.handle('UP');auto_ui.set_pressed_mask(0)
+        if index<2: assert not auto_ui.autoplay
+    assert auto_ui.autoplay and auto_game.snapshot()==paused
     auto_ui.handle('LEFT')
-    assert not auto_ui.autoplay and auto_ui.selected_card == selected
-    assert auto_ui.render().tobytes() == plain_render(auto_ui).tobytes()
+    assert not auto_ui.autoplay and auto_ui.selected_card==selected
+    assert auto_ui.render().tobytes()==plain_render(auto_ui).tobytes()
     auto_clock[0] += 100
     auto_ui.update(auto_clock[0])
-    assert auto_game.snapshot() == paused and not auto_ui.autoplay
+    assert auto_game.snapshot()==paused and not auto_ui.autoplay
     auto_ui.close()
     assert not auto_advisor._thread.is_alive()
     stage('strategy-functional-autoplay-complete')
 
-    assert set(frames) == {'ready','hold','hint-on','autoplay','result'}
+    assert set(frames) == {'ready','hold','hint-on','manual-best-hold','autoplay','result'}
     report = {
         'status':'PASS','mode':'strategy-and-ui-functional-only',
-        'python':sys.version,'pillow':PIL.__version__,'version':'0.4.1',
+        'python':sys.version,'pillow':PIL.__version__,'version':'0.4.8',
         'machine':os.uname().machine,'native_resolution':[320,240],
         'strategy_and_autoplay':{
             'status':'PASS','known_cases':cases,'known_mask_cases':len(known),
             'multiplier_variation_cases':16,'autoplay_rounds':auto_game.rounds,
             'single_hint_mask':hint_mask,'hint_preserved_session':True,
             'held_up_hint_solid_red_until_release':True,
+            'hint_hold_delay_seconds':PokerUI.HINT_HOLD_SECONDS,
+            'hint_invisible_before_hold_delay_even_with_ready_advice':True,
             'release_removes_all_advice_pixels':True,
-            'autoplay_normal_renderer_with_small_top_left_a_only':True,
+            'autoplay_normal_renderer_with_small_footer_a_only':True,
             'paced_autoplay_fake_clock_checks':pacing_checks,
             'autoplay_stage_timeline':timeline,
-            'pacing_seconds':{'consider':6.0,'per_card_selection':.65,'before_draw':2.0,'result':4.0},
+            'pacing_profiles':list(PokerUI.AUTO_PROFILES),
+            'double_up_speed_cycle_keeps_hand_and_autoplay':speed_double_checks,
+            'triple_up_toggles_auto_both_directions_without_speed_change':True,
+            'manual_double_up_sets_best_holds_without_draw_or_spend':True,
+            'held_up_during_auto_does_not_change_speed':True,
+            'medium_one_chevron_fast_two_chevrons':True,
+            'small_filled_triangles_medium_left_fast_adds_right':True,
             'manual_pause_preserved_state':True,
             'three_captured_up_edges_060_apart_never_auto':True,
             'three_captured_up_edges_020_apart_with_100_dispatch_gap_activate':True,

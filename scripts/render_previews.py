@@ -66,6 +66,7 @@ def main():
                         'phase': ui.session.phase, 'menu': copy.deepcopy(ui.menu),
                         'speed': ui.speed, 'animation_active': ui._animation is not None,
                         'autoplay': ui.autoplay, 'autoplay_stage': ui._auto_stage,
+                        'autoplay_speed': ui.autoplay_speed,
                         'hint_mask': ui._advice['mask'] if ui._advice is not None else None,
                         'up_held': ui._up_held, 'hint_visible': ui.hint_visible})
 
@@ -134,27 +135,45 @@ def main():
     advice_ui.speed = 2
     ui = advice_ui
     ui.set_pressed_mask(1); ui.handle('UP'); ui.update(advice_clock())
+    advice_clock.value += ui.HINT_HOLD_SECONDS
+    ui.update(advice_clock())
     assert ui.hint_visible and ui._advice['mask'] == 7 and not ui.autoplay
     save('hint-on')
     ui.set_pressed_mask(0); ui.update(advice_clock())
     assert not ui.hint_visible and ui._advice is None
     save('hint-off')
-    advice_clock.value += .1
-    ui.set_pressed_mask(1)
-    ui.handle('UP')  # Second click is still manual peek mode.
-    ui.set_pressed_mask(0)
-    assert not ui.autoplay
-    advice_clock.value += .1
-    ui.set_pressed_mask(1); ui.handle('UP'); ui.set_pressed_mask(0)
+    ui.pause_autoplay()  # Separate the manual-hold and autoplay capture gestures.
+    for _ in range(2):
+        advice_clock.value += .1
+        ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
+    advice_clock.value += ui.UP_CLICK_GAP_SECONDS+ui.UP_TAP_COMMIT_GRACE_SECONDS+.01
+    ui.update(advice_clock())
+    assert not ui.autoplay and ui.session.held==[True,True,True,False,False]
+    save('manual-best-hold')
+    for index,held in enumerate(ui.session.held):
+        if held: ui.session.toggle_hold(index)
+    ui.pause_autoplay()
+    for _ in range(3):
+        advice_clock.value += .1
+        ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
     ui.update(advice_clock())
     advice_clock.value += ui.AUTO_CONSIDER_SECONDS+.01
     ui.update(advice_clock())
     for _ in range(2):
         advice_clock.value += ui.AUTO_SELECT_SECONDS+.01
         ui.update(advice_clock())
-    assert ui.autoplay and ui._auto_stage == 'select' and not ui.hint_visible
-    assert ui.selected_card == 2 and ui.session.held == [True, True, False, False, False]
+    assert ui.autoplay and ui._auto_stage=='select' and not ui.hint_visible
+    assert ui.selected_card==2 and ui.session.held==[True,True,False,False,False]
     save('autoplay')
+    for suffix in ('medium','fast'):
+        before_speed_change=ui.session.snapshot()
+        for _ in range(2):
+            advice_clock.value += .1
+            ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
+        advice_clock.value += ui.UP_CLICK_GAP_SECONDS+ui.UP_TAP_COMMIT_GRACE_SECONDS+.01
+        ui.update(advice_clock())
+        assert ui.autoplay and ui.session.snapshot()==before_speed_change
+        save('autoplay-'+suffix)
     advice_capture = {
         'hand': advice_snapshot['initial'], 'mask': exact_advice['mask'],
         'active_multipliers': advice_snapshot['active_multipliers'],
@@ -162,7 +181,8 @@ def main():
         'answer': exact_advice,
         'data_sha256': strategy_files,
         'peek': 'Solid red borders only while UP is physically held; release has no overlay',
-        'autoplay': 'Three UP clicks; normal yellow selection and HELD tags with a small top-left A; any button click stops without another game action. Six-second consideration, 0.65-second card steps, two-second draw pause and four-second results',
+        'autoplay': 'Triple UP toggles autoplay on/off. During autoplay double UP advances one speed; holding does not. Manual double UP sets exact best holds without drawing. A has no icon Slow, filled left triangle Medium, and adds right triangle Fast. Other buttons stop autoplay without another action.',
+        'autoplay_profiles': list(PokerUI.AUTO_PROFILES),
     }
     ui.close(); ui = original
 
@@ -194,7 +214,7 @@ def main():
     if manifest_sha != hashlib.sha256((asset_dir/'manifest.json').read_bytes()).hexdigest() or artwork_hashes() != declared_hashes:
         raise RuntimeError('Artwork changed during capture; regenerate against frozen assets')
     (args.output/'capture-record.json').write_text(json.dumps({
-        'version': '0.4.1',
+        'version': '0.4.8',
         'scope': 'deterministic actual application renders; no physical-device claim',
         'artwork': 'private local publicly served reference bitmaps and rasterized installed Arial glyphs',
         'ui_sha256': ui_sha,

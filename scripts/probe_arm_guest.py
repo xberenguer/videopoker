@@ -64,7 +64,7 @@ try:
         'left_dpad_center':{'physical_board_pin':33, 'logical_action':'CENTER', 'role':'Hold / Confirm; next deal on results'},
         'right_middle':{'physical_board_pin':38, 'logical_action':'KEY2', 'role':'Hold / Confirm; next deal on results'},
         'dpad_down':{'physical_board_pin':35, 'logical_action':'DOWN', 'role':'Deal / Draw'},
-        'dpad_up':{'physical_board_pin':31, 'logical_action':'UP', 'role':'Hold for hint; three clicks start autoplay; any click stops'},
+        'dpad_up':{'physical_board_pin':31, 'logical_action':'UP', 'role':'Manual hold: red hint; manual double: best holds; auto double: next speed; triple: toggle autoplay'},
         'outer_chord_board_pins':[40,36],
         'outer_chord_unchanged':True,
         'scope':'Production PlusHardware.read_mask with simulated GPIO levels in stock ARM Python; no physical GPIO exercised',
@@ -510,7 +510,7 @@ try:
         'total_emulated_seconds':round(time.monotonic()-strategy_start,3)}
     stage('strategy-autoplay-complete')
     report={'status':'PASS','python':sys.version,'pillow':PIL.__version__,
-            'version':'0.4.1','visual_assets':asset_proof,
+            'version':'0.4.8','visual_assets':asset_proof,
             'physical_control_mapping':physical_control_mapping,
             'machine':os.uname().machine,'rounds_checked':107,
             'engine_rounds_checked':102,'runtime_rounds_checked':2,
