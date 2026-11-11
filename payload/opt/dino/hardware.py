@@ -14,10 +14,9 @@ class PlusHardware:
     """Own the established Plus GPIO/SPI path until deliberate signer entry."""
 
     # Logical order: UP, DOWN, LEFT, RIGHT, CENTER, KEY1, KEY2, KEY3.
-    # Poker uses the physical D-pad center (33) for KEY2 / Deal, and the
-    # right middle button (38) for CENTER / Hold or confirm. The upstream
-    # signer's own button mapping is separate from this poker-only owner.
-    BUTTON_PINS = (31, 35, 29, 37, 38, 40, 33, 36)
+    # Preserve the standard physical layout. Poker assigns both middle
+    # buttons to Hold / confirm and the D-pad Down button to Deal / Draw.
+    BUTTON_PINS = (31, 35, 29, 37, 33, 40, 38, 36)
     OUTPUT_PINS = (22, 13, 18)
 
     def __init__(self):

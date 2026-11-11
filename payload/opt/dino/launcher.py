@@ -147,6 +147,10 @@ class InputShutdownError(RuntimeError):
     """An input worker still owns GPIO; do not clean it up or enter the signer."""
 
 
+class UIShutdownError(RuntimeError):
+    """A game worker did not close; never continue into the signer."""
+
+
 class SampledInput:
     """Sample GPIO independently of slow Pillow/SPI work on the UI thread.
 
@@ -196,6 +200,14 @@ class SampledInput:
     def stats(self):
         with self._lock:
             return dict(self._stats)
+
+    @property
+    def gesture_pending(self):
+        """Expose chord suppression without allowing the UI to own its state."""
+        with self._lock:
+            gate = self.router.gate
+            return (gate.hold_started is not None or gate.latched or
+                    self.router.suppress_until_neutral)
 
     def __enter__(self):
         if self._thread is not None:
@@ -271,10 +283,19 @@ def _default_ui():
 
 def _neutral_message(hardware):
     try:
-        hardware.show_message("Game unavailable", "D-pad center: retry")
+        hardware.show_message("Game unavailable", "Down button: retry")
     except Exception:
         # A failed frame must not disable GPIO polling or reveal the signer.
         pass
+
+
+def _close_ui(ui):
+    close = getattr(ui, "close", None)
+    if callable(close):
+        try:
+            close()
+        except Exception as error:
+            raise UIShutdownError("Game worker did not stop") from error
 
 
 def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
@@ -285,7 +306,7 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
         hardware_factory = PlusHardware
     # Hardware-construction failure cannot expose SeedSigner. Retry safely.
     while True:
-        inputs = None
+        inputs, ui = None, None
         try:
             hardware_context = hardware_factory()
             hardware = hardware_context.__enter__()
@@ -320,9 +341,13 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                         inputs.reset()
                         actions = ()
                     if ui is None:
-                        retry = "KEY2" in actions
+                        retry = "DOWN" in actions
                     else:
                         try:
+                            if getattr(inputs, "gesture_pending", False):
+                                pause = getattr(ui, "pause_autoplay", None)
+                                if callable(pause):
+                                    pause()
                             for action in actions:
                                 ui.handle(action)
                                 dirty = True
@@ -331,7 +356,9 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                                 hardware.present(ui.render())
                                 dirty = False
                         except Exception:
-                            ui = None
+                            discarded_ui, ui = ui, None
+                            _close_ui(discarded_ui)
+                            discarded_ui = None
                             inputs.reset()
                             _neutral_message(hardware)
                     sleep(POLL_INTERVAL)
@@ -339,10 +366,15 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
             _neutral_message(hardware)
             sleep(1.0)
         finally:
-            # A stuck native GPIO call must never race cleanup or signer setup.
-            # Its bounded join raises above; fail closed with ownership retained.
-            if inputs is None or not getattr(inputs, 'running', False):
-                hardware_context.__exit__(None, None, None)
+            try:
+                # Solver threads must be cancelled/joined before releasing the
+                # display or importing the signer. A failed close aborts entry.
+                _close_ui(ui)
+            finally:
+                # A stuck native GPIO call must never race cleanup or signer setup.
+                # Its bounded join raises above; fail closed with ownership retained.
+                if inputs is None or not getattr(inputs, 'running', False):
+                    hardware_context.__exit__(None, None, None)
 
 
 def start_signer(argv=None):
