@@ -24,6 +24,11 @@ class SynchronousInput:
         self.router.reset()
 
     @property
+    def pressed_mask(self):
+        buttons = self.router.buttons
+        return buttons.stable if buttons.armed else 0
+
+    @property
     def gesture_pending(self):
         gate = self.router.gate
         return (gate.hold_started is not None or gate.latched or

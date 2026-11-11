@@ -2,6 +2,7 @@
 import importlib.util
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -165,7 +166,131 @@ class RouterTests(unittest.TestCase):
         self.assertEqual(actions, ['KEY2'])
 
 
+class SampledStateTests(unittest.TestCase):
+    def run_capture(self, trace):
+        """Run the native capture loop with exact times, no scheduler or sleep."""
+        clock, levels = Clock(), []
+        remaining = list(trace)
+        class Hardware:
+            def read_mask(self):
+                clock.now, value = remaining.pop(0)
+                if isinstance(value, BaseException):
+                    raise value
+                return value
+        service = launcher.SampledInput(Hardware(), clock=clock)
+        service._stop = SimpleNamespace(is_set=lambda: not remaining,
+                                        wait=lambda timeout: levels.append(service.pressed_mask))
+        service._thread = SimpleNamespace(is_alive=lambda: True)
+        service._sample()
+        return service, levels
+
+    def test_native_capture_reports_release_without_losing_queued_up_time(self):
+        service, levels = self.run_capture(((0, 0), (.081, 0), (.100, 1),
+                                           (.115, 1), (.130, 0), (.145, 0)))
+        self.assertEqual(levels, [0, 0, 0, 1, 1, 0])
+        self.assertEqual(service.pressed_mask, 0)
+        self.assertEqual(service.read_timed(), (False, ((.115, "UP"),)))
+        self.assertEqual(service.read(), (False, ()))
+        self.assertEqual(service.stats['gap_resets'], 0)
+
+    def test_native_capture_fault_and_startup_hold_expose_neutral_levels(self):
+        service, levels = self.run_capture(((0, 1), (.081, 1), (.100, 0),
+                                           (.181, 0), (.200, 1), (.215, 1),
+                                           (.230, OSError("GPIO read failed"))))
+        self.assertEqual(levels, [0, 0, 0, 0, 0, 1, 0])
+        self.assertEqual(service.pressed_mask, 0)
+        self.assertEqual(service.read_timed(), (False, ()))
+        self.assertEqual(service.stats['read_errors'], 1)
+
+    def test_synchronous_harness_uses_the_same_debounced_level_contract(self):
+        clock, events = Clock(), []
+        mask = [0]
+        hardware = FakeHardware(clock, lambda t: mask[0], events)
+        service = SynchronousInput(hardware, clock=clock)
+        for now, value, expected in ((0, 0, 0), (.081, 0, 0),
+                                     (.100, 1, 0), (.115, 1, 1),
+                                     (.130, 0, 1), (.145, 0, 0)):
+            clock.now, mask[0] = now, value
+            service.read_timed()
+            self.assertEqual(service.pressed_mask, expected)
+        service.reset()
+        self.assertEqual(service.pressed_mask, 0)
+
+
 class RuntimeTests(unittest.TestCase):
+    def test_current_levels_are_forwarded_before_actions_and_empty_updates(self):
+        clock, events = Clock(), []
+        class LevelInput:
+            running = False
+            pressed_mask = 0
+            def __init__(self, hardware, *, clock):
+                self.calls = 0
+            def __enter__(self):
+                self.running = True
+                return self
+            def __exit__(self, *args):
+                self.running = False
+            def reset(self):
+                pass
+            def read_timed(self):
+                self.calls += 1
+                self.pressed_mask = 1 if self.calls == 2 else 0
+                return (self.calls == 5, ((.005, "UP"),) if self.calls == 2 else ())
+        class LevelUI(FakeUI):
+            mask = None
+            def set_pressed_mask(self, mask):
+                events.append(("mask", mask, clock()))
+                changed, self.mask = self.mask != mask, mask
+                return changed
+            def handle_sampled(self, action, at):
+                events.append(("action", action, at, self.mask))
+            def update(self, now):
+                events.append(("update", now, self.mask))
+                return False
+            def render(self):
+                return self.mask
+        hardware = FakeHardware(clock, lambda t: 0, events)
+        launcher.run_poker_gate(lambda: hardware, LevelUI, clock, clock.sleep,
+                               input_factory=LevelInput)
+        self.assertEqual([event[1] for event in events if isinstance(event, tuple) and event[0] == 'mask'],
+                         [0, 1, 0, 0])
+        self.assertEqual([event[1] for event in events if isinstance(event, tuple) and event[0] == 'frame'],
+                         [0, 1, 0])  # Release alone schedules the clearing frame.
+        self.assertIn(("action", "UP", .005, 1), events)
+        self.assertLess(events.index(("mask", 0, .02)), events.index(("update", .02, 0)))
+
+    def test_already_released_up_is_reported_before_its_queued_press_edge(self):
+        clock, events = Clock(), []
+        class ReleasedInput:
+            running = False
+            pressed_mask = 0
+            def __init__(self, hardware, *, clock):
+                self.calls = 0
+            def __enter__(self):
+                self.running = True
+                return self
+            def __exit__(self, *args):
+                self.running = False
+            def reset(self):
+                pass
+            def read_timed(self):
+                self.calls += 1
+                return (self.calls > 2, ((.002, "UP"),) if self.calls == 2 else ())
+        class ReleasedUI(FakeUI):
+            mask = None
+            def set_pressed_mask(self, mask):
+                self.mask = mask
+                events.append(("mask", mask, clock()))
+                return False
+            def handle_sampled(self, action, at):
+                events.append(("action", action, at, self.mask))
+        hardware = FakeHardware(clock, lambda t: 0, events)
+        launcher.run_poker_gate(lambda: hardware, ReleasedUI, clock, clock.sleep,
+                               input_factory=ReleasedInput)
+        action = ("action", "UP", .002, 0)
+        self.assertIn(action, events)
+        self.assertLess(events.index(("mask", 0, .01)), events.index(action))
+
     def test_runtime_preserves_captured_times_and_prefers_timed_input_dispatch(self):
         clock, events, captured = Clock(), [], []
         class TimedInput:
@@ -219,6 +344,8 @@ class RuntimeTests(unittest.TestCase):
         class TimedUI(FakeUI):
             def handle_sampled(self, action, at):
                 captured.append((action, at))
+            def set_pressed_mask(self, mask):
+                raise AssertionError("Legacy input has no current pressed state")
         hardware = FakeHardware(clock, lambda t: 0, events)
         launcher.run_poker_gate(lambda: hardware, TimedUI, clock, clock.sleep,
                                input_factory=LegacyInput)

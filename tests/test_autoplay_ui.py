@@ -1,4 +1,4 @@
-"""Deterministic controller tests: advice never consumes game randomness."""
+"""Deterministic held-peek and human-paced autoplay controller checks."""
 import copy
 import random
 import sys
@@ -19,11 +19,8 @@ class Clock:
 
 class Advisor:
     def __init__(self):
-        self.requests = []
-        self.answers = {}
-        self.polls = []
-        self.cancels = 0
-        self.closes = 0
+        self.requests, self.answers, self.polls = [], {}, []
+        self.cancels = self.closes = 0
         self.request_error = self.poll_error = self.close_error = None
 
     def request(self, snapshot):
@@ -55,21 +52,42 @@ class AutoplayUITests(unittest.TestCase):
         clock.advance(seconds)
         return ui.update(clock())
 
+    def press_up(self, ui, captured_at=None):
+        ui.set_pressed_mask(1)
+        return ui.handle('UP') if captured_at is None else ui.handle_sampled('UP', captured_at)
+
+    def release_up(self, ui):
+        return ui.set_pressed_mask(0)
+
+    def tap_up(self, ui, captured_at=None):
+        self.press_up(ui, captured_at)
+        self.release_up(ui)
+
     def start_auto(self, ui, clock):
-        ui.handle('UP')
+        self.tap_up(ui)
         clock.advance(.1)
-        ui.handle('UP')
+        self.tap_up(ui)
         self.assertTrue(ui.autoplay)
 
     def answer(self, ui, clock, advisor, mask):
         advisor.answers[ui._advisor_token] = {'mask': mask, 'expected_value': 1.25}
         self.tick(ui, clock)
 
-    def test_single_up_requests_visible_detached_hand_without_holding_or_spending(self):
+    def normal_frame(self, ui):
+        state = dict(ui._visual if ui._visual is not None else ui.session.snapshot())
+        state.update(_button_focus=ui.button_focus, _speed=ui.speed, _badge_frame=ui._badge_frame)
+        return ui.renderer.render(state, ui.selected_card, ui.selected_hand, ui.menu)
+
+    def finish_selections(self, ui, clock):
+        self.tick(ui, clock, ui.AUTO_CONSIDER_SECONDS+.01)
+        self.assertEqual(ui._auto_stage, 'select')
+        for _ in range(5): self.tick(ui, clock, ui.AUTO_SELECT_SECONDS+.01)
+        self.assertEqual(ui._auto_stage, 'draw')
+
+    def test_held_up_requests_visible_detached_hand_without_holding_or_spending(self):
         ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN')
-        before = ui.session.snapshot()
-        ui.handle('UP')
+        ui.handle('DOWN'); before = ui.session.snapshot()
+        self.press_up(ui)
         self.assertEqual(ui.session.snapshot(), before)
         self.assertEqual(len(advisor.requests), 1)
         request = advisor.requests[0]
@@ -80,80 +98,105 @@ class AutoplayUITests(unittest.TestCase):
         request['initial'][0] = -1
         self.assertEqual(ui.session.snapshot(), before)
         self.answer(ui, clock, advisor, 0b10100)
+        for _ in range(12): self.tick(ui, clock, .5)
+        self.assertEqual(len(advisor.requests), 1)
         self.assertEqual(ui.session.snapshot(), before)
+        self.assertTrue(ui.hint_visible)
         self.assertFalse(ui.autoplay)
-        self.assertEqual(ui._advice['mask'], 0b10100)
-        # A held button emits no further action: repeated frames do not request
-        # another solve, debit a bet, or change the recommended mask.
-        for _ in range(12): self.tick(ui, clock, .1)
-        self.assertEqual(len(advisor.requests), 1)
-        self.assertEqual(ui.session.snapshot(), before)
 
-    def test_recommendation_flashes_bright_red_on_only_recommended_card_rings(self):
+    def test_red_peek_is_solid_only_on_recommended_cards_and_clears_on_release(self):
         ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN'); ui.handle('CENTER'); ui.handle('UP')
-        before = ui.render()
-        self.answer(ui, clock, advisor, 0b10101)
-        on = ui.render()
+        ui.handle('DOWN'); ui.handle('CENTER')
+        self.press_up(ui); self.answer(ui, clock, advisor, 0b10101)
         red = (255, 32, 32)
-        for index in range(5):
-            x = (103+87*index)//2-1
-            self.assertEqual(on.getpixel((x, 150)) == red, bool(0b10101 & (1 << index)))
-        # HELD labels and the original source-rendered cards stay intact.
-        self.assertEqual(on.crop((57, 184, 87, 202)).tobytes(), before.crop((57, 184, 87, 202)).tobytes())
-        self.tick(ui, clock, ui.HINT_FLASH_SECONDS+.01)
-        off = ui.render()
-        self.assertFalse(ui._hint_flash)
-        self.assertEqual(off.crop((0, 120, 270, 196)).tobytes(), before.crop((0, 120, 270, 196)).tobytes())
-        self.tick(ui, clock, ui.HINT_FLASH_SECONDS)
-        self.assertTrue(ui._hint_flash)
+        for elapsed in (0, .28, .5, 1.7, 4.0):
+            self.tick(ui, clock, elapsed)
+            frame = ui.render(); normal = self.normal_frame(ui)
+            self.assertTrue(ui.hint_visible)
+            for index in range(5):
+                x = (103+87*index)//2-1
+                self.assertEqual(frame.getpixel((x, 150)) == red, bool(0b10101 & (1 << index)))
+            self.assertEqual(frame.crop((57, 184, 87, 202)).tobytes(), normal.crop((57, 184, 87, 202)).tobytes())
+            # No instructions, analyzing banner, AUTO text or footer overlay.
+            self.assertEqual(frame.crop((0, 197, 320, 240)).tobytes(), normal.crop((0, 197, 320, 240)).tobytes())
+        last_edge = ui._last_up
+        self.assertTrue(self.release_up(ui))
+        self.assertFalse(ui.hint_visible)
+        self.assertEqual(ui._last_up, last_edge)
+        self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+        self.assertEqual(advisor.cancels, 1)
 
-    def test_draw_five_advice_has_no_red_card_and_clear_status(self):
+    def test_pending_and_draw_five_peeks_add_no_text_or_other_pixels(self):
         ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN'); ui.handle('UP')
+        ui.handle('DOWN'); self.press_up(ui)
+        self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
         self.answer(ui, clock, advisor, 0)
-        words = []
-        original = ui.renderer.text
-        def capture(draw, xy, text, *args, **kwargs):
-            words.append(str(text))
-            return original(draw, xy, text, *args, **kwargs)
-        ui.renderer.text = capture
-        frame = ui.render()
-        self.assertIn('DRAW FIVE', words)
-        self.assertNotIn((255, 32, 32), frame.crop((40, 130, 270, 196)).getdata())
-
-    def test_ready_hint_never_bets_and_double_up_starts_one_deal(self):
-        ui, clock, advisor = self.make_ui()
-        before = ui.session.snapshot()
-        ui.handle('UP')
-        self.assertEqual(ui.session.snapshot(), before)
-        self.assertTrue(ui._advice_notice)
-        self.assertEqual(advisor.requests, [])
-        clock.advance(.2); ui.handle('UP')
-        self.assertTrue(ui.autoplay)
+        self.assertTrue(ui.hint_visible)
+        self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
         self.assertIsNone(ui.notice)
-        self.tick(ui, clock)
-        self.assertEqual(ui.session.phase, 'hold')
-        self.assertEqual(ui.session.credits, 9900)
-        self.assertEqual(len(advisor.requests), 1)
-        for _ in range(5): self.tick(ui, clock, .1)
-        self.assertEqual(ui.session.credits, 9900)
-        self.assertEqual(len(advisor.requests), 1)
 
-    def test_autoplay_applies_exact_mask_then_draws_and_waits_before_next_bet(self):
+    def test_released_pending_answer_is_never_polled_or_rendered(self):
         ui, clock, advisor = self.make_ui()
-        self.start_auto(ui, clock)
+        ui.handle('DOWN'); self.press_up(ui)
+        token = ui._advisor_token
+        self.assertTrue(self.release_up(ui))
+        advisor.answers[token] = {'mask': 31}
+        self.tick(ui, clock, 5)
+        self.assertNotIn(token, advisor.polls)
+        self.assertIsNone(ui._advice)
+        self.assertFalse(ui.hint_visible)
+        self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+
+    def test_queued_up_already_released_before_dispatch_cannot_show_late_hint(self):
+        ui, clock, advisor = self.make_ui()
+        ui.handle('DOWN'); before = ui.session.snapshot()
+        ui.set_pressed_mask(0)
+        ui.handle_sampled('UP', clock()-.2)
         self.tick(ui, clock)
-        before = ui.session.snapshot()
+        self.assertEqual(advisor.requests, [])
+        self.assertFalse(ui.hint_visible)
+        self.assertEqual(ui.session.snapshot(), before)
+        self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+
+    def test_ready_and_result_up_are_silent_but_real_double_taps_start_auto(self):
+        for phase in ('ready', 'result'):
+            with self.subTest(phase=phase):
+                ui, clock, advisor = self.make_ui()
+                if phase == 'result': ui.handle('DOWN'); ui.handle('DOWN')
+                before = ui.session.snapshot()
+                self.tap_up(ui)
+                self.assertEqual(ui.session.snapshot(), before)
+                self.assertIsNone(ui.notice)
+                self.assertEqual(advisor.requests, [])
+                self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+                clock.advance(.2); self.tap_up(ui)
+                self.assertTrue(ui.autoplay)
+                self.assertFalse(ui.hint_visible)
+
+    def test_autoplay_paces_each_selection_then_draw_and_results_without_extra_debits(self):
+        ui, clock, advisor = self.make_ui()
+        self.start_auto(ui, clock); self.tick(ui, clock)
+        dealt_at = clock(); before = ui.session.snapshot()
         self.answer(ui, clock, advisor, 0b01010)
-        self.assertEqual(ui.session.held, [False]*5)
-        self.tick(ui, clock, ui.AUTO_HINT_SECONDS-.01)
-        self.assertEqual(ui.session.phase, 'hold')
+        self.assertEqual(ui._auto_stage, 'consider')
+        self.tick(ui, clock, ui.AUTO_CONSIDER_SECONDS-.01)
         self.assertEqual(ui.session.held, [False]*5)
         self.tick(ui, clock, .02)
-        self.assertEqual(ui.session.held, [False, True, False, True, False])
-        self.assertEqual(ui.session.credits, before['credits'])
-        self.tick(ui, clock, ui.AUTO_HOLD_SECONDS+.01)
+        self.assertEqual((ui._auto_stage, ui.selected_card), ('select', 0))
+        self.assertEqual(ui.session.held, [False]*5)
+        expected = [False]*5
+        for index in range(5):
+            self.tick(ui, clock, ui.AUTO_SELECT_SECONDS-.01)
+            self.assertEqual(ui.session.held, expected)
+            self.tick(ui, clock, .02)
+            expected[index] = bool(0b01010 & (1 << index))
+            self.assertEqual(ui.session.held, expected)
+            self.assertEqual(ui.selected_card, min(4, index+1))
+            self.assertEqual(ui.session.credits, before['credits'])
+        self.assertEqual(ui._auto_stage, 'draw')
+        self.tick(ui, clock, ui.AUTO_HOLD_SECONDS-.01)
+        self.assertEqual(ui.session.phase, 'hold')
+        self.tick(ui, clock, .02)
         result = ui.session.snapshot()
         self.assertEqual(result['phase'], 'result')
         self.assertEqual(result['rounds'], 1)
@@ -166,78 +209,93 @@ class AutoplayUITests(unittest.TestCase):
         self.tick(ui, clock, .02)
         self.assertEqual(ui.session.phase, 'hold')
         self.assertEqual(ui.session.credits, result['credits']-result['total_bet'])
-        self.assertEqual(ui.session.rounds, 1)
         self.assertEqual(ui.session.active_multipliers, result['multipliers'])
+        self.assertEqual(ui.session.rounds, 1)
+        self.assertGreaterEqual(clock()-dealt_at, 15.25)
+        self.assertLess(clock()-dealt_at, 16)
         self.assertEqual(len(advisor.requests), 2)
 
-    def test_autoplay_replaces_existing_holds_instead_of_only_adding(self):
+    def test_autoplay_images_are_exactly_normal_yellow_focus_and_held_tags(self):
         ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN'); ui.handle('CENTER')
+        ui.handle('DOWN'); self.start_auto(ui, clock)
+        # Keep UP physically held while auto runs: still no red or labels.
+        ui.set_pressed_mask(1)
+        self.answer(ui, clock, advisor, 0b10101)
+        for seconds in (0, 2, 4.01, .66, .66, .66, .66, .66, 2.01, 0):
+            self.tick(ui, clock, seconds)
+            self.assertTrue(ui.autoplay)
+            self.assertFalse(ui.hint_visible)
+            self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
+        self.assertEqual(ui.session.phase, 'result')
+        self.assertEqual(ui.session.held, [True, False, True, False, True])
+
+    def test_slow_frame_advances_only_one_card_and_never_catches_up_in_a_burst(self):
+        ui, clock, advisor = self.make_ui()
+        ui.handle('DOWN'); self.start_auto(ui, clock)
+        self.answer(ui, clock, advisor, 31)
+        self.tick(ui, clock, 6.01)
+        self.tick(ui, clock, 10)
         self.assertEqual(ui.session.held, [True, False, False, False, False])
-        self.start_auto(ui, clock)
+        self.assertEqual(ui.selected_card, 1)
+        self.tick(ui, clock)
+        self.assertEqual(ui.session.held, [True, False, False, False, False])
+
+    def test_autoplay_replaces_existing_holds_one_position_at_a_time(self):
+        ui, clock, advisor = self.make_ui()
+        ui.handle('DOWN'); ui.handle('CENTER'); self.start_auto(ui, clock)
         self.answer(ui, clock, advisor, 0b10010)
-        self.tick(ui, clock, ui.AUTO_HINT_SECONDS+.01)
+        self.finish_selections(ui, clock)
         self.assertEqual(ui.session.held, [False, True, False, False, True])
 
-    def test_other_manual_actions_cancel_auto_and_advice_before_their_normal_action(self):
+    def test_other_manual_actions_stop_auto_before_their_normal_action(self):
         for action in ('LEFT', 'RIGHT', 'CENTER', 'KEY1', 'KEY2', 'KEY3', 'DOWN'):
             with self.subTest(action=action):
                 ui, clock, advisor = self.make_ui()
                 ui.handle('DOWN'); self.start_auto(ui, clock)
-                token = ui._advisor_token
+                token = ui._advisor_token; cancels = advisor.cancels
                 advisor.answers[token] = {'mask': 31}
                 ui.handle(action)
                 self.assertFalse(ui.autoplay)
                 self.assertIsNone(ui._advice)
                 self.assertIsNone(ui._advisor_token)
-                self.assertEqual(advisor.cancels, 1)
-                snapshot = ui.session.snapshot()
-                self.tick(ui, clock, 10)
+                self.assertEqual(advisor.cancels, cancels+1)
+                snapshot = ui.session.snapshot(); self.tick(ui, clock, 30)
                 self.assertEqual(ui.session.snapshot(), snapshot)
                 self.assertNotIn(token, advisor.polls)
                 if action in ('CENTER', 'KEY1', 'KEY2'):
                     self.assertEqual(ui.session.held, [True, False, False, False, False])
-                elif action == 'DOWN':
-                    self.assertEqual(ui.session.phase, 'result')
-                    self.assertEqual(ui.session.rounds, 1)
-                elif action == 'KEY3':
-                    self.assertEqual(ui.button_focus, 0)
+                elif action == 'DOWN': self.assertEqual(ui.session.phase, 'result')
+                elif action == 'KEY3': self.assertEqual(ui.button_focus, 0)
 
-    def test_double_up_turns_auto_off_and_slow_single_taps_do_not_enable_it(self):
+    def test_double_tap_crosses_releases_and_turns_auto_off(self):
         ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN'); ui.handle('UP')
-        clock.advance(.36); ui.handle('UP')
+        ui.handle('DOWN'); self.tap_up(ui)
+        clock.advance(.36); self.tap_up(ui)
         self.assertFalse(ui.autoplay)
-        self.assertEqual(len(advisor.requests), 1)
-        clock.advance(.1); ui.handle('UP')
+        clock.advance(.1); self.tap_up(ui)
         self.assertTrue(ui.autoplay)
-        clock.advance(.1); ui.handle('UP')
+        clock.advance(.1); self.tap_up(ui)
         self.assertTrue(ui.autoplay)
-        clock.advance(.1); ui.handle('UP')
+        clock.advance(.1); self.tap_up(ui)
         self.assertFalse(ui.autoplay)
         self.assertIsNone(ui._advisor_token)
-        self.assertIsNone(ui._advice)
 
-    def test_menu_and_bottom_focus_up_down_never_request_advice_or_start_auto(self):
+    def test_menu_and_bottom_focus_up_down_never_start_peek_or_auto(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('KEY3')
         for action in ('UP', 'DOWN', 'UP', 'UP'): ui.handle(action)
-        self.assertFalse(ui.autoplay)
-        self.assertEqual(advisor.requests, [])
-        ui.button_focus = 0
-        ui.handle('KEY2')
+        ui.button_focus = 0; ui.handle('KEY2')
         self.assertEqual(ui.menu['page'], 'paytable')
+        ui.set_pressed_mask(1)
         for action in ('UP', 'UP', 'DOWN'): ui.handle(action)
+        self.tick(ui, clock)
         self.assertEqual(ui.menu['bet'], 2)
         self.assertFalse(ui.autoplay)
+        self.assertFalse(ui.hint_visible)
         self.assertEqual(advisor.requests, [])
-        ui.handle('KEY2')
-        self.assertEqual(ui.menu['page'], 'controls')
-        ui.handle('DOWN'); ui.handle('UP')
-        self.assertEqual(ui.menu['index'], 0)
         self.assertEqual(ui.session.credits, 10000)
 
-    def test_changed_board_and_mismatched_token_cannot_apply_stale_advice(self):
+    def test_changed_board_and_wrong_token_cannot_apply_stale_advice(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.start_auto(ui, clock)
         token = ui._advisor_token
@@ -247,144 +305,136 @@ class AutoplayUITests(unittest.TestCase):
         self.assertEqual(ui._advisor_token, token)
         ui.session.initial[0] = (ui.session.initial[0]+1) % 52
         advisor.answers[token] = {'mask': 31, 'token': token}
-        before = ui.session.snapshot()
-        self.tick(ui, clock)
+        before = ui.session.snapshot(); self.tick(ui, clock)
         self.assertFalse(ui.autoplay)
         self.assertIsNone(ui._advisor_token)
         self.assertEqual(ui.session.snapshot(), before)
-        self.assertEqual(advisor.cancels, 1)
 
-    def test_strategy_errors_and_malformed_answers_pause_without_game_mutation(self):
+    def test_strategy_failures_are_silent_and_do_not_retry_each_held_frame(self):
         answers = ({'error': 'unsupported'}, {'mask': -1}, {'mask': 32},
                    {'mask': True}, {'mask': 1.0}, {}, [], 'bad')
-        for answer in answers:
-            with self.subTest(answer=answer):
-                ui, clock, advisor = self.make_ui()
-                ui.handle('DOWN'); self.start_auto(ui, clock)
-                before = ui.session.snapshot()
-                advisor.answers[ui._advisor_token] = answer
-                self.tick(ui, clock)
-                self.assertEqual(ui.session.snapshot(), before)
-                self.assertFalse(ui.autoplay)
-                self.assertEqual(ui.notice, 'Best hold unavailable')
+        for auto in (False, True):
+            for answer in answers:
+                with self.subTest(auto=auto, answer=answer):
+                    ui, clock, advisor = self.make_ui()
+                    ui.handle('DOWN')
+                    if auto: self.start_auto(ui, clock)
+                    else: self.press_up(ui)
+                    before = ui.session.snapshot()
+                    advisor.answers[ui._advisor_token] = answer
+                    self.tick(ui, clock)
+                    requests = len(advisor.requests)
+                    for _ in range(5): self.tick(ui, clock, 1)
+                    self.assertEqual(len(advisor.requests), requests)
+                    self.assertEqual(ui.session.snapshot(), before)
+                    self.assertFalse(ui.autoplay)
+                    self.assertIsNone(ui.notice)
+                    self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
         for stage in ('request', 'poll'):
-            with self.subTest(stage=stage):
-                ui, clock, advisor = self.make_ui()
-                ui.handle('DOWN')
-                setattr(advisor, stage+'_error', RuntimeError('unsupported'))
-                before = ui.session.snapshot()
-                ui.handle('UP'); self.tick(ui, clock)
-                self.assertEqual(ui.session.snapshot(), before)
-                self.assertFalse(ui.autoplay)
-                self.assertEqual(ui.notice, 'Best hold unavailable')
+            ui, clock, advisor = self.make_ui(); ui.handle('DOWN')
+            setattr(advisor, stage+'_error', RuntimeError('unsupported'))
+            before = ui.session.snapshot(); self.press_up(ui); self.tick(ui, clock)
+            self.assertEqual(ui.session.snapshot(), before)
+            self.assertIsNone(ui.notice)
+            self.assertFalse(ui.hint_visible)
 
-    def test_insufficient_credits_pause_auto_without_refill_or_extra_deal(self):
+    def test_insufficient_credits_pause_auto_without_refilling_or_an_extra_deal(self):
         ui, clock, advisor = self.make_ui(credits=20)
         self.start_auto(ui, clock); self.tick(ui, clock)
         self.assertFalse(ui.autoplay)
         self.assertTrue(ui._credit_notice)
         self.assertEqual(ui.session.phase, 'ready')
         self.assertEqual(ui.session.credits, 20)
-        self.assertEqual(advisor.requests, [])
-        self.tick(ui, clock, 20)
+        self.tick(ui, clock, 30)
         self.assertEqual(ui.session.credits, 20)
         ui.handle('KEY2')
         self.assertEqual(ui.session.credits, 10020)
         self.assertEqual(ui.session.phase, 'ready')
         self.assertFalse(ui.autoplay)
 
-    def test_entropy_failure_pauses_auto_and_leaves_retry_manual(self):
+    def test_entropy_failure_pauses_auto_with_a_manual_retry(self):
         class Blocked:
             def sample(self, population, count): raise RandomNotReady('wait')
-        ui, clock, advisor = self.make_ui(rng=Blocked())
-        before = ui.session.snapshot()
+        ui, clock, advisor = self.make_ui(rng=Blocked()); before = ui.session.snapshot()
         self.start_auto(ui, clock); self.tick(ui, clock)
         self.assertFalse(ui.autoplay)
         self.assertEqual(ui.session.snapshot(), before)
         self.assertTrue(ui._entropy_notice)
         self.assertEqual(advisor.requests, [])
 
-    def test_auto_animation_never_debits_or_draws_before_presentation_finishes(self):
-        ui, clock, advisor = self.make_ui()
-        ui.speed = 0
+    def test_consideration_and_result_timers_start_after_full_animation(self):
+        ui, clock, advisor = self.make_ui(); ui.speed = 0
         self.start_auto(ui, clock); self.tick(ui, clock)
         self.assertIsNotNone(ui._animation)
         self.answer(ui, clock, advisor, 31)
-        self.tick(ui, clock, ui.AUTO_HINT_SECONDS+.01)
-        self.assertEqual(ui.session.phase, 'hold')
-        self.assertEqual(ui.session.credits, 9900)
+        self.assertIsNone(ui._auto_due)
+        self.tick(ui, clock, .66)
+        self.assertIsNone(ui._animation)
+        due = ui._auto_due
+        self.assertEqual(due, clock()+6)
+        self.tick(ui, clock, 5.99)
         self.assertEqual(ui.session.held, [False]*5)
-        self.tick(ui, clock, .1)
-        self.tick(ui, clock, ui.AUTO_HINT_SECONDS+.01)
-        self.tick(ui, clock, ui.AUTO_HOLD_SECONDS+.01)
-        self.assertEqual(ui.session.phase, 'result')
+        self.tick(ui, clock, .02)
+        for _ in range(5): self.tick(ui, clock, .66)
+        self.tick(ui, clock, 2.01)
+        result = ui.session.snapshot()
+        self.assertEqual(result['phase'], 'result')
         self.assertIsNotNone(ui._animation)
-        before = ui.session.snapshot()
         self.tick(ui, clock, .2)
-        self.assertEqual(ui.session.snapshot(), before)
-        # The result wait starts after the last result animation frame.
+        self.assertEqual(ui._auto_stage, 'result-animation')
         self.tick(ui, clock, 2)
-        self.assertEqual(ui.session.snapshot(), before)
-        self.tick(ui, clock, ui.AUTO_RESULT_SECONDS-.01)
-        self.assertEqual(ui.session.snapshot(), before)
+        self.assertEqual(ui.session.snapshot(), result)
+        self.assertEqual(ui._auto_due, clock()+4)
+        self.tick(ui, clock, 3.99)
+        self.assertEqual(ui.session.snapshot(), result)
         self.tick(ui, clock, .02)
         self.assertEqual(ui.session.phase, 'hold')
-        self.assertEqual(ui.session.credits, before['credits']-before['total_bet'])
+        self.assertEqual(ui.session.credits, result['credits']-result['total_bet'])
 
-    def test_pause_hook_cancels_solver_and_close_is_idempotent(self):
+    def test_pause_and_close_cleanup_preserve_fail_closed_shutdown(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.start_auto(ui, clock)
-        before = ui.session.snapshot()
-        self.assertTrue(ui.pause_autoplay())
-        self.assertFalse(ui.pause_autoplay())
-        self.assertEqual(advisor.cancels, 1)
-        self.assertEqual(ui.session.snapshot(), before)
-        ui.close(); ui.close()
-        self.assertEqual(advisor.closes, 1)
-        self.assertFalse(ui.handle('DOWN'))
-        self.assertFalse(ui.update(clock()))
-        self.assertEqual(ui.session.snapshot(), before)
-
-    def test_advisor_shutdown_failure_propagates_for_launcher_fail_closed_guard(self):
-        ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN'); self.start_auto(ui, clock)
+        before = ui.session.snapshot(); cancels = advisor.cancels
+        self.assertTrue(ui.pause_autoplay()); self.assertFalse(ui.pause_autoplay())
+        self.assertEqual(advisor.cancels, cancels+1)
         advisor.close_error = RuntimeError('worker did not stop')
-        with self.assertRaisesRegex(RuntimeError, 'worker did not stop'):
-            ui.close()
-        self.assertFalse(ui.autoplay)
-        self.assertEqual(advisor.cancels, 1)
+        with self.assertRaisesRegex(RuntimeError, 'worker did not stop'): ui.close()
         self.assertFalse(ui._closed)
         advisor.close_error = None
-        ui.close()
-        self.assertTrue(ui._closed)
+        ui.close(); ui.close()
         self.assertEqual(advisor.closes, 2)
-
-    def test_slow_separate_up_taps_drained_together_never_start_autoplay(self):
-        ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN')
-        before = ui.session.snapshot()
-        # Two 600 ms-separated captured edges arrive in one LCD-stalled batch.
-        ui.handle_sampled('UP', clock()-0.70)
-        ui.handle_sampled('UP', clock()-0.10)
-        self.assertFalse(ui.autoplay)
+        self.assertFalse(ui.handle('DOWN'))
+        self.assertFalse(ui.update(clock()))
+        self.assertFalse(ui.set_pressed_mask(1))
         self.assertEqual(ui.session.snapshot(), before)
-        self.assertEqual(len(advisor.requests), 1)
 
-    def test_real_double_up_survives_separate_delayed_ui_dispatches(self):
-        ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN')
-        captured = clock()-0.05
+    def test_separate_sampled_taps_drained_together_cannot_become_a_double(self):
+        ui, clock, advisor = self.make_ui(); ui.handle('DOWN')
+        ui.set_pressed_mask(0)
+        ui.handle_sampled('UP', clock()-.70)
+        ui.handle_sampled('UP', clock()-.10)
+        self.assertFalse(ui.autoplay)
+        self.assertEqual(advisor.requests, [])
+        self.assertFalse(ui.hint_visible)
+
+    def test_real_double_survives_released_levels_and_delayed_dispatch(self):
+        ui, clock, advisor = self.make_ui(); ui.handle('DOWN')
+        captured = clock()-.05
+        ui.set_pressed_mask(0)
         ui.handle_sampled('UP', captured)
-        clock.advance(.65)  # A slow redraw delays delivery of the second edge.
+        clock.advance(.65)
         ui.handle_sampled('UP', captured+.20)
         self.assertTrue(ui.autoplay)
-        self.assertEqual(ui._captured_input_at, None)
+        self.assertFalse(ui.hint_visible)
+        self.assertIsNone(ui._captured_input_at)
 
-    def test_invalid_sampled_time_cannot_toggle_autoplay(self):
+    def test_invalid_sampled_times_or_masks_cannot_enable_auto(self):
         ui, clock, advisor = self.make_ui()
         for invalid in (None, True, '100', float('nan'), float('inf')):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 ui.handle_sampled('UP', invalid)
+        for invalid in (None, True, '1', -1, 256):
+            with self.subTest(mask=invalid), self.assertRaises(ValueError): ui.set_pressed_mask(invalid)
         self.assertFalse(ui.autoplay)
 
 
