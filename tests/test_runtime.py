@@ -1,0 +1,266 @@
+"""Runtime behavior tests without real GPIO, SPI or importing SeedSigner."""
+import importlib.util
+from pathlib import Path
+import sys
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("poker_launcher", ROOT / "payload/opt/dino/launcher.py")
+launcher = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(launcher)
+sys.path.insert(0, str(ROOT / "payload/opt/dino"))
+from input_harness import SynchronousInput
+
+
+class Clock:
+    def __init__(self):
+        self.now = 0.0
+    def __call__(self):
+        return self.now
+    def sleep(self, duration):
+        self.now += duration
+        if self.now > 12:
+            raise AssertionError("Runtime did not finish its explicit gesture")
+
+
+class FakeHardware:
+    def __init__(self, clock, trace, events):
+        self.clock, self.trace, self.events = clock, trace, events
+    def __enter__(self):
+        self.events.append("open")
+        return self
+    def __exit__(self, *args):
+        self.events.append("close")
+    def read_mask(self):
+        result = self.trace(self.clock())
+        if isinstance(result, BaseException):
+            raise result
+        return result
+    def present(self, frame):
+        self.events.append(("frame", frame))
+    def show_message(self, message, detail):
+        self.events.append(("message", message, detail))
+
+
+class FakeUI:
+    def __init__(self):
+        self.actions = []
+    def handle(self, action):
+        self.actions.append(action)
+    def update(self, now):
+        return False
+    def render(self):
+        return "RGB320x240"
+
+
+class GateTests(unittest.TestCase):
+    def test_full_chord_and_every_key_release_are_required(self):
+        gate = launcher.HoldReleaseGate()
+        chord = launcher.SIGNER_CHORD
+        self.assertFalse(gate.update(0, chord))
+        self.assertFalse(gate.update(1.999, chord))
+        self.assertFalse(gate.update(2.0, chord))
+        self.assertTrue(gate.latched)
+        self.assertFalse(gate.update(3.0, launcher.KEY2))
+        self.assertFalse(gate.update(3.1, 0))
+        self.assertFalse(gate.update(3.179, 0))
+        self.assertTrue(gate.update(3.181, 0))
+
+    def test_interrupted_hold_does_not_count_towards_next_hold(self):
+        gate = launcher.HoldReleaseGate()
+        chord = launcher.SIGNER_CHORD
+        for now, mask in ((0, chord), (1.9, launcher.KEY1), (2.0, chord), (3.999, chord)):
+            self.assertFalse(gate.update(now, mask))
+        self.assertFalse(gate.latched)
+        gate.update(4.0, chord)
+        self.assertTrue(gate.latched)
+
+    def test_clock_regression_cannot_complete_a_gate(self):
+        gate = launcher.HoldReleaseGate()
+        gate.update(100, launcher.SIGNER_CHORD)
+        gate.update(102, launcher.SIGNER_CHORD)
+        self.assertFalse(gate.update(1, 0))
+        self.assertFalse(gate.latched)
+
+
+class RouterTests(unittest.TestCase):
+    def setUp(self):
+        self.router = launcher.InputRouter()
+        self.router.update(0, 0)
+        self.router.update(.081, 0)
+
+    def test_held_deal_key_emits_only_one_edge(self):
+        actions = []
+        for now in (.1, .14, .2, .5, 1.0):
+            unlock, events = self.router.update(now, launcher.KEY2)
+            self.assertFalse(unlock)
+            actions.extend(events)
+        self.assertEqual(actions, ["KEY2"])
+
+    def test_bounce_does_not_emit_a_deal(self):
+        actions = []
+        for now, mask in ((.1, launcher.KEY2), (.11, 0), (.12, launcher.KEY2), (.13, 0), (.2, 0)):
+            actions.extend(self.router.update(now, mask)[1])
+        self.assertEqual(actions, [])
+
+    def test_outer_key_is_a_release_action(self):
+        self.router.update(.1, launcher.KEY1)
+        self.assertEqual(self.router.update(.14, launcher.KEY1)[1], ())
+        self.router.update(.2, 0)
+        self.assertEqual(self.router.update(.24, 0)[1], ("KEY1",))
+
+    def test_short_chord_does_not_hold_a_card_or_open_menu(self):
+        actions = []
+        for now, mask in ((.1, launcher.KEY1), (.14, launcher.KEY1),
+                          (.2, launcher.SIGNER_CHORD), (.24, launcher.SIGNER_CHORD),
+                          (.7, 0), (.75, 0), (.9, 0)):
+            unlock, events = self.router.update(now, mask)
+            self.assertFalse(unlock)
+            actions.extend(events)
+        self.assertEqual(actions, [])
+
+    def test_long_chord_suppresses_every_ordinary_action(self):
+        actions = []
+        trace = ((.1, launcher.KEY1), (.14, launcher.KEY1),
+                 (.2, launcher.SIGNER_CHORD), (.24, launcher.SIGNER_CHORD),
+                 (2.21, launcher.SIGNER_CHORD | launcher.KEY2),
+                 (2.3, launcher.KEY2), (2.4, 0), (2.481, 0))
+        for now, mask in trace:
+            unlock, events = self.router.update(now, mask)
+            actions.extend(events)
+        self.assertTrue(unlock)
+        self.assertEqual(actions, [])
+
+    def test_held_key_at_boot_requires_release_before_any_action(self):
+        router = launcher.InputRouter()
+        for now in (0, .1, .5):
+            self.assertEqual(router.update(now, launcher.KEY2), (False, ()))
+        router.update(.6, 0)
+        router.update(.69, 0)
+        router.update(.8, launcher.KEY2)
+        self.assertEqual(router.update(.84, launcher.KEY2)[1], ("KEY2",))
+
+    def test_invalid_masks_are_rejected(self):
+        for mask in (-1, 256, True, None, "0"):
+            with self.assertRaises(ValueError):
+                self.router.update(.1, mask)
+
+    def test_twenty_ms_taps_register_once_for_every_button(self):
+        for bit, action in enumerate(launcher.BUTTONS):
+            with self.subTest(action=action):
+                router = launcher.InputRouter()
+                actions = []
+                for tick in range(61):
+                    now = tick * .005
+                    mask = (1 << bit) if 20 <= tick < 24 else 0
+                    actions.extend(router.update(now, mask)[1])
+                self.assertEqual(actions, [action])
+
+    def test_other_button_bounce_does_not_restart_a_stable_key_timer(self):
+        actions = []
+        for now, mask in ((.100, launcher.KEY2), (.105, launcher.KEY2 | 1),
+                          (.110, launcher.KEY2), (.115, launcher.KEY2 | 1),
+                          (.120, 0), (.125, 1), (.130, 0), (.145, 0)):
+            actions.extend(self.router.update(now, mask)[1])
+        self.assertEqual(actions, ['KEY2'])
+
+
+class RuntimeTests(unittest.TestCase):
+    def test_handoff_closes_hardware_before_starting_signer(self):
+        clock, events, ui = Clock(), [], FakeUI()
+        hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
+        launcher.main(["test"], hardware_factory=lambda: hardware, ui_factory=lambda: ui,
+                      clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
+                      signer_runner=lambda argv: events.append(("signer", argv)))
+        self.assertEqual(events[0], "open")
+        self.assertEqual(events[-2:], ["close", ("signer", ["test"])])
+        self.assertEqual(ui.actions, [])
+        self.assertFalse(any(name.startswith("seedsigner") for name in sys.modules))
+
+    def test_game_failure_offers_retry_and_does_not_automatically_open_signer(self):
+        clock, events, attempts = Clock(), [], []
+        def trace(t):
+            if .2 <= t < .5:
+                return launcher.KEY2
+            return launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0
+        hardware = FakeHardware(clock, trace, events)
+        def broken_ui():
+            attempts.append(clock())
+            raise RuntimeError("game import failed")
+        launcher.main(hardware_factory=lambda: hardware, ui_factory=broken_ui,
+                      clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
+                      signer_runner=lambda argv: events.append("signer"))
+        self.assertEqual(len(attempts), 2)
+        self.assertGreaterEqual(clock(), 3.28)
+        self.assertEqual(events[-2:], ["close", "signer"])
+        self.assertTrue(any(isinstance(event, tuple) and event[0] == "message" for event in events))
+
+    def test_gpio_failure_interrupts_the_signer_hold(self):
+        clock, events, ui = Clock(), [], FakeUI()
+        def trace(t):
+            if .1 <= t < 2.1 or 3 <= t < 5.2:
+                return launcher.SIGNER_CHORD
+            if 2.1 <= t < 2.2:
+                return OSError("GPIO read failed")
+            return 0
+        hardware = FakeHardware(clock, trace, events)
+        launcher.run_poker_gate(lambda: hardware, lambda: ui, clock, clock.sleep, input_factory=SynchronousInput)
+        self.assertGreaterEqual(clock(), 5.28)
+        self.assertEqual(events[-1], "close")
+
+    def test_render_failure_remains_in_recovery_until_deliberate_exit(self):
+        clock, events = Clock(), []
+        class BrokenRender(FakeUI):
+            def render(self):
+                raise RuntimeError("render failure")
+        hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
+        launcher.run_poker_gate(lambda: hardware, BrokenRender, clock, clock.sleep, input_factory=SynchronousInput)
+        self.assertEqual(events[-1], "close")
+        self.assertGreaterEqual(clock(), 3.28)
+
+    def test_dead_input_worker_recovers_with_a_delay_and_never_opens_signer(self):
+        clock, events, ui = Clock(), [], FakeUI()
+        hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1.2 <= t < 3.4 else 0, events)
+        attempts = []
+        class DeadInput:
+            running = False
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+            def read(self):
+                raise launcher.InputServiceError('worker unavailable')
+        def factory(hw, *, clock):
+            attempts.append(clock())
+            return DeadInput() if len(attempts) == 1 else SynchronousInput(hw, clock=clock)
+        launcher.main(hardware_factory=lambda: hardware, ui_factory=lambda: ui,
+                      clock=clock, sleep=clock.sleep, input_factory=factory,
+                      signer_runner=lambda argv: events.append('signer'))
+        self.assertEqual(len(attempts), 2)
+        self.assertGreaterEqual(attempts[1] - attempts[0], 1.0)
+        self.assertEqual(events.count('close'), 2)
+        self.assertEqual(events[-2:], ['close', 'signer'])
+        self.assertEqual(ui.actions, [])
+
+    def test_stuck_worker_aborts_without_gpio_cleanup_or_signer_entry(self):
+        clock, events = Clock(), []
+        hardware = FakeHardware(clock, lambda t: 0, events)
+        class StuckInput:
+            running = True
+            def __init__(self, hardware, *, clock):
+                pass
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                raise launcher.InputShutdownError('worker still owns GPIO')
+            def read(self):
+                return True, ()
+        with self.assertRaises(launcher.InputShutdownError):
+            launcher.main(hardware_factory=lambda: hardware, ui_factory=FakeUI,
+                          clock=clock, sleep=clock.sleep, input_factory=StuckInput,
+                          signer_runner=lambda argv: events.append('signer'))
+        self.assertEqual(events, ['open'])
+
+
+if __name__ == "__main__":
+    unittest.main()
