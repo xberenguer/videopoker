@@ -3,12 +3,141 @@
   "mode": "strategy-and-ui-functional-only",
   "python": "3.12.10 (main, Apr 22 2025, 18:36:40) [GCC 13.3.0]",
   "pillow": "10.3.0",
-  "version": "0.4.8",
+  "version": "0.5.1",
   "machine": "armv6l",
   "native_resolution": [
     320,
     240
   ],
+  "cabinet": {
+    "status": "PASS",
+    "games": [
+      {
+        "game_id": "bp3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 18,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bpd3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 17,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 27,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 15,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "job5",
+        "hands": 5,
+        "deck_size": 52,
+        "mask": 27,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "db5",
+        "hands": 5,
+        "deck_size": 52,
+        "mask": 5,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "joker5",
+        "hands": 5,
+        "deck_size": 53,
+        "mask": 15,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw5",
+        "hands": 5,
+        "deck_size": 52,
+        "mask": 0,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bp10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 5,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 5,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "tdb10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 30,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dwb10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 24,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      }
+    ],
+    "menu_boot_checked": true,
+    "real_async_advice_all_twelve": true,
+    "two_press_M_preserved": true,
+    "all_workers_joined": true
+  },
   "strategy_and_autoplay": {
     "status": "PASS",
     "known_cases": [
@@ -158,94 +287,97 @@
     "hint_hold_delay_seconds": 0.3,
     "hint_invisible_before_hold_delay_even_with_ready_advice": true,
     "release_removes_all_advice_pixels": true,
+    "draw_five_real_advice_mask": 0,
+    "draw_five_only_actual_draw_button_flashes_red": true,
+    "draw_hint_flash_cycle_seconds": 1.0,
     "autoplay_normal_renderer_with_small_footer_a_only": true,
     "paced_autoplay_fake_clock_checks": {
       "consider": 3,
       "draw": 3,
       "result": 2,
-      "one_card_per_update": 545
+      "one_card_per_update": 304
     },
     "autoplay_stage_timeline": [
       {
-        "time": 4.05,
+        "time": 4.63,
         "stage": "consider",
         "phase": "hold",
         "completed_rounds": 0
       },
       {
-        "time": 10.6,
+        "time": 8.23,
         "stage": "select",
         "phase": "hold",
         "completed_rounds": 0
       },
       {
-        "time": 12.6,
+        "time": 9.48,
         "stage": "draw",
         "phase": "hold",
         "completed_rounds": 0
       },
       {
-        "time": 13.1,
+        "time": 9.78,
         "stage": "result-animation",
         "phase": "result",
         "completed_rounds": 1
       },
       {
-        "time": 13.9,
+        "time": 10.33,
         "stage": "result",
         "phase": "result",
         "completed_rounds": 1
       },
       {
-        "time": 16.4,
+        "time": 11.68,
         "stage": "consider",
         "phase": "hold",
         "completed_rounds": 1
       },
       {
-        "time": 22.9,
+        "time": 15.23,
         "stage": "select",
         "phase": "hold",
         "completed_rounds": 1
       },
       {
-        "time": 24.9,
+        "time": 16.48,
         "stage": "draw",
         "phase": "hold",
         "completed_rounds": 1
       },
       {
-        "time": 25.4,
+        "time": 16.78,
         "stage": "result-animation",
         "phase": "result",
         "completed_rounds": 2
       },
       {
-        "time": 26.2,
+        "time": 17.33,
         "stage": "result",
         "phase": "result",
         "completed_rounds": 2
       },
       {
-        "time": 28.7,
+        "time": 18.68,
         "stage": "consider",
         "phase": "hold",
         "completed_rounds": 2
       },
       {
-        "time": 35.25,
+        "time": 22.23,
         "stage": "select",
         "phase": "hold",
         "completed_rounds": 2
       },
       {
-        "time": 37.5,
+        "time": 23.48,
         "stage": "draw",
         "phase": "hold",
         "completed_rounds": 2
       },
       {
-        "time": 38.05,
+        "time": 23.78,
         "stage": "result-animation",
         "phase": "result",
         "completed_rounds": 3
@@ -253,12 +385,14 @@
     ],
     "pacing_profiles": [
       {
-        "name": "slow",
-        "consider": 6.0,
-        "select": 0.4,
-        "draw": 0.5,
-        "result": 2.5,
-        "animation": 0.1
+        "name": "manual",
+        "consider": 1.6,
+        "select": 0.12,
+        "draw": 0.15,
+        "result": 0.8,
+        "animation": 0.04,
+        "manual": true,
+        "instant": true
       },
       {
         "name": "medium",
@@ -278,11 +412,11 @@
       }
     ],
     "double_up_speed_cycle_keeps_hand_and_autoplay": [
-      1,
       2,
-      0
+      0,
+      1
     ],
-    "triple_up_toggles_auto_both_directions_without_speed_change": true,
+    "triple_up_toggles_both_directions_without_speed_change": true,
     "manual_double_up_sets_best_holds_without_draw_or_spend": true,
     "held_up_during_auto_does_not_change_speed": true,
     "medium_one_chevron_fast_two_chevrons": true,
@@ -291,7 +425,21 @@
     "three_captured_up_edges_060_apart_never_auto": true,
     "three_captured_up_edges_020_apart_with_100_dispatch_gap_activate": true,
     "stop_key_consumed_without_game_action": true,
+    "fresh_down_during_draw_immediately_deals_next_hand_once": true,
+    "fresh_down_during_deal_only_reveals_cards": true,
     "both_advisor_workers_joined": true,
+    "manual_autoplay_real_advisor_cycles": 2,
+    "manual_autoplay_waits_without_debit_until_down": true,
+    "manual_autoplay_two_down_presses_per_round": true,
+    "manual_autoplay_waits_after_deal_before_holds_or_draw": true,
+    "manual_autoplay_ready_advice_draw_without_pacing_or_animation": true,
+    "manual_autoplay_default_first_mode": true,
+    "manual_autoplay_m_native_size": [
+      5,
+      4
+    ],
+    "manual_autoplay_marker": "A M beside speaker",
+    "all_advisor_workers_joined": true,
     "table_sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2",
     "bellman_span": 3.512923285597935e-11,
     "scope": "Actual delivered Python strategy, async advisor and UI in stock ARM emulation; fake presentation clock; fixture Random injection only"
@@ -337,6 +485,26 @@
       ],
       "mode": "RGB"
     },
+    "draw-hint": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": true,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "draw-hint-pulse": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": true,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
     "autoplay": {
       "phase": "hold",
       "autoplay": true,
@@ -356,16 +524,183 @@
         240
       ],
       "mode": "RGB"
+    },
+    "autoplay-manual": {
+      "phase": "hold",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "autoplay-manual-wait": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-menu": {
+      "phase": "ready",
+      "autoplay": false,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-bp3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-bpd3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-ddb3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-dw3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-job5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-db5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-joker5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-dw5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-bp10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-ddb10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-tdb10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-dwb10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
     }
   },
   "autoplay_rounds_checked": 3,
   "png_sha256": {
-    "autoplay.png": "e21b2e674812626a7c62f83973b9fc6f1f676491c9d80a22dae3fd47022bf2a6",
+    "autoplay.png": "dafc92c44f3e7f03377e791f42162d6aee074ffe77d31f8a546ea5a6c6b8d37e",
+    "autoplay-manual.png": "d5134f8b6797ab8dab00f2003dbca17b5e17b8584e8e5ee8e5c4b4bde930afbf",
+    "autoplay-manual-wait.png": "962cfabc703b2fbc200416a44f7b578625c377902014963add68969b1dd2db22",
+    "cabinet-bp10.png": "6437da5ea5b5fd63cd466ac151ccf107b660a4cb5f3bcd09f0ae543d05ca6c2c",
+    "cabinet-bp3.png": "7a209de6c12d19491fa4162dcba2180aa7a5dcfb45df3f4091fc488122e6996f",
+    "cabinet-bpd3.png": "e09e392421e36f60fb3ae3daa222ef76813dfc254e5ba5bc94d9f908e618b7d4",
+    "cabinet-db5.png": "ee105262edeeb31e70dfd54eb820c823024b33213c8269e6e270b29122b08e39",
+    "cabinet-ddb10.png": "e8bc8eeb1defedc81e0cab8a0447cfd14a775341c49502069ad9b5b8aa6f2bc6",
+    "cabinet-ddb3.png": "37dec0664896dc12bcb739715a4fe4a349a8bee82d0a6c01a0f0841e5988d12c",
+    "cabinet-dw3.png": "b305ca31b4cc4e6c6827986ddf5b26948eea522ae3ebad47f74aade16ba75cd4",
+    "cabinet-dw5.png": "e4118057bf0a6d0ae73604e0647d6afad9498a4fbd0174d2269c5f8992abcc19",
+    "cabinet-dwb10.png": "244ccf88a7761d2f9a51a1af686debcad31c0bd59dc8a254abe6607e0d9350cd",
+    "cabinet-job5.png": "619145606cb2e3ce53d4ed0f6101be69fe8a0071b105ccae7ef79562ae08f6aa",
+    "cabinet-joker5.png": "a39e2bf1bbfba9a22c96b003cbd7a1e605adb06a1d0f2470f09e7e03fe2cbd7d",
+    "cabinet-menu.png": "a968a2746e57f254888d6c9d5fd5d35c6916436bdb1f95b0cf732430d1fa0d77",
+    "cabinet-tdb10.png": "d9bd2d1b951e94ae0181027e3a7d67b777bedbbcf6752a76ac0ebe19a0f65fcc",
+    "draw-hint.png": "402f9fbaef25774e8bdb7c74fb2c0a7dbeb9b9b22cb1d2dbb98d205af16d686a",
+    "draw-hint-pulse.png": "387bdfd09001ce1f73847715510d799f51df1b071226716975e9db7359b136cf",
     "hint-on.png": "a91cd2c9359f4bb413d56e6845c159068f5fd1c280b90aae8a1402d1dde5438b",
     "hold.png": "04e51ef5631f51815a3bacf0fdccfe31f5b9726223912e6cd074350157e3c575",
     "manual-best-hold.png": "209ba549e0fb4d7204ac848b701a66af79ac17f63476a9e40581b88c5d1f6ae2",
     "ready.png": "2979b24f7eb66dd6aa2bb193b6afa72b0eb9f005d0120975c92d7bcbbcfe8831",
-    "result.png": "f43ff4c3b2ba3017ef11ef21160621495d7066043dca10312344580c14699d3d"
+    "result.png": "681356109298cb60e4fc267298ec375f5f07bcc19367f574269824c509d366c4"
   },
   "input_wall_clock_qualification": "NOT CLAIMED",
   "full_probe_timing_report_replaced": false,
@@ -376,7 +711,7 @@
   "physical_buttons_tested": false,
   "camera_or_signing_tested": false,
   "production_rng_path_tested": false,
-  "duration_seconds": 7.47,
+  "duration_seconds": 18.312,
   "guest_png_readback_verified": true,
   "qemu_only_dtb_changes": {
     "/soc/watchdog@7e100000": "disabled",
@@ -387,7 +722,7 @@
   "probe_mode": "strategy-and-ui-functional-only",
   "diagnostic_clock": "virtual-instruction-clock; no wall-clock qualification",
   "production_dtb_modified": false,
-  "production_image_sha256": "beccafbc3508b42974c44b1fe5a9f40333cb4225c267fb2b6f542b919f8d52ee",
+  "production_image_sha256": "517bf36b4d8c233c29cbbb6e6900a6586045e6c5a579508f7153f21f4f98ebb0",
   "qemu_only_dtb_sha256": "c7f851ff2da226f072fad7df58eb9882f51c779504113244a5f7e4cab498e175",
   "qemu_termination": "Stopped after completed guest marker or bounded timeout",
   "marker_polling": "Lightweight mtools mtype; full FAT decode only after completion",

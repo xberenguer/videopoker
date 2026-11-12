@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import struct
+import stat
 import zlib
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +50,14 @@ def minimal_payload(root):
 
 
 class PayloadTests(unittest.TestCase):
+    def test_gzip_overlay_is_deterministic_and_decodes_to_identical_newc(self):
+        records={'start.sh':(stat.S_IFREG|0o755,b'#!/bin/sh\n')}
+        first=image.pack_overlay(records)
+        self.assertEqual(first,image.pack_overlay(records))
+        self.assertEqual(image.inspect_newc(first),image.inspect_newc(image.pack_newc(records)))
+        for damaged in (first[:-1],first+b'unexpected suffix',b'\x1f\x8bnot gzip'):
+            with self.assertRaises(ValueError):image.inspect_newc(damaged)
+
     def test_payload_newc_roundtrip_preserves_every_byte(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

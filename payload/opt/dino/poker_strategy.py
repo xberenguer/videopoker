@@ -207,8 +207,12 @@ class StrategyAdvisor:
         self._thread = threading.Thread(target=self._run, name='poker-advisor', daemon=True)
         self._thread.start()
 
+    @staticmethod
+    def _freeze_round(snapshot):
+        return _round(snapshot)
+
     def request(self, snapshot):
-        frozen = _round(snapshot)
+        frozen = self._freeze_round(snapshot)
         with self._condition:
             if self._closed:
                 raise StrategyError('Advisor is closed')

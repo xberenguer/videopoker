@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "method": "two independent full regular-file image builds",
+  "sha256": "08bf8991e438942da429934f02820a9633518a72cfa866cc6876c08312a3544b",
+  "runtime_files": 199,
+  "stock_files_preserved": 334,
+  "gzip_overlay": true
+}

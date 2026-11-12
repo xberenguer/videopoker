@@ -7,6 +7,9 @@ kernel rebuilds, network access, or private keys are involved.
 """
 import argparse
 import hashlib
+import gzip
+import io
+import zlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -27,7 +30,7 @@ OVERLAY_NAME = "poker-overlay.cpio"
 INITRAMFS_LINE = "initramfs poker-overlay.cpio followkernel"
 SETTINGS = {"persistent_settings": "E", "display_config": "st7789_320x240"}
 EXECUTABLES = {"start.sh"}
-PROJECT_VERSION = "0.4.8"
+PROJECT_VERSION = "0.5.1"
 
 
 def sha(data):
@@ -111,8 +114,23 @@ def pack_newc(records):
     return bytes(archive)
 
 
+def pack_overlay(records):
+    buffer=io.BytesIO()
+    with gzip.GzipFile(fileobj=buffer,mode='wb',filename='',mtime=0,compresslevel=9) as stream:
+        stream.write(pack_newc(records))
+    return buffer.getvalue()
+
+
 def inspect_newc(data):
     """Independent strict decoder; does not extract or execute archive contents."""
+    if data[:2] == b"\x1f\x8b":
+        decoder=zlib.decompressobj(16+zlib.MAX_WBITS)
+        try:
+            data=decoder.decompress(data,32*1024*1024+1)
+        except zlib.error as error:
+            raise ValueError('Invalid compressed overlay') from error
+        if len(data)>32*1024*1024 or not decoder.eof or decoder.unused_data:
+            raise ValueError('Invalid or oversized compressed overlay')
     result = {}
     offset = 0
     while True:
@@ -312,6 +330,7 @@ def inspect_image(path, base_path=None):
             "fat_files_sha256": {name: sha(content) for name, content in sorted(fat.files.items())},
             "overlay_sha256": sha(fat.files[OVERLAY_NAME]),
             "overlay_size_bytes": len(fat.files[OVERLAY_NAME]),
+            "overlay_encoding": "gzip-newc" if fat.files[OVERLAY_NAME][:2] == b"\x1f\x8b" else "newc",
             "overlay_entries": {name: {k: v for k, v in record.items() if k != "content"} for name, record in entries.items()},
             "hardware_tested": False, "physical_device_written": False,
             "project": "SeedSigner Poker", "project_version": PROJECT_VERSION,
@@ -328,7 +347,7 @@ def build(base, payload, output, mcopy="mcopy"):
         raise ValueError("Pinned upstream image hash/size does not match the pinned Pi Zero release")
     upstream = Fat16(original)
     records = collect_payload(payload)
-    archive = pack_newc(records)
+    archive = pack_overlay(records)
     if any(inspect_newc(archive)[name]["content"] != record[1] for name, record in records.items()):
         raise ValueError("CPIO readback mismatch")
     output = new_path(output)

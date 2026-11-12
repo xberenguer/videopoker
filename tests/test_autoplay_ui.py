@@ -47,6 +47,7 @@ class AutoplayUITests(unittest.TestCase):
         session_args.setdefault('rng', random.Random(250))
         ui = PokerUI(Session(**session_args), clock=clock, advisor=advisor)
         ui.speed = 2
+        ui.autoplay_speed = 1
         # Most controller tests isolate timing from animation presentation;
         # the real-profile test below restores all production animation values.
         ui.AUTO_PROFILES = tuple(dict(profile, animation=0) for profile in PokerUI.AUTO_PROFILES)
@@ -68,6 +69,7 @@ class AutoplayUITests(unittest.TestCase):
         self.release_up(ui)
 
     def start_auto(self, ui, clock):
+        desired_speed = ui.autoplay_speed
         self.tap_up(ui)
         self.assertFalse(ui.autoplay)
         clock.advance(.1)
@@ -76,6 +78,13 @@ class AutoplayUITests(unittest.TestCase):
         clock.advance(.1)
         self.tap_up(ui)
         self.assertTrue(ui.autoplay)
+        self.assertTrue(ui.manual_autoplay)
+        # Continuous-controller fixtures explicitly choose their profile after
+        # the production activation gesture, which always starts in M.
+        for _ in range(desired_speed):
+            self.double_up(ui, clock)
+            clock.advance(ui.UP_CLICK_GAP_SECONDS+ui.UP_TAP_COMMIT_GRACE_SECONDS+.01)
+            ui._commit_auto_up()
 
     def double_up(self, ui, clock):
         self.tap_up(ui)
@@ -92,7 +101,7 @@ class AutoplayUITests(unittest.TestCase):
     def normal_frame(self, ui):
         state = dict(ui._visual if ui._visual is not None else ui.session.snapshot())
         state.update(_button_focus=ui.button_focus,
-                     _speed=ui.autoplay_speed if ui.autoplay else ui.speed,
+                     _speed=ui.autoplay_display_speed if ui.autoplay else ui.speed,
                      _badge_frame=ui._badge_frame)
         return ui.renderer.render(state, ui.selected_card, ui.selected_hand, ui.menu)
 
@@ -145,25 +154,69 @@ class AutoplayUITests(unittest.TestCase):
         self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
         self.assertEqual(advisor.cancels, 1)
 
-    def test_pending_and_draw_five_peeks_add_no_text_or_other_pixels(self):
+    def test_pending_and_draw_five_hint_flashes_actual_draw_button_only(self):
         ui, clock, advisor = self.make_ui()
-        ui.handle('DOWN'); self.press_up(ui)
+        ui.handle('DOWN'); before=ui.session.snapshot(); self.press_up(ui)
         self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
         self.answer(ui, clock, advisor, 0)
         self.tick(ui, clock, ui.HINT_HOLD_SECONDS+.001)
         self.assertTrue(ui.hint_visible)
-        self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
-        self.assertIsNone(ui.notice)
+        for frame in range(8):
+            if frame:self.tick(ui,clock,ui.HINT_DRAW_FLASH_SECONDS/2)
+            image=ui.render();normal=self.normal_frame(ui)
+            box=ImageChops.difference(image,normal).getbbox()
+            if frame%2==0:
+                self.assertIsNotNone(box)
+                self.assertGreaterEqual(box[0],275);self.assertGreaterEqual(box[1],218)
+                self.assertLessEqual(box[2],319);self.assertLessEqual(box[3],234)
+                changed=sum(a!=b for a,b in zip(image.crop((275,218,319,234)).getdata(),
+                                               normal.crop((275,218,319,234)).getdata()))
+                self.assertGreater(changed,250) # Whole button face, not its outline.
+                # Dark lettering is retained rather than covered with a fill.
+                self.assertTrue(all(p==q for p,q in zip(image.crop((280,221,314,230)).getdata(),
+                    normal.crop((280,221,314,230)).getdata()) if max(q)<50))
+            else:self.assertIsNone(box)
+            self.assertEqual(ui.session.snapshot(),before);self.assertIsNone(ui.notice)
+        self.release_up(ui)
+        self.assertFalse(ui.hint_visible)
+        self.assertEqual(ui.render().tobytes(),self.normal_frame(ui).tobytes())
 
-    def test_released_pending_answer_is_never_polled_or_rendered(self):
+    def test_draw_hint_flash_restarts_only_for_a_new_continuous_hold(self):
+        ui, clock, advisor = self.make_ui()
+        ui.handle('DOWN');self.press_up(ui);self.answer(ui,clock,advisor,0)
+        self.tick(ui,clock,ui.HINT_HOLD_SECONDS+.01)
+        first=ui._draw_hint_started
+        self.tick(ui,clock,2);self.assertEqual(ui._draw_hint_started,first)
+        self.release_up(ui);self.tick(ui,clock,.5)
+        self.press_up(ui);self.answer(ui,clock,advisor,0)
+        self.assertIsNone(ui._draw_hint_started)
+        self.tick(ui,clock,ui.HINT_HOLD_SECONDS+.01)
+        self.assertGreater(ui._draw_hint_started,first)
+        self.assertFalse(ui.autoplay)
+
+    def test_quick_double_and_triple_with_draw_five_advice_show_no_red_draw(self):
+        for count in (2,3):
+            ui,clock,advisor=self.make_ui();ui.handle('DOWN')
+            for _ in range(count):
+                self.press_up(ui)
+                if ui._advisor_token is not None:self.answer(ui,clock,advisor,0)
+                self.tick(ui,clock,.08)
+                self.assertFalse(ui.hint_visible)
+                self.assertEqual(ui.render().crop((275,218,319,233)).tobytes(),
+                                 self.normal_frame(ui).crop((275,218,319,233)).tobytes())
+                self.release_up(ui);self.tick(ui,clock,.08)
+
+    def test_released_pending_answer_is_cached_without_showing_or_applying_it(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.press_up(ui)
         token = ui._advisor_token
-        self.assertTrue(self.release_up(ui))
+        before = ui.session.snapshot()
+        self.assertFalse(self.release_up(ui))  # No visible hint yet.
         advisor.answers[token] = {'mask': 31}
         self.tick(ui, clock, 5)
-        self.assertNotIn(token, advisor.polls)
-        self.assertIsNone(ui._advice)
+        self.assertIn(token, advisor.polls)
+        self.assertEqual(ui._advice['mask'], 31)
+        self.assertEqual(ui.session.snapshot(), before)
         self.assertFalse(ui.hint_visible)
         self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
 
@@ -218,10 +271,11 @@ class AutoplayUITests(unittest.TestCase):
     def test_queued_up_already_released_before_dispatch_cannot_show_late_hint(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); before = ui.session.snapshot()
+        requests = len(advisor.requests)
         ui.set_pressed_mask(0)
         ui.handle_sampled('UP', clock()-.2)
         self.tick(ui, clock)
-        self.assertEqual(advisor.requests, [])
+        self.assertEqual(len(advisor.requests), requests)
         self.assertFalse(ui.hint_visible)
         self.assertEqual(ui.session.snapshot(), before)
         self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
@@ -232,10 +286,11 @@ class AutoplayUITests(unittest.TestCase):
                 ui, clock, advisor = self.make_ui()
                 if phase == 'result': ui.handle('DOWN'); ui.handle('DOWN')
                 before = ui.session.snapshot()
+                requests = len(advisor.requests)
                 self.tap_up(ui)
                 self.assertEqual(ui.session.snapshot(), before)
                 self.assertIsNone(ui.notice)
-                self.assertEqual(advisor.requests, [])
+                self.assertEqual(len(advisor.requests), requests)
                 self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
                 clock.advance(.2); self.tap_up(ui)
                 self.assertFalse(ui.autoplay)
@@ -281,8 +336,8 @@ class AutoplayUITests(unittest.TestCase):
         self.assertEqual(ui.session.credits, result['credits']-result['total_bet'])
         self.assertEqual(ui.session.active_multipliers, result['multipliers'])
         self.assertEqual(ui.session.rounds, 1)
-        self.assertGreaterEqual(clock()-dealt_at, 11.0)
-        self.assertLess(clock()-dealt_at, 11.3)
+        self.assertGreaterEqual(clock()-dealt_at, 6.03)
+        self.assertLess(clock()-dealt_at, 6.3)
         self.assertEqual(len(advisor.requests), 2)
 
     def test_autoplay_uses_normal_yellow_and_only_adds_a_small_footer_a(self):
@@ -351,7 +406,7 @@ class AutoplayUITests(unittest.TestCase):
                 self.assertFalse(ui.hint_visible)
                 self.assertEqual(ui.render().tobytes(), self.normal_frame(ui).tobytes())
 
-    def test_double_tap_changes_speed_and_triple_tap_toggles_auto_without_changing_speed(self):
+    def test_double_tap_changes_speed_and_triple_stops_without_double_prefix(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.tap_up(ui)
         clock.advance(.36); self.tap_up(ui)
@@ -466,8 +521,8 @@ class AutoplayUITests(unittest.TestCase):
         self.tick(ui, clock, .66)
         self.assertIsNone(ui._animation)
         due = ui._auto_due
-        self.assertEqual(due, clock()+6)
-        self.tick(ui, clock, 5.99)
+        self.assertEqual(due, clock()+3.2)
+        self.tick(ui, clock, 3.19)
         self.assertEqual(ui.session.held, [False]*5)
         self.tick(ui, clock, .02)
         for _ in range(5): self.tick(ui, clock, .66)
@@ -479,8 +534,8 @@ class AutoplayUITests(unittest.TestCase):
         self.assertEqual(ui._auto_stage, 'result-animation')
         self.tick(ui, clock, 2)
         self.assertEqual(ui.session.snapshot(), result)
-        self.assertEqual(ui._auto_due, clock()+2.5)
-        self.tick(ui, clock, 2.49)
+        self.assertEqual(ui._auto_due, clock()+1.35)
+        self.tick(ui, clock, 1.34)
         self.assertEqual(ui.session.snapshot(), result)
         self.tick(ui, clock, .02)
         self.assertEqual(ui.session.phase, 'hold')
@@ -505,11 +560,12 @@ class AutoplayUITests(unittest.TestCase):
 
     def test_three_separate_sampled_taps_drained_together_cannot_start_auto(self):
         ui, clock, advisor = self.make_ui(); ui.handle('DOWN')
+        requests = len(advisor.requests)
         ui.set_pressed_mask(0)
         for captured in (clock()-1.2, clock()-.6, clock()):
             ui.handle_sampled('UP', captured)
         self.assertFalse(ui.autoplay)
-        self.assertEqual(advisor.requests, [])
+        self.assertEqual(len(advisor.requests), requests)
         self.assertFalse(ui.hint_visible)
 
     def test_real_triple_survives_released_levels_and_delayed_dispatch(self):
@@ -548,7 +604,7 @@ class AutoplayUITests(unittest.TestCase):
         self.press_up(ui); self.tick(ui, clock, .2)
         self.release_up(ui)
         self.assertTrue(ui.autoplay)
-        self.assertEqual(ui.autoplay_speed,0)
+        self.assertEqual(ui.autoplay_speed,1)
         self.assertEqual(ui.session.snapshot(),before)
         self.assertFalse(ui.hint_visible)
         self.assertEqual(len(advisor.requests), requests)
@@ -556,7 +612,7 @@ class AutoplayUITests(unittest.TestCase):
     def test_double_taps_cycle_speeds_and_a_single_hold_never_changes_speed(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); self.start_auto(ui, clock)
-        for previous, expected in ((0,1),(1,2),(2,0)):
+        for previous, expected in ((1,2),(2,0),(0,1)):
             before=ui.session.snapshot()
             self.double_up(ui,clock)
             self.tick(ui,clock,.34)
@@ -585,22 +641,22 @@ class AutoplayUITests(unittest.TestCase):
                     ui.set_pressed_mask_sampled(1,at)
                     ui.handle_sampled('UP',at)
                     ui.set_pressed_mask_sampled(0,at+.02)
-                    self.assertEqual(ui.autoplay_speed,0)
+                    self.assertEqual(ui.autoplay_speed,1)
                 self.tick(ui,clock)
                 self.assertEqual(ui.autoplay,clicks==2)
-                self.assertEqual(ui.autoplay_speed,1 if clicks==2 else 0)
+                self.assertEqual(ui.autoplay_speed,2 if clicks==2 else 1)
                 self.assertEqual(ui.session.snapshot(),before)
                 self.assertFalse(ui.hint_visible)
 
     def test_speed_change_preserves_the_remaining_phase_fraction_and_does_not_catch_up(self):
         ui,clock,advisor=self.make_ui()
         self.start_auto(ui,clock);self.tick(ui,clock)
-        self.answer(ui,clock,advisor,31);self.tick(ui,clock,3)
+        self.answer(ui,clock,advisor,31);self.tick(ui,clock,1.6)
         before=ui.session.snapshot()
         self.double_up(ui,clock);self.tick(ui,clock,10)
-        self.assertEqual(ui.autoplay_speed,1)
-        self.assertAlmostEqual(ui._auto_due-clock(),1.6)
-        self.tick(ui,clock,1.59)
+        self.assertEqual(ui.autoplay_speed,2)
+        self.assertAlmostEqual(ui._auto_due-clock(),.8)
+        self.tick(ui,clock,.79)
         self.assertEqual(ui.session.snapshot(),before)
         self.tick(ui,clock,.02)
         self.assertEqual(ui._auto_stage,'select')
@@ -615,7 +671,7 @@ class AutoplayUITests(unittest.TestCase):
                 self.double_up(ui,clock);self.tick(ui,clock,.1)
                 ui.handle(action)
                 self.assertFalse(ui.autoplay)
-                self.assertEqual(ui.autoplay_speed,0)
+                self.assertEqual(ui.autoplay_speed,1)
                 self.tick(ui,clock,20)
                 self.assertEqual(ui.session.snapshot(),before)
                 self.assertFalse(ui.hint_visible)
@@ -626,8 +682,8 @@ class AutoplayUITests(unittest.TestCase):
         before=ui.session.snapshot()
         progress=(clock()-ui._animation['started'])/ui._animation['interval']
         self.double_up(ui,clock);self.finish_up_sequence(ui,clock)
-        self.assertEqual(ui.autoplay_speed,1)
-        self.assertAlmostEqual(ui._animation['interval'],.065)
+        self.assertEqual(ui.autoplay_speed,2)
+        self.assertAlmostEqual(ui._animation['interval'],.04)
         self.assertAlmostEqual((clock()-ui._animation['started'])/ui._animation['interval'],progress)
         self.assertEqual(ui.session.snapshot(),before)
         self.assertTrue(ui.autoplay)
@@ -701,8 +757,8 @@ class AutoplayUITests(unittest.TestCase):
         self.assertEqual(ui.session.phase,'hold')
         self.assertEqual(ui.session.credits,before['credits'])
 
-    def test_all_three_production_profiles_keep_visible_card_steps_and_paced_results(self):
-        for index, expected_round in enumerate((12.3, 6.875, 3.67)):
+    def test_both_continuous_production_profiles_keep_card_steps_and_paced_results(self):
+        for index, expected_round in ((1,6.875),(2,3.67)):
             with self.subTest(speed=index):
                 ui, clock, advisor = self.make_ui()
                 ui.AUTO_PROFILES = PokerUI.AUTO_PROFILES
@@ -756,7 +812,7 @@ class AutoplayUITests(unittest.TestCase):
                 self.assertNotIn((255,255,0),list(frame.crop((256,212,262,214)).getdata()))
             if speed==1:
                 self.assertNotIn((255,255,0),list(frame.crop((259,208,262,212)).getdata()))
-        self.assertEqual(icon_pixels[0],0)
+        self.assertGreater(icon_pixels[0],0)
         self.assertGreater(icon_pixels[1],0)
         self.assertGreater(icon_pixels[2],icon_pixels[1])
         self.assertEqual(left_icons[1],left_icons[2])

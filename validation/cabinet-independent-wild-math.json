@@ -1,0 +1,522 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "method": "Independent rank/suit enumeration and physical draw checks for wild games.\n\nWild replacements are exhaustively assigned ranks. Suit multiplicities count\nall physical terminal hands without visiting millions of equivalent hands.\nThis oracle never calls the production evaluator, category counts or solver.\n",
+  "families": {
+    "deuces": {
+      "status": "PASS",
+      "all_physical_terminal_hands": 2598960,
+      "weighted_rank_suit_patterns": 7748,
+      "terminal_category_counts": {
+        "four_5k": 31552,
+        "full_house": 12672,
+        "three_kind": 355080,
+        "nothing": 2119728,
+        "straight_flush": 2068,
+        "straight": 62232,
+        "flush": 14472,
+        "royal_flush": 4,
+        "five_345": 156,
+        "five_6k": 416,
+        "wild_royal": 480,
+        "five_aces": 52,
+        "four_deuces": 44,
+        "four_deuces_ace": 4
+      },
+      "per_hand_oracle_checks": 1006,
+      "conditional_draw_checks": [
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 30,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 29,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 27,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 23,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 15,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 7,
+          "physical_completions": 1081
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            39,
+            12
+          ],
+          "mask": 25,
+          "physical_completions": 1081
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 30,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 29,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 27,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 23,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 15,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 7,
+          "physical_completions": 1081
+        },
+        {
+          "hand": [
+            0,
+            13,
+            26,
+            8,
+            12
+          ],
+          "mask": 25,
+          "physical_completions": 1081
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 30,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 29,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 27,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 23,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 15,
+          "physical_completions": 47
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 7,
+          "physical_completions": 1081
+        },
+        {
+          "hand": [
+            0,
+            13,
+            8,
+            9,
+            12
+          ],
+          "mask": 25,
+          "physical_completions": 1081
+        }
+      ],
+      "table_sha256": "cd6d00050613efe751b63f28f6073bdedf2e32abb236fe4b5259fac6dab98cda"
+    },
+    "joker": {
+      "status": "PASS",
+      "all_physical_terminal_hands": 2869685,
+      "weighted_rank_suit_patterns": 9997,
+      "terminal_category_counts": {
+        "four_5k": 3120,
+        "full_house": 6552,
+        "three_kind": 137280,
+        "two_pair": 123552,
+        "nothing": 2307672,
+        "straight_flush": 180,
+        "straight": 20532,
+        "flush": 7804,
+        "high_pair": 262956,
+        "royal_flush": 4,
+        "five_345": 4,
+        "five_6k": 8,
+        "wild_royal": 20,
+        "five_aces": 1
+      },
+      "per_hand_oracle_checks": 1006,
+      "conditional_draw_checks": [
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 30,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 29,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 27,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 23,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 15,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 7,
+          "physical_completions": 1128
+        },
+        {
+          "hand": [
+            52,
+            12,
+            25,
+            38,
+            51
+          ],
+          "mask": 25,
+          "physical_completions": 1128
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 30,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 29,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 27,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 23,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 15,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 7,
+          "physical_completions": 1128
+        },
+        {
+          "hand": [
+            52,
+            8,
+            9,
+            10,
+            12
+          ],
+          "mask": 25,
+          "physical_completions": 1128
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 30,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 29,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 27,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 23,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 15,
+          "physical_completions": 48
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 7,
+          "physical_completions": 1128
+        },
+        {
+          "hand": [
+            52,
+            11,
+            24,
+            0,
+            2
+          ],
+          "mask": 25,
+          "physical_completions": 1128
+        }
+      ],
+      "table_sha256": "ce149b8d3d55df49f91197cfea6bd85da1aebac430f4d938d615fec6e6f8412a"
+    }
+  },
+  "oracle_source_sha256": "89ba10b706c2e9d4fa882f2a3fbea58f18a53c2add9af33b4973340066c46a0e",
+  "duration_seconds": 2.5792500420000124,
+  "physical_hardware_tested": false
+}

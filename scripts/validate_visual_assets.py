@@ -20,10 +20,10 @@ from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageStat
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_ROLES = {
     "background": 3, "active-badge-frame": 13, "inactive-badge-frame": 7,
-    "card-front": 52, "card-back": 2, "glyph-atlas-bold": 1,
+    "card-front": 57, "card-back": 2, "glyph-atlas-bold": 1,
     "glyph-atlas-regular": 1, "gui": 23, "help-control": 7,
-    "help-screen": 6, "multiplier": 14, "multiplier-label": 1,
-    "win-indicator": 16,
+    "help-screen": 6, "multiplier": 18, "multiplier-label": 1,
+    "win-indicator": 16, "cabinet-tile":12, "cabinet-selection":1, "cabinet-return":1,
 }
 FONT_SOURCES = {
     "regular": Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
@@ -81,7 +81,7 @@ def audit_font(style, row, manifest, image):
     atlas = manifest["glyph_atlases"][style]
     require(atlas["path"] == row["path"], "font atlas points to different image")
     checked = 0
-    for size in (7, 11, 15, 19, 13.076923):
+    for size in (7, 11, 15, 19, 13.076923,15.454545,18.888889):
         font = ImageFont.truetype(str(expected_source), size)
         glyphs = atlas["sizes"][str(size)]["glyphs"]
         for char in "0123456789AJQKX./- ":
@@ -121,6 +121,7 @@ def audit_assets(project=ROOT):
     lost_animation = []
     public_count = 0
     verified_pixels = 0
+    verified_crops = 0
     verified_runtime = 0
     role_counts = dict(sorted(Counter(row.get("role") for row in rows).items()))
 
@@ -129,7 +130,7 @@ def audit_assets(project=ROOT):
             failures.append(message)
 
     check(manifest.get("schema") == 1, "manifest schema must be 1")
-    check(len(rows) == 146, "asset count must be 146")
+    check(len(rows) == 169, "cabinet asset count must be 169")
     check(role_counts == EXPECTED_ROLES, "asset role counts differ from the exact reference set")
     paths = [row["path"] for row in rows]
     check(len(set(paths)) == len(paths), "duplicate runtime asset paths")
@@ -151,6 +152,24 @@ def audit_assets(project=ROOT):
                 fonts.append(audit_font(style, row, manifest, image))
                 continue
             public_count += 1
+            if row.get('source_format','').startswith('visible-reference-screenshot'):
+                expected_sources=[project/'validation/cabinet/reference'/name for name in
+                                  ('menu-return-bp3-focus.png','cabinet-menu.png')]
+                source_path=next((p for p in expected_sources if p.is_file() and sha256(p.read_bytes())==row['source_sha256']),None)
+                require(source_path is not None,'missing hashed visible menu source')
+                source_image,_=decode_rgba(source_path.read_bytes())
+                if row['role']=='cabinet-tile':
+                    ids=('bp3','bpd3','ddb3','dw3','job5','db5','joker5','dw5','bp10','ddb10','tdb10','dwb10')
+                    tile=ids.index(Path(path).stem)
+                    x,y=30+157*(tile%4),74+100*(tile//4)
+                    box=tuple(round(v*1.3125) for v in (x,y,x+130,y+66))
+                    expected=source_image.crop(box).resize((130,66),Image.Resampling.LANCZOS)
+                elif row['role']=='cabinet-return':
+                    expected=source_image.crop((715,561,824,625)).resize((83,49),Image.Resampling.LANCZOS)
+                else:raise ValueError('unexpected reference crop role')
+                require(expected.tobytes()==image.tobytes(),'visible reference crop pixels differ')
+                verified_crops+=1
+                continue
             parsed = urlparse(row["source_url"])
             require(parsed.scheme == "https" and parsed.hostname == "media.vidpok.com",
                     "unexpected public image origin")
@@ -173,11 +192,12 @@ def audit_assets(project=ROOT):
         except (OSError, ValueError, KeyError, TypeError) as error:
             failures.append(path + ": " + str(error))
 
-    check(public_count == 144, "expected 144 public source image entries")
-    check(verified_pixels == 144, "not all 144 public image pixel identities were verified")
+    check(public_count == 167, "expected 167 public source image entries")
+    check(verified_pixels == 154, "not all 154 original image pixel identities were verified")
+    check(verified_crops == 13, "not all thirteen visible-reference crops were verified")
     check(len(fonts) == 2, "both installed font provenance checks must pass")
     check({r["path"] for r in rows if r["role"] == "card-front"} ==
-          {"cards/" + str(n) + ".png" for n in range(52)}, "52 named card faces must be present")
+          ({"cards/" + str(n) + ".png" for n in range(52)} | {"cards/"+n+".png" for n in ("Joker","0w","13w","26w","39w")}), "52 standard faces plus joker/four wild deuces must be present")
     check({r["path"] for r in rows if r["role"] == "card-back"} ==
           {"cards/Back.png", "cards/Back_Disabled.png"}, "both actual card backs must be present")
     by_path = {row["path"]: row for row in rows}
@@ -211,7 +231,7 @@ def audit_assets(project=ROOT):
         "scope": "Local original-byte SHA and exact decoded frame-0 RGBA identity; not a license clearance or whole-screen match",
         "manifest_sha256": sha256(manifest_bytes), "asset_count": len(rows),
         "runtime_pngs_verified": verified_runtime, "public_source_images": public_count,
-        "exact_rgba_pixel_identities": verified_pixels,
+        "exact_rgba_pixel_identities": verified_pixels, "visible_reference_crops_verified":verified_crops,
         "identity_set_sha256": sha256(proof), "roles": role_counts,
         "source_animation_policy": "Every cached source must have exactly one frame; badge animation uses individually preserved source files",
         "unsupported_lost_animation": lost_animation, "badge_sequence_frames": sequence_frames,

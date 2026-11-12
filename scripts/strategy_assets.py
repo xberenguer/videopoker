@@ -45,6 +45,8 @@ def validate_strategy_inventory(files):
             or not math.isfinite(bias['bellman_span'])
             or not 0 <= bias['bellman_span'] <= 0.000001):
         raise ValueError('Uncertified strategy continuation values')
-    return {'table_sha256': digest, 'table_bytes': len(raw),
+    from cabinet_strategy_assets import validate_cabinet_inventory
+    cabinet=validate_cabinet_inventory(files)
+    return {'cabinet':cabinet, 'table_sha256': digest, 'table_bytes': len(raw),
             'metadata_sha256': hashlib.sha256(description).hexdigest(),
             'states': len(reachable), 'bellman_span': bias['bellman_span']}

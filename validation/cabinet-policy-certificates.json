@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "status": "PASS",
+  "games": {
+    "bpd3": {
+      "policy-certificate.json": {
+        "gain": 29.871362583488192,
+        "return": 0.995712086116273,
+        "stationary_norm_error": 0,
+        "stationary_min_probability": 3.789044211091254e-09,
+        "stationary_residual": 4.9683347713713744e-14,
+        "transition_row_error": 5.129230373768223e-14,
+        "poisson_span": 2.723155034800584e-11,
+        "bias_comparison_max_error": 4.8544279707130045e-11,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "9fe88195b5a2c325882db3772370011999e3a71a139c0b43c89fa22f5deb82d6"
+      }
+    },
+    "joker5": {
+      "policy-certificate.json": {
+        "gain": 48.640416666211706,
+        "return": 0.9728083333242341,
+        "stationary_norm_error": 3.3306690738754696e-16,
+        "stationary_min_probability": 3.951057069908602e-11,
+        "stationary_residual": 4.275833159761433e-14,
+        "transition_row_error": 4.529709940470639e-14,
+        "poisson_span": 4.403943876241101e-11,
+        "bias_comparison_max_error": 2.241904439870268e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "b7e99bf628ce3595995f00bd9db5de9cc9f2414c387afc37eac6a7e83b658899"
+      }
+    },
+    "job5": {
+      "policy-certificate.json": {
+        "gain": 49.70038176415276,
+        "return": 0.9940076352830551,
+        "stationary_norm_error": 1.1102230246251565e-16,
+        "stationary_min_probability": 1.299968188807339e-14,
+        "stationary_residual": 4.364997946426641e-14,
+        "transition_row_error": 4.529709940470639e-14,
+        "poisson_span": 7.496225862269057e-11,
+        "bias_comparison_max_error": 1.4719603314006235e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "62938b359fa79c367a51a790f80bb3e97ffbb2585d321795116cdbfafba0a6cf"
+      }
+    },
+    "bp3": {
+      "policy-certificate.json": {
+        "gain": 29.78483344204111,
+        "return": 0.9928277814013703,
+        "stationary_norm_error": 2.220446049250313e-16,
+        "stationary_min_probability": 4.118365787971404e-09,
+        "stationary_residual": 5.711923989348833e-14,
+        "transition_row_error": 5.861977570020827e-14,
+        "poisson_span": 3.2301272767654154e-11,
+        "bias_comparison_max_error": 5.562981186812976e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "b729104f453aebc9b971cf6d8f85f968a9dead83cf4ed58c7e2bd7fcc83b95a9"
+      }
+    },
+    "dw3": {
+      "policy-certificate.json": {
+        "gain": 29.73844892030168,
+        "return": 0.9912816306767226,
+        "stationary_norm_error": 2.220446049250313e-16,
+        "stationary_min_probability": 0.00010438187347457327,
+        "stationary_residual": 2.3719741448768872e-14,
+        "transition_row_error": 2.5424107263916085e-14,
+        "poisson_span": 1.3603340676127118e-11,
+        "bias_comparison_max_error": 8.72262262419099e-11,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "67e6b1aba1ccc20726a2169ca27e16d9162584560f0dfc62033408ed4f18e927"
+      }
+    },
+    "dw5": {
+      "policy-certificate.json": {
+        "gain": 49.6328536526207,
+        "return": 0.992657073052414,
+        "stationary_norm_error": 1.1102230246251565e-16,
+        "stationary_min_probability": 2.5846444893716494e-06,
+        "stationary_residual": 5.6170996673432505e-14,
+        "transition_row_error": 5.695444116327053e-14,
+        "poisson_span": 9.445955129194772e-11,
+        "bias_comparison_max_error": 1.9704771148099098e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "0330e49098e847c2304d59a30250e62956c9325a788cc52b058339c26f3ef89c"
+      }
+    },
+    "tdb10": {
+      "policy-certificate.json": {
+        "gain": 98.79275798344436,
+        "return": 0.9879275798344436,
+        "stationary_norm_error": 9.992007221626409e-16,
+        "stationary_min_probability": -9.50175407654069e-20,
+        "stationary_residual": 2.7812821490336148e-14,
+        "transition_row_error": 3.219646771412954e-14,
+        "poisson_span": 3.3944047572731506e-10,
+        "bias_comparison_max_error": 5.319975571183022e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "57cb1666ed79d3e34fb319c3fa3ad7beee88a0419109269aa08251bca1c69660"
+      }
+    },
+    "ddb10": {
+      "policy-certificate.json": {
+        "gain": 99.8663394862666,
+        "return": 0.998663394862666,
+        "stationary_norm_error": 6.661338147750939e-16,
+        "stationary_min_probability": 2.690119915439508e-28,
+        "stationary_residual": 5.584074869169342e-15,
+        "transition_row_error": 7.327471962526033e-15,
+        "poisson_span": 6.959055554034421e-11,
+        "bias_comparison_max_error": 3.8619418774032965e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "18c545efb39bee7f17d13fa8abf571b1679f6d4d84e670d21618d6cdd5228c13"
+      }
+    },
+    "db5": {
+      "policy-certificate.json": {
+        "gain": 48.68821595063232,
+        "return": 0.9737643190126464,
+        "stationary_norm_error": 1.1102230246251565e-16,
+        "stationary_min_probability": 1.2614620158336078e-14,
+        "stationary_residual": 2.57073008713693e-14,
+        "transition_row_error": 2.708944180085382e-14,
+        "poisson_span": 4.2241765640937956e-11,
+        "bias_comparison_max_error": 1.5555201571260113e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "a24ac3be1e7a54a592c8fa0a30ea897e683ee40d50d1bb6419ab5449dfbe6a7c"
+      }
+    },
+    "dwb10": {
+      "policy-certificate.json": {
+        "gain": 99.95836905755137,
+        "return": 0.9995836905755137,
+        "stationary_norm_error": 2.220446049250313e-16,
+        "stationary_min_probability": 9.60078419934578e-18,
+        "stationary_residual": 7.678645046194088e-15,
+        "transition_row_error": 1.0436096431476471e-14,
+        "poisson_span": 9.268319445254747e-11,
+        "bias_comparison_max_error": 1.907665136968717e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "4b53991a5b01d7d9f771c1d671df42594ad7b751834b62bc9d5b938d55c51f37"
+      }
+    },
+    "ddb3": {
+      "policy-certificate.json": {
+        "gain": 29.917829787374625,
+        "return": 0.9972609929124875,
+        "stationary_norm_error": 0,
+        "stationary_min_probability": 4.337938885874002e-09,
+        "stationary_residual": 5.44434289317941e-14,
+        "transition_row_error": 6.017408793468348e-14,
+        "poisson_span": 2.9963587167003425e-11,
+        "bias_comparison_max_error": 5.1244342103018425e-11,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "59cbac46be88eb5777d6e2fdf65577a3ef35a6fe82fb2893b7e4af6a7b3f58b5"
+      }
+    },
+    "bp10": {
+      "policy-certificate.json": {
+        "gain": 99.40344577696838,
+        "return": 0.9940344577696838,
+        "stationary_norm_error": 1.1102230246251565e-16,
+        "stationary_min_probability": 2.2082134087695176e-28,
+        "stationary_residual": 5.005978270800071e-15,
+        "transition_row_error": 1.021405182655144e-14,
+        "poisson_span": 7.02300440025283e-11,
+        "bias_comparison_max_error": 3.531681613822002e-10,
+        "arithmetic": "long double accumulation; Gaussian elimination policy evaluation"
+      },
+      "input-binding.json": {
+        "generator_sha256": "d0128de5212ba9576f4839ffb9e0fb1bf6a8f98d356b0d0648381d622088e981",
+        "config_sha256": "c765319f8871527750cbe4dd8ce13f677faf8bc65b78d82dbc923ebd6fc5cba8"
+      }
+    }
+  }
+}

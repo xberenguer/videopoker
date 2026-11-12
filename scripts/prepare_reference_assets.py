@@ -57,10 +57,10 @@ def targets():
 
 
 
-def glyph_atlases(runtime):
+def glyph_atlases(runtime, extra_sizes=(), extra_labels=()):
     """Rasterize installed Arial once; no TTF is copied into the runtime."""
     rows, atlases = [], {}
-    sizes = list(range(5, 41)) + [13.076923]
+    sizes = list(range(5, 41)) + [13.076923] + list(extra_sizes)
     labels = ['Royal Flush', 'Straight Flush', '4 Aces w/2,3,4',
               '4 2s,3s,4s w/Ace,2,3,4', '4 Aces', '4 2s,3s,4s',
               '4 5s thru Ks', 'Full House', 'Flush', 'Straight', '3 of a Kind',
@@ -69,6 +69,7 @@ def glyph_atlases(runtime):
               'INACTIVE X LOST ON DEAL', 'BET', 'HELP', 'RETURN TO GAME']
     labels.extend(['4 Aces w/ 2,3,4', '4 2s,3s,4s w/ Ace 2,3,4'])
     labels += [label.upper() for label in labels]
+    labels.extend(extra_labels)
     pairs = sorted({text[i:i+2] for text in labels for i in range(len(text)-1)})
     for style, name in [('regular', 'Arial.ttf'), ('bold', 'Arial Bold.ttf')]:
         source = Path('/System/Library/Fonts/Supplemental')/name

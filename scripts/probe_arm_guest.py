@@ -510,7 +510,7 @@ try:
         'total_emulated_seconds':round(time.monotonic()-strategy_start,3)}
     stage('strategy-autoplay-complete')
     report={'status':'PASS','python':sys.version,'pillow':PIL.__version__,
-            'version':'0.4.8','visual_assets':asset_proof,
+            'version':'0.4.9','visual_assets':asset_proof,
             'physical_control_mapping':physical_control_mapping,
             'machine':os.uname().machine,'rounds_checked':107,
             'engine_rounds_checked':102,'runtime_rounds_checked':2,
@@ -575,7 +575,7 @@ poweroff -f
 
 
 def main():
-    from build_poker_image import Fat16, inspect_newc, pack_newc
+    from build_poker_image import Fat16, inspect_newc, pack_overlay
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
@@ -602,7 +602,7 @@ def main():
         from arm_strategy_probe import GUEST as strategy_guest
         probe_guest = strategy_guest
     records['opt/dino/arm_probe.py'] = (stat.S_IFREG|0o644, probe_guest.encode())
-    (folder/'probe.cpio').write_bytes(pack_newc(records))
+    (folder/'probe.cpio').write_bytes(pack_overlay(records))
     (folder/'zImage').write_bytes(fat.files['zImage'])
     dtb = folder/'qemu-only-pi-zero.dtb'
     dtb.write_bytes(fat.files['bcm2708-rpi-zero.dtb'])

@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "version": "0.5.1",
+  "status": "INTENTIONAL_PREFERENCE_DIFFERENCE",
+  "scope": "The reference defaults to one credit and one hand; this release deliberately fixes all games at ten credits per hand with their full board, as requested. Prior ready-frame comparison is retained separately.",
+  "layout_changed": false,
+  "menu_black_footer_changed": false
+}

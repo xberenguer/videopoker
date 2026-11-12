@@ -64,7 +64,7 @@ class PokerUITests(unittest.TestCase):
                 self.assertEqual(ui.session.rounds, 1)
                 self.assertIsNone(ui.menu)
 
-    def test_each_play_or_middle_button_only_skips_an_active_animation(self):
+    def test_down_advances_draw_results_while_middle_buttons_only_skip_animation(self):
         for action in ('DOWN', 'CENTER', 'KEY2'):
             with self.subTest(action=action):
                 ui = PokerUI(Session(rng=random.Random(250)), clock=Clock())
@@ -77,9 +77,50 @@ class PokerUITests(unittest.TestCase):
                 result = ui.session.snapshot()
                 self.assertIsNotNone(ui._animation)
                 ui.handle(action)
-                self.assertIsNone(ui._animation)
-                self.assertEqual(ui.session.snapshot(), result)
+                if action == 'DOWN':
+                    self.assertEqual(ui.session.phase,'hold')
+                    self.assertEqual(ui._animation['kind'],'deal')
+                    self.assertEqual(ui.session.credits,result['credits']-result['total_bet'])
+                    self.assertEqual(ui.session.active_multipliers,result['multipliers'])
+                    self.assertEqual(ui.session.rounds,result['rounds'])
+                else:
+                    self.assertIsNone(ui._animation)
+                    self.assertEqual(ui.session.snapshot(), result)
                 self.assertIsNone(ui.menu)
+
+    def test_queued_fresh_down_edges_draw_then_deal_without_waiting_for_animation(self):
+        clock=Clock();ui=PokerUI(Session(rng=random.Random(250)),clock=clock)
+        ui.speed=2;ui.handle('DOWN');ui.speed=0
+        ui.handle_sampled('DOWN',clock.value)
+        settled=ui.session.snapshot()
+        self.assertEqual(settled['phase'],'result')
+        self.assertEqual(ui._animation['kind'],'draw')
+        ui.handle_sampled('DOWN',clock.value+.06)
+        self.assertEqual(ui.session.phase,'hold')
+        self.assertEqual(ui.session.credits,settled['credits']-settled['total_bet'])
+        self.assertEqual(ui.session.rounds,1)
+        self.assertEqual(ui.session.active_multipliers,settled['multipliers'])
+        self.assertEqual(ui._animation['kind'],'deal')
+        self.assertEqual(ui._animation['started'],clock.value)
+        # A subsequent press during this DEAL only reveals, never draws again.
+        new_deal=ui.session.snapshot();ui.handle('DOWN')
+        self.assertEqual(ui.session.snapshot(),new_deal)
+        self.assertIsNone(ui._animation)
+
+    def test_quick_next_deal_with_insufficient_credits_does_not_settle_twice(self):
+        class FixedSampler:
+            def __init__(self):self.calls=0
+            def sample(self,population,count):
+                self.calls+=1
+                if self.calls==1:return [0,14,28,44,6]
+                return [1,15,29,45,7][:count]
+        ui=PokerUI(Session(credits=100,rng=FixedSampler()),clock=Clock())
+        ui.speed=2;ui.handle('DOWN');ui.speed=0;ui.handle('DOWN')
+        result=ui.session.snapshot();self.assertEqual(result['credits'],0)
+        ui.handle('DOWN')
+        self.assertEqual(ui.session.snapshot(),result)
+        self.assertTrue(ui._credit_notice)
+        self.assertIsNone(ui._animation)
 
     def test_gold_controls_are_navigable_without_spending(self):
         ui = self.make_ui()
@@ -240,7 +281,7 @@ class PokerUITests(unittest.TestCase):
         self.assertEqual(ui.session.phase, 'result')
         self.assertIsNotNone(ui._animation)
         credits = ui.session.credits
-        ui.handle('DOWN')
+        ui.handle('CENTER')
         self.assertEqual(ui.session.credits, credits)
         self.assertEqual(ui.session.rounds, 1)
         self.assertIsNone(ui._animation)
