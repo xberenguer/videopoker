@@ -81,6 +81,21 @@ class ManualBootTests(unittest.TestCase):
         self.assertEqual(len(advisor.requests), 1)
         self.assertEqual(ui.session.credits, before['credits'])
 
+    def test_release_of_a_long_second_tap_requests_redraw_while_double_is_pending(self):
+        ui, clock, advisor = self.make_ui(); ui.speed = 2
+        ui.handle('DOWN'); before = ui.session.snapshot()
+        advisor.answers[ui._advisor_token] = {'mask':7}; ui.update(clock())
+        ui.set_pressed_mask(1); ui.handle('UP'); ui.set_pressed_mask(0)
+        clock.advance(.08)
+        ui.set_pressed_mask(1); ui.handle('UP')
+        clock.advance(ui.HINT_HOLD_SECONDS+.001); ui.update(clock())
+        self.assertTrue(ui.hint_visible)
+        self.assertTrue(ui._wants_manual_advice())
+        self.assertEqual(ui.session.snapshot(), before)
+        self.assertTrue(ui.set_pressed_mask(0))
+        self.assertFalse(ui.hint_visible)
+        self.assertEqual(ui.session.snapshot(), before)
+
     def test_late_preload_cannot_hold_or_draw_a_replaced_board(self):
         ui, clock, advisor = self.make_ui()
         ui.handle('DOWN'); token = ui._advisor_token
