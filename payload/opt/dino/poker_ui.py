@@ -662,6 +662,7 @@ class PokerUI:
         if type(mask) is not int or not 0 <= mask < 256:
             raise ValueError('Invalid pressed button mask')
         held = bool(mask & self.UP_MASK)
+        was_visible = self.hint_visible
         if not held:
             self._peek_blocked_until_release = False
         if held == self._up_held:
@@ -671,9 +672,11 @@ class PokerUI:
         self._peek_ready = False
         self._draw_hint_started = self._draw_hint_step = None
         self._hint_failed_key = None
-        if not held and not self.autoplay and not self._wants_manual_advice():
-            # Preserve the click sequence across its physical releases.
-            return self._cancel_advice()
+        if not held:
+            # Release hides the peek immediately, but the detached calculation
+            # belongs to this dealt hand. Do not cancel cold table loading on
+            # the first release of a double/triple tap.
+            return was_visible
         return False
 
     @property
@@ -818,6 +821,16 @@ class PokerUI:
         """
         if self._closed:
             return False
+        if not self.autoplay:
+            # Discard gesture/action state, not a read-only first-hand preload.
+            # A recovered neutral sample cannot apply a hold, draw, or show red.
+            changed = self._up_click_count != 0 or self._manual_hold_key is not None or self.hint_visible
+            self._last_up = self._manual_up_due = self._manual_hold_key = None
+            self._up_click_count = 0
+            self._peek_ready = False
+            self._peek_blocked_until_release = self._up_held
+            self._draw_hint_started = self._draw_hint_step = None
+            return changed
         if self.autoplay and not self.manual_autoplay:
             self._resume_autoplay_clock()
             self._clear_auto_up()
@@ -1051,9 +1064,9 @@ class PokerUI:
         self._hint_failed_key = failed_key
         return True
 
-    def _request_hint(self, now):
+    def _request_hint(self, now, prepare=False):
         state = self.session.snapshot()
-        if state['phase'] != 'hold' or (not self.autoplay and
+        if state['phase'] != 'hold' or (not prepare and not self.autoplay and
                 (not self._wants_manual_advice() and
                  (not self._up_held or self._peek_blocked_until_release))):
             return False
@@ -1107,8 +1120,8 @@ class PokerUI:
         return False
 
     def _poll_advice(self, now):
-        if not self.autoplay and not self._up_held and not self._wants_manual_advice():
-            return self._cancel_advice()
+        # Advice may finish before UP is pressed or after it is released.
+        # Visibility and hold application have separate, explicit gesture gates.
         if self._advisor_board is not None and self._advisor_board != self._advice_key(self.session.snapshot()):
             self.pause_autoplay()
             return True
@@ -1245,6 +1258,10 @@ class PokerUI:
                                    'started': self._clock(), 'interval': interval}
                 self._last_stage = None
                 self._update_visual(self._clock())
+            if kind == 'deal':
+                # Start cold imports/table checks during Deal, before the first
+                # hint or best-hold gesture. This never mutates holds or RNG.
+                self._request_hint(self._clock(), prepare=True)
         except RandomNotReady:
             self.notice = 'Shuffling is getting ready'
             self._entropy_notice = True
