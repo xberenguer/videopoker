@@ -5,6 +5,7 @@
 - Add the twelve-game cabinet with 3-, 5- and 10-hand modes, wild-card graphics, game-specific pays, multipliers and advice.
 - Start and keep every cabinet game at max bet with its complete board. Bet Per Hand and Select Hands remain disabled.
 - Restore triple-UP autoplay on/off. Every activation starts M; double-UP cycles M, Medium and Fast. Single/held UP and DOWN in M preserve autoplay.
+- Prepare read-only advice as each hand is dealt. Releasing UP hides the hint without aborting first-use table loading, so the first held hint and double-UP best-hold request do not need repeating.
 - Preserve game credits and each game's pending multipliers when selecting another game. Keep the existing SeedSigner entry gesture.
 
 Functional host, stock ARM and image/source verification are recorded in the matching release artifacts. Physical Pi performance, cold boot, camera and signing are not qualified by emulation.

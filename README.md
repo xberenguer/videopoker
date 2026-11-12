@@ -49,6 +49,8 @@ Returning from More Games preserves the entire current game. Selecting a tile cl
 
 Input recovery discards stale physical presses and requires neutral release. It preserves the autoplay mode. M cancels a queued Draw and waits for a fresh press; continuous modes preserve their intentional playback progress. M retries only an already requested Deal/Draw if secure randomness is temporarily unavailable. A stop key cancels pending actions. No weaker random source is substituted.
 
+Advice starts in the background during Deal, including the first hand. Releasing UP hides the hint without cancelling that read-only calculation; a double-tap best-hold request waits for its answer without needing another tap sequence.
+
 ## Hardware and flashing
 
 Raspberry Pi **Zero 1.3**, compatible Play/Plus ST7789 **320 × 240** display and standard SeedSigner button wiring. Other boards and the regular 240 × 240 screen are not qualified.
