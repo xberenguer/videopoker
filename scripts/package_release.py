@@ -11,7 +11,7 @@ import sys
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.4.8'
+VERSION = '0.5.1'
 PREFIX = 'seedsigner-poker-v' + VERSION
 
 
@@ -40,7 +40,7 @@ def main():
         'seedsigner-pgp.asc', 'seedsigner.0.8.7.sha256.txt',
         'seedsigner.0.8.7.sha256.txt.sig'))
     files.extend((ROOT/'validation').glob('*.json'))
-    capture_directory = ROOT/'validation/screenshots-v048'
+    capture_directory = ROOT/'validation/screenshots-v051'
     capture_path = capture_directory/'capture-record.json'
     capture = json.loads(capture_path.read_text())
     if capture.get('version') != VERSION:
@@ -76,7 +76,7 @@ def main():
     for name, digest in arm['png_sha256'].items():
         if not re.fullmatch(r'[a-z0-9][a-z0-9-]*\.png', name):
             raise ValueError('Invalid target-runtime capture filename')
-        path = ROOT/'validation/arm-probe-v0.4.8'/name
+        path = ROOT/'validation/arm-probe-v0.5.1'/name
         if (not path.is_file() or path.is_symlink()
                 or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
             raise ValueError('Target-runtime capture missing or changed: ' + name)

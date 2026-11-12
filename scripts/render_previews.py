@@ -133,6 +133,7 @@ def main():
     advice_ui = PokerUI(advice_session, font_dir=args.font_dir, clock=advice_clock,
                        advisor=CaptureAdvisor())
     advice_ui.speed = 2
+    advice_ui.autoplay_speed = 1
     ui = advice_ui
     ui.set_pressed_mask(1); ui.handle('UP'); ui.update(advice_clock())
     advice_clock.value += ui.HINT_HOLD_SECONDS
@@ -140,7 +141,7 @@ def main():
     assert ui.hint_visible and ui._advice['mask'] == 7 and not ui.autoplay
     save('hint-on')
     ui.set_pressed_mask(0); ui.update(advice_clock())
-    assert not ui.hint_visible and ui._advice is None
+    assert not ui.hint_visible and ui._advice['mask'] == exact_advice['mask']
     save('hint-off')
     ui.pause_autoplay()  # Separate the manual-hold and autoplay capture gestures.
     for _ in range(2):
@@ -156,6 +157,12 @@ def main():
     for _ in range(3):
         advice_clock.value += .1
         ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
+    for _ in range(2):
+        advice_clock.value += .1
+        ui.set_pressed_mask(1); ui.handle('UP'); ui.set_pressed_mask(0)
+    advice_clock.value += ui.UP_CLICK_GAP_SECONDS+ui.UP_TAP_COMMIT_GRACE_SECONDS+.01
+    ui._commit_auto_up()
+    assert ui.autoplay_speed == 1
     ui.update(advice_clock())
     advice_clock.value += ui.AUTO_CONSIDER_SECONDS+.01
     ui.update(advice_clock())
@@ -165,10 +172,12 @@ def main():
     assert ui.autoplay and ui._auto_stage=='select' and not ui.hint_visible
     assert ui.selected_card==2 and ui.session.held==[True,True,False,False,False]
     save('autoplay')
-    for suffix in ('medium','fast'):
+    save('autoplay-medium')
+    for suffix in ('fast','manual'):
         before_speed_change=ui.session.snapshot()
-        for _ in range(2):
-            advice_clock.value += .1
+        for click in range(2):
+            # Start the gesture before the next fast card-selection tick.
+            advice_clock.value += .02 if click==0 else .1
             ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
         advice_clock.value += ui.UP_CLICK_GAP_SECONDS+ui.UP_TAP_COMMIT_GRACE_SECONDS+.01
         ui.update(advice_clock())
@@ -181,10 +190,101 @@ def main():
         'answer': exact_advice,
         'data_sha256': strategy_files,
         'peek': 'Solid red borders only while UP is physically held; release has no overlay',
-        'autoplay': 'Triple UP toggles autoplay on/off. During autoplay double UP advances one speed; holding does not. Manual double UP sets exact best holds without drawing. A has no icon Slow, filled left triangle Medium, and adds right triangle Fast. Other buttons stop autoplay without another action.',
+        'autoplay': 'Triple UP toggles autoplay on and off; each activation starts M. Single/held UP preserves an active mode. During autoplay double UP advances one speed; holding does not. Manual double UP sets exact best holds without drawing. A has no icon Slow, filled left triangle Medium, and adds right triangle Fast. M is first/default, followed by Medium and Fast. M waits at both Deal and Draw: DOWN deals, waits for study, then the next DOWN applies the best holds together and draws immediately. The M mark is 5x4 pixels. No added pacing or animation in M. Other buttons stop autoplay without another action.',
         'autoplay_profiles': list(PokerUI.AUTO_PROFILES),
     }
+    ui.close()
+    # A full actual M-mode cycle with an exact advisor, deterministic RNG and
+    # an injected presentation clock. The delivered app still uses its worker.
+    manual_clock=Clock();manual_table=StrategyTable(args.strategy_dir)
+    class ManualCaptureAdvisor:
+        def __init__(self):self.token=0;self.answers={}
+        def request(self,snapshot):
+            self.token+=1;self.answers[self.token]=manual_table.advise(_round(snapshot));return self.token
+        def poll(self,token):return self.answers.pop(token,None)
+        def cancel(self):self.answers.clear()
+        def close(self):self.answers.clear()
+    ui=PokerUI(Session(rng=random.Random(250)),font_dir=args.font_dir,clock=manual_clock,advisor=ManualCaptureAdvisor())
+    for _ in range(3):
+        manual_clock.value+=.1;ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
+    ui.update(manual_clock());assert ui.manual_autoplay and ui._auto_stage=='manual-deal'
+    save('autoplay-manual-ready')
+    ui.handle('DOWN');ui.update(manual_clock())
+    assert ui._auto_stage=='manual-draw' and ui._advice is not None and ui.session.held==[False]*5
+    manual_mask=ui._advice['mask'];save('autoplay-manual-think')
+    ui.handle('DOWN');assert ui._auto_stage=='manual-deal' and ui.session.phase=='result'
+    assert ui.session.held==[bool(manual_mask&(1<<i)) for i in range(5)]
+    assert ui._animation is None;save('autoplay-manual-result')
+    advice_capture['manual_autoplay']={'mode_order':['manual','medium','fast'],'default':'manual',
+        'mask':manual_mask,'presses_per_round':2,'behavior':'DOWN Deal, wait to think; DOWN exact holds and immediate Draw; wait for next Deal',
+        'marker_native_pixels':[5,4],'pacing_or_animation_delays':False}
+    ui.close()
+    class DrawFiveSampler:
+        def sample(self,population,count): return [26,20,41,43,6]
+    draw_game=Session(rng=DrawFiveSampler());draw_game.deal()
+    draw_snapshot=draw_game.snapshot()
+    draw_advice=StrategyTable(args.strategy_dir).advise(_round(draw_snapshot))
+    assert draw_advice['mask']==0
+    class DrawCaptureAdvisor:
+        def request(self,snapshot):
+            assert _round(snapshot)==_round(draw_snapshot)
+            return 1
+        def poll(self,token): return dict(draw_advice) if token==1 else None
+        def cancel(self): pass
+        def close(self): pass
+    draw_clock=Clock()
+    ui=PokerUI(draw_game,font_dir=args.font_dir,clock=draw_clock,advisor=DrawCaptureAdvisor())
+    ui.speed=2;ui.set_pressed_mask(1);ui.handle('UP');ui.update(draw_clock())
+    assert not ui.hint_visible
+    draw_clock.value+=ui.HINT_HOLD_SECONDS+.001;ui.update(draw_clock())
+    save('draw-hint')
+    pulse_frames=[]
+    for i in range(25):
+        draw_clock.value=ui._draw_hint_started+i*ui.HINT_DRAW_FLASH_SECONDS/24
+        ui.update(draw_clock());pulse_frames.append(ui.render())
+    pulse_frames.extend([pulse_frames[-1]]*20)
+    pulse_frames[0].save(args.output/'draw-hint-flash.gif',save_all=True,append_images=pulse_frames[1:],duration=40,loop=0)
+    draw_clock.value=ui._draw_hint_started+ui.HINT_DRAW_FLASH_SECONDS/2;ui.update(draw_clock())
+    save('draw-hint-normal')
+    ui.set_pressed_mask(0);ui.update(draw_clock());save('draw-hint-off')
+    assert not ui.hint_visible and draw_game.snapshot()==draw_snapshot
+    advice_capture['draw_five']={'hand':draw_snapshot['initial'],'actual_advice':draw_advice,
+        'appearance':'Only the real Draw button face flashes red at one cycle per second, while UP is held after the 0.30-second delay; exact dark label and bevel retained'}
     ui.close(); ui = original
+
+    # Actual menu and all twelve engines/layouts, not fabricated device renders.
+    from poker_games import GAMES
+    cabinet_clock=Clock()
+    cabinet_ui=PokerUI(Session(game_id='bp3',cabinet_defaults=False,rng=random.Random(600)),
+                       cabinet=True,clock=cabinet_clock)
+    ui=cabinet_ui;save('cabinet-menu')
+    for game_index,game in enumerate(GAMES):
+        ui.menu={'page':'cabinet','index':game_index,'return':game_index>0}
+        save('cabinet-'+game.id+'-selected')
+        ui.handle('CENTER');ui.speed=2
+        save('cabinet-'+game.id+'-ready')
+        ui._button_action(5);save('cabinet-'+game.id+'-hold')
+        ui.handle('DOWN');save('cabinet-'+game.id+'-result')
+        ui._button_action(0);save('cabinet-'+game.id+'-paytable')
+    from poker_cabinet_strategy import CabinetStrategyTable,freeze_round
+    class CabinetCaptureAdvisor:
+        # The actual solver supplies the answer; only its delivery is made
+        # synchronous for deterministic screenshots. Runtime stays async.
+        def __init__(self):self.table=CabinetStrategyTable();self.answer=None;self.token=0
+        def request(self,snapshot):
+            self.answer=self.table.advise(freeze_round(snapshot));self.token+=1;return self.token
+        def poll(self,token):return dict(self.answer) if token==self.token and self.answer is not None else None
+        def cancel(self):self.answer=None
+        def close(self):self.table=None;self.answer=None
+    ui.menu={'page':'cabinet','index':9,'return':True};ui.handle('CENTER')
+    ui._advisor=CabinetCaptureAdvisor()
+    for _ in range(3):
+        cabinet_clock.value+=.1
+        ui.set_pressed_mask(1);ui.handle('UP');ui.set_pressed_mask(0)
+    ui.update(cabinet_clock());save('cabinet-autoplay-manual-ready')
+    ui.handle('DOWN');ui.update(cabinet_clock());save('cabinet-autoplay-manual-think')
+    ui.handle('DOWN');save('cabinet-autoplay-manual-result')
+    cabinet_ui.close();ui=original
 
     clock = Clock()
     animated = PokerUI(Session(rng=random.Random(250)), font_dir=args.font_dir, clock=clock)
@@ -214,7 +314,7 @@ def main():
     if manifest_sha != hashlib.sha256((asset_dir/'manifest.json').read_bytes()).hexdigest() or artwork_hashes() != declared_hashes:
         raise RuntimeError('Artwork changed during capture; regenerate against frozen assets')
     (args.output/'capture-record.json').write_text(json.dumps({
-        'version': '0.4.8',
+        'version': '0.5.1',
         'scope': 'deterministic actual application renders; no physical-device claim',
         'artwork': 'private local publicly served reference bitmaps and rasterized installed Arial glyphs',
         'ui_sha256': ui_sha,
