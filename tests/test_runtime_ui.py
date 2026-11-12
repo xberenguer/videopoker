@@ -84,7 +84,7 @@ class RealControllerTests(unittest.TestCase):
         self.assertGreaterEqual(clock(), 3.03)
         self.assertEqual(events[-2], "close")
 
-    def test_animation_skip_and_held_deal_do_not_double_spend(self):
+    def test_fresh_down_during_draw_deals_once_and_held_down_never_repeats(self):
         def trace(t):
             if .10 <= t < .19 or .90 <= t < .99 or 1.10 <= t < 1.80:
                 return 1 << 1
@@ -94,12 +94,40 @@ class RealControllerTests(unittest.TestCase):
                 return launcher.SIGNER_CHORD
             return 0
         game, ui, clock, events = self.run_trace(trace)
+        expected=Session(rng=random.Random(25))
+        expected.deal();expected.toggle_hold(0);expected.draw();expected.deal()
         self.assertEqual(game.rounds, 1)
-        self.assertEqual(game.phase, "result")
-        self.assertEqual(game.credits, 10000 - 100 + game.total_win)
+        self.assertEqual(game.phase, "hold")
+        self.assertEqual(game.snapshot(),expected.snapshot())
+        self.assertEqual(game.credits,expected.credits)
         self.assertIsNone(ui._animation)
         self.assertGreaterEqual(clock(), 4.23)
         self.assertGreaterEqual(sum(isinstance(event, tuple) and event[0] == "frame" for event in events), 8)
+
+    def test_manual_autoplay_held_down_runs_one_cycle_per_physical_press(self):
+        class ImmediateAdvisor:
+            def request(self,snapshot):return 1
+            def poll(self,token):return {'mask':31}
+            def cancel(self):pass
+            def close(self):pass
+        def mode(game,clock):
+            ui=PokerUI(game,clock=clock,advisor=ImmediateAdvisor())
+            ui.autoplay=True;ui.autoplay_speed=0;ui._auto_stage='manual-deal'
+            return ui
+        def trace(t):
+            if .10<=t<1.80 or 2.10<=t<2.20 or 2.50<=t<2.60 or 2.90<=t<3.0:return 1<<1
+            if 3.3<=t<5.5:return launcher.SIGNER_CHORD
+            return 0
+        game,ui,clock,events=self.run_trace(trace,mode)
+        expected=Session(rng=random.Random(25))
+        for _ in range(2):
+            expected.deal()
+            for i in range(5):expected.toggle_hold(i)
+            expected.draw()
+        self.assertEqual(game.snapshot(),expected.snapshot())
+        self.assertEqual(game.rounds,2);self.assertEqual(game.phase,'result')
+        self.assertFalse(ui.autoplay)
+        self.assertEqual(events[-2],'close')
 
     def test_reserved_gesture_remains_responsive_during_long_animation(self):
         def long_animation(game, clock):
