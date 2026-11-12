@@ -1,0 +1,66 @@
+{
+  "status": "MEASURED_WITHOUT_PASS_THRESHOLD",
+  "scope": "Complete ready frames; browser scaling, JPEG compression and state/label differences remain counted",
+  "games": {
+    "bp3": {
+      "mean_absolute_RGB_error": 25.379049479166667,
+      "reference_sha256": "8298efb092d84d27805dbbe9b2d900590a45ecc948020c88d3c6a379500a4dea",
+      "candidate_sha256": "d2a103fad6336fb46216d87ce8670cfdba1d1c13ea4868652e71ec093f9e7788"
+    },
+    "bpd3": {
+      "mean_absolute_RGB_error": 25.50974392361111,
+      "reference_sha256": "5bb574c634416bd85991f88105320e607e703bf0146c2b99fd0707f4fa8ec58d",
+      "candidate_sha256": "d939136b67c0fd7e26c9b1867dc754cd331ccbe0c69293fc0eac1e7e11f44bc3"
+    },
+    "ddb3": {
+      "mean_absolute_RGB_error": 25.54437934027778,
+      "reference_sha256": "e44dcfdd5601ca1f2ace15385454cb1df9d04d7925ea9692fd49b9ef95cdf427",
+      "candidate_sha256": "db28f2107e71add09ac5ef5c11d342b484c80f15e13bb5e67c01e206146ccfda"
+    },
+    "dw3": {
+      "mean_absolute_RGB_error": 25.542296006944444,
+      "reference_sha256": "fc01650e2f1331add96e008650c667300f707c00f3194754c32e6df459fe94d0",
+      "candidate_sha256": "e9f84fbe0c813cd76615855069e544705fd1aa7d5ad0e0dba13e8bab1953652c"
+    },
+    "job5": {
+      "mean_absolute_RGB_error": 25.407265625,
+      "reference_sha256": "192c72760e4bc596e351429944ba4edafb5dd632ee153ffbc5b48268e6d48f37",
+      "candidate_sha256": "572637a143882d2ce241f7187487ce36ad5afdf98bc728278c1e1a360730ac55"
+    },
+    "db5": {
+      "mean_absolute_RGB_error": 25.403168402777776,
+      "reference_sha256": "9ce613ddcfebbc5e53ac108f0a7f7b9cb5df11656c84737d4eb671959a863e2f",
+      "candidate_sha256": "6336a0ba925363eff5b2a22bdc77e11793e4a751a68fa679b5d68c3e913bba2a"
+    },
+    "joker5": {
+      "mean_absolute_RGB_error": 25.389809027777776,
+      "reference_sha256": "f28895e9f27cc9623cc974c4a3d5cbf724d88ac8587bb426bfba52982366b9d4",
+      "candidate_sha256": "d6f840cf4315e1c6e0f759881ea35aac524853e00162e3d909b32558c1f7476e"
+    },
+    "dw5": {
+      "mean_absolute_RGB_error": 25.427591145833333,
+      "reference_sha256": "0856e61fa64761598d132e615b18d3169d42064cfe5406f8212afba6123680d6",
+      "candidate_sha256": "99308e40a7bd0c094b7918d95675bec5018a5a0555adb313057c3c522af697c1"
+    },
+    "bp10": {
+      "mean_absolute_RGB_error": 21.586762152777776,
+      "reference_sha256": "e72b0536cf000873627652918ed41fb831afb41e2fbed05cce6cff1271452e04",
+      "candidate_sha256": "12bf5db71d3c3def894c6726a0bdf5680d5d700e25cda295533892f88e6c96a3"
+    },
+    "ddb10": {
+      "mean_absolute_RGB_error": 21.589105902777778,
+      "reference_sha256": "908e2ceb75334086860ec81f14a3cd7217f9361a9e649121d0cfe8809988bb20",
+      "candidate_sha256": "1e7c7b754ce0b2eb9847060a31713c8c53c891c202f7298b1cc1663cda99d78f"
+    },
+    "tdb10": {
+      "mean_absolute_RGB_error": 21.573767361111113,
+      "reference_sha256": "aa765e26130089a46df72b474f0ffd262345db4699dfdbca1fff6217ed1ed84b",
+      "candidate_sha256": "9f687a5fac301c0d0da3501e6eb7c5cfe58f79a5c61c7889b3e7d0f0dd8aaa65"
+    },
+    "dwb10": {
+      "mean_absolute_RGB_error": 21.610924479166666,
+      "reference_sha256": "677bccb6f2ac764814b27f3a7c7a38d1d10cbfc2e7f591a0370ed2c89d4cb013",
+      "candidate_sha256": "1eab2262c8e07da367edf3f5f93ee0edab530fa9c29dc162628ef5afea3f3b27"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "version": "0.5.1",
+  "method": "Two independent complete image builds; all regular overlay files compared to tested runtime hashes",
+  "sha256": "517bf36b4d8c233c29cbbb6e6900a6586045e6c5a579508f7153f21f4f98ebb0",
+  "runtime_files": 199,
+  "stock_files_preserved": 334
+}

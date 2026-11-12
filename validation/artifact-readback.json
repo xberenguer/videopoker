@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "image": "/Users/xyz/Documents/Codex/2026-09-26/car-deals-las-vegas/work/seedsigner-poker/outputs/seedsigner-v0.8.7-poker-v0.4.8-play-plus-pi0.img",
+  "image": "/Users/xyz/Documents/Codex/2026-09-26/car-deals-las-vegas/work/seedsigner-poker/review-builds/v0.5.1/outputs/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img",
   "image_size_bytes": 52428800,
-  "sha256": "beccafbc3508b42974c44b1fe5a9f40333cb4225c267fb2b6f542b919f8d52ee",
+  "sha256": "517bf36b4d8c233c29cbbb6e6900a6586045e6c5a579508f7153f21f4f98ebb0",
   "base_sha256": "67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9",
   "filesystem": "FAT16",
   "partition_start_sector": 2048,
@@ -342,13 +342,14 @@
     "overlays/waveshare-can-fd-hat-mode-b.dtbo": "3b12faa480bbbc9b6922e9e75000d19c3843424512e673ab97b5a927e31403ac",
     "overlays/wittypi.dtbo": "6db58b2093cee11014b347de9b4a51688aca3b2a3bd84b5959d68a340dec88a2",
     "overlays/wm8960-soundcard.dtbo": "47c1d1030ad3f6800af0fde0becde5e15e0cb7ccde78b2b6fd25ebf544e4a8a0",
-    "poker-overlay.cpio": "667604b58b947cd24a205dbc5f9426bdcffacffdf770edad8cc0ca6f6fba0294",
+    "poker-overlay.cpio": "0eeada37e64ab1840a620f804b65f72ac4cd4ca06fd74ad911ec22fc1dd85d89",
     "settings.json": "b279ec2f3c7c1f16a58b6cdcd682b68b5596df0f12ac1a8393a115d9f21ad5f3",
     "start_x.elf": "6f72a3fda8cbdacb340676e18a8468b9edd89458173b5ecf3c12b00c147dce40",
     "zImage": "58fed3fe472937318a7b4585cdb707f301f2a9cc4955d08cfb4143a48e979bd9"
   },
-  "overlay_sha256": "667604b58b947cd24a205dbc5f9426bdcffacffdf770edad8cc0ca6f6fba0294",
-  "overlay_size_bytes": 7368704,
+  "overlay_sha256": "0eeada37e64ab1840a620f804b65f72ac4cd4ca06fd74ad911ec22fc1dd85d89",
+  "overlay_size_bytes": 2761668,
+  "overlay_encoding": "gzip-newc",
   "overlay_entries": {
     "opt": {
       "mode": 16877,
@@ -419,32 +420,64 @@
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 20842,
-      "sha256": "5184b0d5e71d83f163e84474164c1a2f1972fdab4ca85ab4c4d2929cb40fd487"
+      "size": 21017,
+      "sha256": "1209214981ca0a2ed9c65addbc5125cb0d2ae190c22e616232a92c83839dc3d6"
+    },
+    "opt/dino/poker_cabinet_strategy.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 9085,
+      "sha256": "dc1cf622e00e690cd88675dbb6f6c8db3fc1b4e8d3d066666948cd5f51c367b2"
+    },
+    "opt/dino/poker_cabinet_ui.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 10679,
+      "sha256": "d2908e927aa5222443abef20e0449d14e244f7105e7c8313823a352dfb10d2c6"
     },
     "opt/dino/poker_engine.py": {
       "mode": 33188,
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 15600,
-      "sha256": "5366201590aafe009186d0e6f96cef401c8bc46b81624fc603b9dc87f9c3738d"
+      "size": 16594,
+      "sha256": "918c2e95c4a32821a2f65b826832516ff6fca67006e2c23b506621dc589ae26d"
+    },
+    "opt/dino/poker_evaluate.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2018,
+      "sha256": "8094b556d75ca51b45dd20dceff2517f52c2d6dd55e19571f8a9241b19725b5d"
+    },
+    "opt/dino/poker_games.py": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 5855,
+      "sha256": "d7d543f69ffed00f03d2b9e02be8b4cc133aa780df29d73f0f5f79bd8e9f9acb"
     },
     "opt/dino/poker_strategy.py": {
       "mode": 33188,
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 12246,
-      "sha256": "5c98988fbeca991f85904d32ce9c3b7731055d733dd833942667e0b6683a2539"
+      "size": 12342,
+      "sha256": "fbff2fd74accc082039b5d341c79aa0e9313484ae38036887cee8b2c5f833db0"
     },
     "opt/dino/poker_ui.py": {
       "mode": 33188,
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 62014,
-      "sha256": "5cac7b05f99e9b1a02e72d33dd0fb15d8617a35b300b758570b783a8b83734c2"
+      "size": 75186,
+      "sha256": "7527676d544fbd29cd41cb1428e70863cbf856a1f54493db3d6665f7e469b4a9"
     },
     "opt/dino/strategy": {
       "mode": 16877,
@@ -461,6 +494,30 @@
       "mtime": 1672531200,
       "size": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/strategy/cabinet": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/strategy/deuces_counts.dat": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6355844,
+      "sha256": "cd6d00050613efe751b63f28f6073bdedf2e32abb236fe4b5259fac6dab98cda"
+    },
+    "opt/dino/strategy/joker_counts.dat": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6853044,
+      "sha256": "ce149b8d3d55df49f91197cfea6bd85da1aebac430f4d938d615fec6e6f8412a"
     },
     "opt/dino/strategy/strategy.json": {
       "mode": 33188,
@@ -487,6 +544,14 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "opt/dino/assets/videopoker/badges": {
+      "mode": 16877,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/assets/videopoker/cabinet": {
       "mode": 16877,
       "uid": 0,
       "gid": 0,
@@ -531,8 +596,8 @@
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 704859,
-      "sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a"
+      "size": 1811972,
+      "sha256": "77fd0afc19c1c5171e95cd0fa5765950491672f110cd7a635a128cf2244bbff7"
     },
     "opt/dino/assets/videopoker/multipliers": {
       "mode": 16877,
@@ -549,6 +614,102 @@
       "mtime": 1672531200,
       "size": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "opt/dino/strategy/cabinet/bp10.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6779,
+      "sha256": "38e0e747e2bd95f254a3aa2638f55bbe892a2c26ff472c55a03871f9fd3a91b1"
+    },
+    "opt/dino/strategy/cabinet/bp3.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 3993,
+      "sha256": "fe6cac06901cf4935921e34d2eadb3347c3db21b4686969f0ab1fff179083fe3"
+    },
+    "opt/dino/strategy/cabinet/bpd3.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 3980,
+      "sha256": "b6bf4aeb756e6fcf1b79f6934f895588c9363c79f1ff1b208d4ae78d762a4109"
+    },
+    "opt/dino/strategy/cabinet/db5.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4678,
+      "sha256": "5fbc32f408320d0162e80ff234d6c3ad59343739fd43c47740ce50c46b8f0cb2"
+    },
+    "opt/dino/strategy/cabinet/ddb10.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6651,
+      "sha256": "194742adca9f9fcd8430ba07a4f3d78d2668f92b02887799e027d1777ab7cfda"
+    },
+    "opt/dino/strategy/cabinet/ddb3.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 3879,
+      "sha256": "8d594e3b68d95f0080ed4665e202c94ba17da74be9b01d4a2132d85d6315b74c"
+    },
+    "opt/dino/strategy/cabinet/dw3.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 3966,
+      "sha256": "90ae8a91bb6c2132cb0e45b5c08da2fb5f2170bb7d33807402125d81b631a0eb"
+    },
+    "opt/dino/strategy/cabinet/dw5.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4754,
+      "sha256": "6c8f47687a161b26e13469fc3c9d0a2759e374a2b9583688205253868b74fb56"
+    },
+    "opt/dino/strategy/cabinet/dwb10.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6793,
+      "sha256": "c84c529052c4232e1ed2f105008438ab44eb72d7febede68c7f2344ba0a5523a"
+    },
+    "opt/dino/strategy/cabinet/job5.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4822,
+      "sha256": "6fdac750328bd585d791d35155189b48f876ddb0c6478769a6641434d09d30c8"
+    },
+    "opt/dino/strategy/cabinet/joker5.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 4121,
+      "sha256": "c7381a783cd9fc128ec7d02ac1ebf5edca53dfa93e5551e9e4a96fdb6dbf5988"
+    },
+    "opt/dino/strategy/cabinet/tdb10.json": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 6680,
+      "sha256": "2bef4b8b2f6963730a1ab2e6ee4a038703860d44dea4a1abc3b1545d98887a46"
     },
     "opt/dino/assets/videopoker/backgrounds/uxbg.png": {
       "mode": 33188,
@@ -734,6 +895,118 @@
       "size": 8888,
       "sha256": "da83c1fc1c6421d6d1c986b3cd971f6c9db0b3cc5556e6ae76d8b8b7012f7564"
     },
+    "opt/dino/assets/videopoker/cabinet/bp10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 17435,
+      "sha256": "dab4cbf118b1a69c2f1d35b82ddca389b66e3917d62de027886057d0fab8c500"
+    },
+    "opt/dino/assets/videopoker/cabinet/bp3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 18899,
+      "sha256": "d0fb8be98990b8e2ba5f5ad7588a77d97d19289b4dc2a9a2fde6e780c77e0170"
+    },
+    "opt/dino/assets/videopoker/cabinet/bpd3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 19047,
+      "sha256": "31a2ae11f9555f84a96cfd08515bc11a5361174bf879ef146bb7d23a2b8dbbc9"
+    },
+    "opt/dino/assets/videopoker/cabinet/db5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 19992,
+      "sha256": "afafaf11f942d1cca6843c49eb748627d1974d53b3d56c468bcd92726a38f033"
+    },
+    "opt/dino/assets/videopoker/cabinet/ddb10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 19367,
+      "sha256": "272101b29c6fcb7dcae4d6bb8829bd1fe055d78965b25ed7b3a7e5609133ed91"
+    },
+    "opt/dino/assets/videopoker/cabinet/ddb3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 20310,
+      "sha256": "eb4a99a20caadc818dbc5ff0acd77b005b975b6b89f93ba8700b1de5da461082"
+    },
+    "opt/dino/assets/videopoker/cabinet/dw3.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 19851,
+      "sha256": "3eff64d815d766018af274f00ba79a118cb0c632e264d937992e7c61c9f77e07"
+    },
+    "opt/dino/assets/videopoker/cabinet/dw5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 19749,
+      "sha256": "a65a39da67b5a8d08fadd0305b730cc5bd68932c770ce8568dfaf9cffc0a8e43"
+    },
+    "opt/dino/assets/videopoker/cabinet/dwb10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 17253,
+      "sha256": "c4dc216ab6a5791ad08289091c7f6ed6ef9d4919acbcb89c224d36b764df6a0c"
+    },
+    "opt/dino/assets/videopoker/cabinet/job5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 20412,
+      "sha256": "f7e798fcb2ba7986e6a761463d2d9d319db45443e08e7838d76a34522488d982"
+    },
+    "opt/dino/assets/videopoker/cabinet/joker5.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 17580,
+      "sha256": "e11ff09da07f46968467ca981cd25f121a47e01279bd6946f72669688f7a85fe"
+    },
+    "opt/dino/assets/videopoker/cabinet/return.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 9767,
+      "sha256": "ccfd8ff571e02ad621f9e46a918e67ebc447df9cc893d1c9b04bbe6f99119b16"
+    },
+    "opt/dino/assets/videopoker/cabinet/selection.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 552,
+      "sha256": "f38d8ddd8974bebff648203e4985b110eebcd8b00bfb57a520369e458378b71b"
+    },
+    "opt/dino/assets/videopoker/cabinet/tdb10.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 19303,
+      "sha256": "2bfcbe984f4d54b9f2a56492af7ead85567480f49ece1cb3eff9ff65d8b4126d"
+    },
     "opt/dino/assets/videopoker/cards/0.png": {
       "mode": 33188,
       "uid": 0,
@@ -741,6 +1014,14 @@
       "mtime": 1672531200,
       "size": 4395,
       "sha256": "de9acda4bccd761fd4993f25dd09b7c29be68212e0b2bcfcf554e3512b99ef20"
+    },
+    "opt/dino/assets/videopoker/cards/0w.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11272,
+      "sha256": "e79f9a4be69f251eae2a8636a7da5cf1cdc2fd6852095c120407e45bb32176c4"
     },
     "opt/dino/assets/videopoker/cards/1.png": {
       "mode": 33188,
@@ -781,6 +1062,14 @@
       "mtime": 1672531200,
       "size": 4921,
       "sha256": "2bfce7f0a01ff0eb44451bb748dc49ec5ebc86f9854dae1ff4355c9b96ca1fd8"
+    },
+    "opt/dino/assets/videopoker/cards/13w.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 11810,
+      "sha256": "c3c4c7baf6da8ab3efcff3354ae859197aefee236378e0b76b5bb2ccc1492cec"
     },
     "opt/dino/assets/videopoker/cards/14.png": {
       "mode": 33188,
@@ -894,6 +1183,14 @@
       "size": 6482,
       "sha256": "f32df76e4420a91a9bf88282727908efffc0695e394ebbd6ecdd7006dbdf19a0"
     },
+    "opt/dino/assets/videopoker/cards/26w.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 13100,
+      "sha256": "07b1c79721a36b3e10ad1d70ede9efba0aff6d6de884777a8725fdc7400d6093"
+    },
     "opt/dino/assets/videopoker/cards/27.png": {
       "mode": 33188,
       "uid": 0,
@@ -1005,6 +1302,14 @@
       "mtime": 1672531200,
       "size": 5977,
       "sha256": "e582a9302a4f1869b2a0e8f9fe234f693bcec1ec2e9e4f10bb97bfa4c9c56b50"
+    },
+    "opt/dino/assets/videopoker/cards/39w.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 12707,
+      "sha256": "9564f2635188312b4dee36631eaf8edfafa124ef841c95f4dd556c3f0ed75dc9"
     },
     "opt/dino/assets/videopoker/cards/4.png": {
       "mode": 33188,
@@ -1166,21 +1471,29 @@
       "size": 11097,
       "sha256": "cd44134d1dbe7284c142ce336f9d683de78ac644abac3f45947afb1c18ec4954"
     },
+    "opt/dino/assets/videopoker/cards/Joker.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 28039,
+      "sha256": "710d9caccf0c59eba743b7d3f5bb0515c5e2ed5acfbcb95ddc1259c1e2ce8b1e"
+    },
     "opt/dino/assets/videopoker/fonts/arial-bold.png": {
       "mode": 33188,
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 498250,
-      "sha256": "c7bf3ae9acb57cf298c3522a2e11c29eca05bf50f635554aac7bf5a1f596b181"
+      "size": 517169,
+      "sha256": "03a9878b7d6efc1e4668cc484e4168f0489390536ad342eb0c0b3286e99688f4"
     },
     "opt/dino/assets/videopoker/fonts/arial-regular.png": {
       "mode": 33188,
       "uid": 0,
       "gid": 0,
       "mtime": 1672531200,
-      "size": 490824,
-      "sha256": "271f146256e9bde6fc3488aaf3d1b5f04e7c030db7f206e95ac5b7f418f29f2b"
+      "size": 510175,
+      "sha256": "60c9120466c58fa47ff45f3d8bf90c132c15e1bff8f5d9431da17e3b5da5f63e"
     },
     "opt/dino/assets/videopoker/gui/BetMax.png": {
       "mode": 33188,
@@ -1454,6 +1767,14 @@
       "size": 1518,
       "sha256": "92183cc47079d15437d64aeb8feae40645f20939c8ea6dcc50e86f8159fcbb1b"
     },
+    "opt/dino/assets/videopoker/multipliers/11x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1991,
+      "sha256": "0a9d14c44bbd569eae388242086348a19644a7fcdd77a36872b55aa8820947c3"
+    },
     "opt/dino/assets/videopoker/multipliers/12x_2.png": {
       "mode": 33188,
       "uid": 0,
@@ -1525,6 +1846,30 @@
       "mtime": 1672531200,
       "size": 1414,
       "sha256": "953e79b88f5ad3142da76a6033166f1cd8b130eaf57c9d02fbd835779ae8811b"
+    },
+    "opt/dino/assets/videopoker/multipliers/5x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 2095,
+      "sha256": "164a628457766ac7655e37f25bdb56826847c1b7c9861a2ec66c6c50cd6b6704"
+    },
+    "opt/dino/assets/videopoker/multipliers/6x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1946,
+      "sha256": "1a73ad4eea5b6740d8d16c9b72ea26f48f030673b97efc768474fa5e2c99d3cc"
+    },
+    "opt/dino/assets/videopoker/multipliers/7x_2.png": {
+      "mode": 33188,
+      "uid": 0,
+      "gid": 0,
+      "mtime": 1672531200,
+      "size": 1946,
+      "sha256": "d20233186d3b9ff5c73e8b04179080b791a7cde80da5fbb03225c0a0ee48591c"
     },
     "opt/dino/assets/videopoker/multipliers/8x_2.png": {
       "mode": 33188,
@@ -1738,20 +2083,41 @@
   "hardware_tested": false,
   "physical_device_written": false,
   "project": "SeedSigner Poker",
-  "project_version": "0.4.8",
+  "project_version": "0.5.1",
   "visual_assets": {
-    "manifest_sha256": "aa9ebb17357001a9d661de4adf1dd5aa1f23f2169123868e17f8a0f575e4a71a",
-    "asset_count": 146,
-    "manifest_bytes": 704859,
+    "manifest_sha256": "77fd0afc19c1c5171e95cd0fa5765950491672f110cd7a635a128cf2244bbff7",
+    "asset_count": 169,
+    "manifest_bytes": 1811972,
     "glyph_atlas_count": 2,
-    "png_count": 146,
+    "png_count": 169,
     "font_count": 0,
-    "asset_bytes": 2042767,
-    "decoded_rgba_budget_bytes": 27924948,
+    "asset_bytes": 2405460,
+    "decoded_rgba_budget_bytes": 29295792,
     "sequence_count": 2,
     "artwork_rights": "Third-party artwork retains its source rights; not granted by project GPL"
   },
   "strategy_assets": {
+    "cabinet": {
+      "status": "PASS",
+      "game_count": 12,
+      "resource_count": 14,
+      "resources_sha256": {
+        "opt/dino/strategy/cabinet/bp10.json": "38e0e747e2bd95f254a3aa2638f55bbe892a2c26ff472c55a03871f9fd3a91b1",
+        "opt/dino/strategy/cabinet/bp3.json": "fe6cac06901cf4935921e34d2eadb3347c3db21b4686969f0ab1fff179083fe3",
+        "opt/dino/strategy/cabinet/bpd3.json": "b6bf4aeb756e6fcf1b79f6934f895588c9363c79f1ff1b208d4ae78d762a4109",
+        "opt/dino/strategy/cabinet/db5.json": "5fbc32f408320d0162e80ff234d6c3ad59343739fd43c47740ce50c46b8f0cb2",
+        "opt/dino/strategy/cabinet/ddb10.json": "194742adca9f9fcd8430ba07a4f3d78d2668f92b02887799e027d1777ab7cfda",
+        "opt/dino/strategy/cabinet/ddb3.json": "8d594e3b68d95f0080ed4665e202c94ba17da74be9b01d4a2132d85d6315b74c",
+        "opt/dino/strategy/cabinet/dw3.json": "90ae8a91bb6c2132cb0e45b5c08da2fb5f2170bb7d33807402125d81b631a0eb",
+        "opt/dino/strategy/cabinet/dw5.json": "6c8f47687a161b26e13469fc3c9d0a2759e374a2b9583688205253868b74fb56",
+        "opt/dino/strategy/cabinet/dwb10.json": "c84c529052c4232e1ed2f105008438ab44eb72d7febede68c7f2344ba0a5523a",
+        "opt/dino/strategy/cabinet/job5.json": "6fdac750328bd585d791d35155189b48f876ddb0c6478769a6641434d09d30c8",
+        "opt/dino/strategy/cabinet/joker5.json": "c7381a783cd9fc128ec7d02ac1ebf5edca53dfa93e5551e9e4a96fdb6dbf5988",
+        "opt/dino/strategy/cabinet/tdb10.json": "2bef4b8b2f6963730a1ab2e6ee4a038703860d44dea4a1abc3b1545d98887a46",
+        "opt/dino/strategy/deuces_counts.dat": "cd6d00050613efe751b63f28f6073bdedf2e32abb236fe4b5259fac6dab98cda",
+        "opt/dino/strategy/joker_counts.dat": "ce149b8d3d55df49f91197cfea6bd85da1aebac430f4d938d615fec6e6f8412a"
+      }
+    },
     "table_sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2",
     "table_bytes": 4449110,
     "metadata_sha256": "997c119917a280e373f7ca949b77b3f9f9f0709333a7812d809d44dd1cea46a4",
