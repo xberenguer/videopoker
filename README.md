@@ -2,24 +2,30 @@
 
 # Video Poker
 
-An offline, twelve-game video poker cabinet with best-hold hints, three autoplay modes, an EV calculator and a hidden trainer. Built for a **Raspberry Pi Zero 1.3, 320 × 240 ST7789 display, D-pad with center button and three action buttons**. Virtual credits only; no account or connection required.
+Twelve offline video poker games, best-hold hints, autoplay, a calculator and a hidden trainer. Virtual credits only.
 
-**v0.6.6:** optional persistent memory with explanations, general Settings with brightness and animation speed, verified DDB paytable presets, automatic calculator results and immediate right-button trainer-sidebar entry.
-
-[Download IMG](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img) · [SHA-256](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img.sha256) · [Matching source](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-source.tar.gz)
+[Download v0.6.6 IMG](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img) · [Release](https://github.com/xberenguer/videopoker/releases/tag/v0.6.6) · [Buy or build the handheld](#get-the-hardware)
 
 [Complete user guide](docs/USER-GUIDE.md) · [All menus and settings](docs/USER-GUIDE.md#general-settings) · [Trainer and statistics](docs/USER-GUIDE.md#hidden-trainer) · [Build and validation](docs/TECHNICAL.md) · [Licenses and credits](NOTICE)
 
 ## Quick install
 
-1. Download the **IMG** and matching **.sha256** from the same release. Verify the checksum; [commands](docs/USER-GUIDE.md#install-and-first-boot) are in the guide.
-2. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/) and insert your microSD card into the computer.
-3. Select **Raspberry Pi Zero** as the device. Under the OS selection, choose **Use Custom** and select the downloaded `.img`.
-4. Select the intended microSD card as storage. Writing replaces its contents.
-5. Skip OS customisation such as Wi-Fi/SSH, then write the image. Approve any system authorisation and let verification finish.
-6. Eject the card, insert it into the powered-off handheld, then power on. The first cabinet tile is selected; choose a game and press DOWN to deal.
+You'll need the handheld, a microSD card, a computer and a card reader.
 
-Imager versions vary in layout. These steps follow the [official Raspberry Pi installation guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#install-an-os-onto-boot-media); this custom offline image does not use normal Raspberry Pi OS customisation. Do not flash the source `.tar.gz` archive.
+1. [Download the game image (.img)](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img) and install [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+2. Insert the microSD card into your computer using a card reader, then open Imager.
+3. Choose **Raspberry Pi Zero** as the device. For the operating system, choose **Use Custom** and open the downloaded `.img` file.
+4. Choose your **microSD card** as storage. Skip OS customisation if asked.
+5. Click **Write**, confirm erasing that card and approve the computer's permission prompt. Let writing and verification finish.
+6. Eject the card, put it in the powered-off handheld's boot slot (**top slot on Play**) and connect USB power. The game opens automatically.
+
+## Get the hardware
+
+- **Buy assembled:** [SeedSigner Play](https://bitkitbtc.com/product/seedsigner-play/) or [SeedSigner Plus](https://bitkitbtc.com/product/seedsigner-plus/) from BitKit. Choose a **Pi Zero 1.3 / 320 × 240** configuration for this image.
+- **Build the handheld:** use a Pi Zero 1.3, a [Plus display HAT](https://github.com/3rdIteration/seedsigner-hardware/tree/main/display_hats/plus_hat), a suitable case and a microSD card. The linked project includes board design, fabrication and display details. The regular 240 × 240 HAT needs a different image.
+- **Build the software:** [source and image-build instructions](docs/TECHNICAL.md#build-from-source).
+
+[Optional download verification](docs/USER-GUIDE.md#verify-the-download) · [Official Imager guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#install-using-imager)
 
 ## Play
 

@@ -7,9 +7,9 @@
     "CHANGELOG.md": "531b2eaa0a10e27f6a4d7e2846d8ad40d58ff647df9da7db416868d81cf9f5c2",
     "LICENSE": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
     "NOTICE": "0cdb461d9eef916d61e6cbfcab6d720f5347504e3fe2cbc7eb10d45970723207",
-    "README.md": "7c54472b9c65c040e2ce854662be3915aad4b9ac510e4e28a1c7161612214e13",
-    "docs/TECHNICAL.md": "ce8f625b297ba0dbbf495aea66c72126ad4eb00ced9ab2cc88b6fa88ae00b33a",
-    "docs/USER-GUIDE.md": "0757b3d4d7ea38ff50d6597e8763d12b231dc292c211d3e98049acb5d961a501",
+    "README.md": "6539a37432cbe04a7bc39cfac57dc302ac6567ad43f878842869bcd98a957461",
+    "docs/TECHNICAL.md": "50a004f3232001f76da2531d22cfc36c0d839a33f920b26ee7c962c6a8d04162",
+    "docs/USER-GUIDE.md": "64a142640dda2d352dfbc2d229415359a3afa9a75413f28441c10ed266caf415",
     "docs/images/handheld-videopoker.jpg": "a8a66f660d27b8d4b2bab4eecee21296733423433d7e705127fb6162284679cb",
     "docs/images/south-point-ddb-75.jpg": "22da64afb6bd2839d4c18bcfb784dce2897dee5deded961528d1b5fe25552b98",
     "docs/screenshots/AM-red-peek.png": "78accc593f5355edf05967fa9af63903f06f5177b389aef2dcdf27db76745f28",
@@ -454,5 +454,6 @@
     "validation/settings-v066/south-point-pays.png": "af8d631fc39e41ba401f81a67ded878b279cd4470b86a0e1f7687af22c44c377",
     "validation/tests.json": "2c4170d49e1c72c6a3e70369131b009a0afe5230977debb8432c8f593ca26030"
   },
-  "README_download_links_adapted_for_publication": true
+  "README_download_links_adapted_for_publication": true,
+  "documentation_revision": "Beginner flashing guide, hardware links and optional checksum appendix; runtime image unchanged"
 }
