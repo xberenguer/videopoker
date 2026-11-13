@@ -22,6 +22,8 @@ class PlusHardware:
     def __init__(self):
         self.display, self.gpio = None, None
         self._last_frame = None
+        self._backlight_pwm = None
+        self._brightness = 100
 
     def __enter__(self):
         upstream_path = "/opt/src"
@@ -45,6 +47,17 @@ class PlusHardware:
     def read_mask(self):
         return sum(1 << bit for bit, pin in enumerate(self.BUTTON_PINS)
                    if self.gpio.input(pin) == self.gpio.LOW)
+
+    def set_brightness(self, value):
+        if type(value) is not int or value not in range(10,101,10):
+            raise ValueError('Brightness must be 10..100 in 10% steps')
+        if value == self._brightness:return False
+        if self._backlight_pwm is None:
+            self._backlight_pwm=self.gpio.PWM(self.display.backlight,1000)
+            self._backlight_pwm.start(value)
+        else:self._backlight_pwm.ChangeDutyCycle(value)
+        self._brightness=value
+        return True
 
     def present(self, image):
         if image.mode != "RGB" or image.size != (320, 240):
@@ -78,6 +91,9 @@ class PlusHardware:
 
     def close(self):
         self._last_frame = None
+        if self._backlight_pwm is not None:
+            self._backlight_pwm.stop()
+            self._backlight_pwm=None
         if self.display is not None:
             try:
                 self.display.spi.close()

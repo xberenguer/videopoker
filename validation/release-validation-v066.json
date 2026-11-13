@@ -1,0 +1,72 @@
+{
+  "status": "PASS_SOFTWARE_CHECKS_HARDWARE_TEST_PENDING",
+  "version": "0.6.6",
+  "image": "./outputs/videopoker-v0.6.6-pi0-320x240.img",
+  "image_sha256": "ba6f311d794dd5f6cd2eb1d04e93aaed3341f99da3b66a6764d91907ae720424",
+  "image_size_bytes": 52957184,
+  "runtime_files_read_back": 213,
+  "host_tests": 352,
+  "host_failures": 0,
+  "host_errors": 0,
+  "host_skips": 0,
+  "wall_clock_fake_gpio_tests_passed": true,
+  "stock_ARM_training_games": 12,
+  "stock_ARM_cabinet_games": 12,
+  "stock_ARM_calculator_modes": 24,
+  "stock_ARM_alternate_profiles": [
+    "ddb3_95",
+    "ddb3_85",
+    "ddb3_75",
+    "ddb10_95",
+    "ddb10_85",
+    "ddb10_75"
+  ],
+  "device_settings_and_memory": {
+    "status": "PASS",
+    "default_OFF_no_history_writes": true,
+    "opt_in_restores_training_and_device_settings": true,
+    "OFF_erases_saved_data": true,
+    "clear_preserves_memory_mode_and_device_settings": true,
+    "live_game_starts_fresh": true,
+    "RIGHT_TOP_BOTTOM_toggles_live_sidebar_at_two_seconds": true,
+    "Dpad_entry_shortcut_removed": true,
+    "cabinet_has_no_settings_caption": true,
+    "neutral_release_required_before_reentry": true,
+    "calculator_fifth_card_auto_calculation": true,
+    "alternate_paytable_full_EV_profiles": [
+      "ddb3_95",
+      "ddb3_85",
+      "ddb3_75",
+      "ddb10_95",
+      "ddb10_85",
+      "ddb10_75"
+    ],
+    "save_test_backing": "Disposable regular file in guest RAM; no host or physical SD card written"
+  },
+  "boot_tile": "bp3",
+  "factory_memory_default": "OFF",
+  "general_and_trainer_memory_toggle_share_one_setting": true,
+  "brightness_host_PWM_sink_verified": true,
+  "original_payout_engine_and_evaluator_unchanged": true,
+  "regular_and_trainer_deal_oracles_passed_games": 12,
+  "docs_links_and_anchors_prepackage": 49,
+  "current_documentation_screenshots": 17,
+  "previous_images_preserved": true,
+  "physical_device_flashed": false,
+  "physical_hardware_tested": false,
+  "github_published": false,
+  "limitations": [
+    "Physical Pi cold boot, actual LCD brightness/PWM, button feel and timing need hardware testing.",
+    "ON saves are coalesced; wait for Saved on SD before power-off to retain the latest changes.",
+    "Only listed, strategy-bound alternate paytables are supported; casino locations are not inferred.",
+    "Curated Close/Clear drills are currently available for the twelve original profiles.",
+    "EV uses an all-1x continuation reference; vendor XEV formatting is not claimed identical."
+  ],
+  "diagnostic_attempts_preserved": [
+    "Current v0.6.6 full host and both stock ARM suites passed; prior v0.6.5 experimental diagnostics remain in their separate local folders."
+  ],
+  "RIGHT_TOP_BOTTOM_toggles_sidebar_at_two_seconds_before_release": true,
+  "Dpad_entry_shortcut_removed": true,
+  "cabinet_settings_caption_removed": true,
+  "github_publication_authorized": true
+}

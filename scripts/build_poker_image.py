@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build/inspect the Poker-on-SeedSigner image, using regular files only.
+"""Build/inspect the Video Poker image, using regular files only.
 
 The pinned upstream image is the immutable base. A tiny, deterministic external
 newc initramfs supplements its built-in RAM filesystem. No raw devices, mounts,
@@ -22,6 +22,8 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from payload_assets import APP_FILES, MANIFEST as ASSET_MANIFEST, PREFIX as ASSET_PREFIX, validate_asset_inventory
 from strategy_assets import validate_strategy_inventory
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'payload/opt/dino'))
+from poker_training_store import REGION_BYTES, HEADER_BYTES, SLOT_BYTES, initial_region, header, unpack_slot
 
 BASE_SHA256 = "67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9"
 BASE_SIZE = 52_428_800
@@ -30,7 +32,7 @@ OVERLAY_NAME = "poker-overlay.cpio"
 INITRAMFS_LINE = "initramfs poker-overlay.cpio followkernel"
 SETTINGS = {"persistent_settings": "E", "display_config": "st7789_320x240"}
 EXECUTABLES = {"start.sh"}
-PROJECT_VERSION = "0.5.1"
+PROJECT_VERSION = "0.6.6"
 
 
 def sha(data):
@@ -190,7 +192,8 @@ class Fat16:
         self.root_offset = self.fat_offset + self.fat_count * self.fat_sectors * self.sector_bytes
         self.root_bytes = self.root_count * 32
         self.data_offset = self.root_offset + ((self.root_bytes + 511) // 512) * 512
-        if self.offset + self.partition_sectors * 512 != len(data):
+        self.partition_end=self.offset+self.partition_sectors*512
+        if self.partition_end != BASE_SIZE or len(data) not in (BASE_SIZE, BASE_SIZE+REGION_BYTES):
             raise ValueError("Unexpected upstream partition boundary")
         fat_size = self.fat_sectors * self.sector_bytes
         for index in range(1, self.fat_count):
@@ -207,7 +210,7 @@ class Fat16:
                 raise ValueError("FAT cluster cycle")
             seen.add(cluster)
             off = self.data_offset + (cluster - 2) * self.cluster_bytes
-            if off + self.cluster_bytes > len(self.data):
+            if off + self.cluster_bytes > self.partition_end:
                 raise ValueError("FAT cluster outside partition")
             result.append(off)
             cluster = struct.unpack_from("<H", self.data, self.fat_offset + cluster * 2)[0]
@@ -282,11 +285,18 @@ def config_with_overlay(original):
     text = original.decode("ascii")
     if any(line.strip().startswith(("initramfs ", "ramfsfile=", "os_prefix=")) for line in text.splitlines()):
         raise ValueError("Unexpected initramfs or OS prefix in upstream config")
-    return (text.rstrip() + "\n\n# Poker launcher: same SeedSigner kernel and RAM filesystem.\n" + INITRAMFS_LINE + "\n").encode("ascii")
+    return (text.rstrip() + "\n\n# Video Poker launcher: upstream kernel and RAM filesystem.\n" + INITRAMFS_LINE + "\n").encode("ascii")
 
 
 def inspect_image(path, base_path=None):
     data = regular(path).read_bytes()
+    if len(data) != BASE_SIZE + REGION_BYTES:
+        raise ValueError('Training image size differs')
+    if data[BASE_SIZE:BASE_SIZE+HEADER_BYTES] != header(data[:512]):
+        raise ValueError('Training journal header differs')
+    journal_records = [unpack_slot(data[BASE_SIZE+HEADER_BYTES+i*SLOT_BYTES:BASE_SIZE+HEADER_BYTES+(i+1)*SLOT_BYTES]) for i in range(2)]
+    if any(record is None for record in journal_records):
+        raise ValueError('Training save slot is invalid')
     fat = Fat16(data)
     required = ("bootcode.bin", "start_x.elf", "fixup_x.dat", "zImage", "bcm2708-rpi-zero.dtb", "config.txt", "settings.json", OVERLAY_NAME)
     if any(name not in fat.files for name in required):
@@ -312,7 +322,7 @@ def inspect_image(path, base_path=None):
         if sha(original) != BASE_SHA256 or len(original) != BASE_SIZE:
             raise ValueError("Upstream image checksum differs")
         upstream = Fat16(original)
-        if data[:fat.offset] != original[:fat.offset] or len(data) != len(original):
+        if data[:fat.offset] != original[:fat.offset] or len(data) != len(original) + REGION_BYTES:
             raise ValueError("Candidate MBR/padding/layout differs from upstream")
         if set(fat.files) != set(upstream.files) | {OVERLAY_NAME, "settings.json"}:
             raise ValueError("Unexpected FAT file additions/removals")
@@ -333,11 +343,15 @@ def inspect_image(path, base_path=None):
             "overlay_encoding": "gzip-newc" if fat.files[OVERLAY_NAME][:2] == b"\x1f\x8b" else "newc",
             "overlay_entries": {name: {k: v for k, v in record.items() if k != "content"} for name, record in entries.items()},
             "hardware_tested": False, "physical_device_written": False,
-            "project": "SeedSigner Poker", "project_version": PROJECT_VERSION,
+            "project": "Video Poker", "project_version": PROJECT_VERSION,
             "visual_assets": visual_assets,
             "strategy_assets": strategy_assets,
-            "base_seedsigner_version": "0.8.7", "target": "Pi Zero 1.3 / Plus-compatible Play ST7789 320x240",
-            "game_state_persistence": "RAM only; reset on reboot", "emulator_or_rom_included": False}
+            "base_os_version": "0.8.7", "target": "Pi Zero 1.3 / ST7789 320x240 handheld",
+            "game_state_persistence": "Live play state in RAM; training/device memory OFF by default, optional explicit SD opt-in",
+            "training_journal": {"offset":BASE_SIZE,"bytes":REGION_BYTES,"slots":2,"slot_bytes":SLOT_BYTES,
+                "runtime_enabled":"explicit opt-in", "default_enabled":False,"purpose":"Two checksummed copies for optional training and device memory",
+                "boot_partition_unchanged":True,"initial_generations":[r['generation'] for r in journal_records]},
+            "emulator_or_rom_included": False}
 
 
 def build(base, payload, output, mcopy="mcopy"):
@@ -366,7 +380,7 @@ def build(base, payload, output, mcopy="mcopy"):
             os.utime(source, (EPOCH, EPOCH))
             subprocess.run([mcopy, "-o", "-m", "-i", f"{staged_image}@@{upstream.offset}", str(source), "::/" + name],
                            check=True, env={**os.environ, "TZ": "UTC"})
-        staged_image.write_bytes(normalized_metadata(staged_image.read_bytes(), (OVERLAY_NAME, "config.txt", "settings.json")))
+        staged_image.write_bytes(normalized_metadata(staged_image.read_bytes(), (OVERLAY_NAME, "config.txt", "settings.json")) + initial_region(original[:512]))
         report = inspect_image(staged_image, base)
         report["image"] = str(output)
         report["reproducibility"] = {"cpio_mtime": EPOCH, "cpio_owner": "0:0", "entry_order": "parent-before-child, sorted", "modified_fat_timestamps": "2023-01-01T00:00:00Z"}

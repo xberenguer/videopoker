@@ -1,4 +1,4 @@
-Third-party visual assets - SeedSigner Poker 0.3.0
+Third-party visual assets - Video Poker
 
 The files declared in assets/videopoker/manifest.json are separate from this
 project's original GPL-2.0-or-later program code. Their inclusion does not grant

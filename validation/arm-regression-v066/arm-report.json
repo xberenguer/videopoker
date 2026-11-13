@@ -1,0 +1,1181 @@
+{
+  "status": "PASS",
+  "mode": "strategy-and-ui-functional-only",
+  "native_RAM_only_training_verified": true,
+  "python": "3.12.10 (main, Apr 22 2025, 18:36:40) [GCC 13.3.0]",
+  "pillow": "10.3.0",
+  "version": "0.6.6",
+  "machine": "armv6l",
+  "native_resolution": [
+    320,
+    240
+  ],
+  "cabinet": {
+    "status": "PASS",
+    "games": [
+      {
+        "game_id": "bp3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 18,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bpd3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 17,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 27,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw3",
+        "hands": 3,
+        "deck_size": 52,
+        "mask": 15,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "job5",
+        "hands": 5,
+        "deck_size": 52,
+        "mask": 27,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "db5",
+        "hands": 5,
+        "deck_size": 52,
+        "mask": 5,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "joker5",
+        "hands": 5,
+        "deck_size": 53,
+        "mask": 15,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw5",
+        "hands": 5,
+        "deck_size": 52,
+        "mask": 0,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bp10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 5,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 5,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "tdb10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 30,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dwb10",
+        "hands": 10,
+        "deck_size": 52,
+        "mask": 24,
+        "first_double_up_best_holds": true,
+        "first_held_hint": true,
+        "rounds": 1,
+        "status": "PASS"
+      }
+    ],
+    "menu_boot_checked": true,
+    "real_async_advice_all_twelve": true,
+    "two_press_M_preserved": true,
+    "all_workers_joined": true
+  },
+  "strategy_and_autoplay": {
+    "status": "PASS",
+    "known_cases": [
+      {
+        "cards": [
+          12,
+          25,
+          38,
+          1,
+          2
+        ],
+        "multiplier_sum": 10,
+        "expected_mask": 7,
+        "actual_mask": 7,
+        "variations": [
+          {
+            "multiplier_sum": 20,
+            "mask": 7,
+            "expected_current_win": 1226.7345050878816
+          },
+          {
+            "multiplier_sum": 40,
+            "mask": 7,
+            "expected_current_win": 2453.4690101757633
+          },
+          {
+            "multiplier_sum": 80,
+            "mask": 7,
+            "expected_current_win": 4906.938020351527
+          },
+          {
+            "multiplier_sum": 120,
+            "mask": 7,
+            "expected_current_win": 7360.40703052729
+          }
+        ]
+      },
+      {
+        "cards": [
+          0,
+          1,
+          2,
+          3,
+          17
+        ],
+        "multiplier_sum": 10,
+        "expected_mask": 31,
+        "actual_mask": 31,
+        "variations": [
+          {
+            "multiplier_sum": 20,
+            "mask": 31,
+            "expected_current_win": 400.0
+          },
+          {
+            "multiplier_sum": 40,
+            "mask": 31,
+            "expected_current_win": 800.0
+          },
+          {
+            "multiplier_sum": 80,
+            "mask": 31,
+            "expected_current_win": 1600.0
+          },
+          {
+            "multiplier_sum": 120,
+            "mask": 31,
+            "expected_current_win": 2400.0
+          }
+        ]
+      },
+      {
+        "cards": [
+          11,
+          24,
+          37,
+          50,
+          12
+        ],
+        "multiplier_sum": 10,
+        "expected_mask": 31,
+        "actual_mask": 31,
+        "variations": [
+          {
+            "multiplier_sum": 20,
+            "mask": 31,
+            "expected_current_win": 5000.0
+          },
+          {
+            "multiplier_sum": 40,
+            "mask": 31,
+            "expected_current_win": 10000.0
+          },
+          {
+            "multiplier_sum": 80,
+            "mask": 31,
+            "expected_current_win": 20000.0
+          },
+          {
+            "multiplier_sum": 120,
+            "mask": 31,
+            "expected_current_win": 30000.0
+          }
+        ]
+      },
+      {
+        "cards": [
+          0,
+          15,
+          30,
+          44,
+          12
+        ],
+        "multiplier_sum": 10,
+        "expected_mask": 16,
+        "actual_mask": 16,
+        "variations": [
+          {
+            "multiplier_sum": 20,
+            "mask": 16,
+            "expected_current_win": 46.8410282286323
+          },
+          {
+            "multiplier_sum": 40,
+            "mask": 16,
+            "expected_current_win": 93.6820564572646
+          },
+          {
+            "multiplier_sum": 80,
+            "mask": 16,
+            "expected_current_win": 187.3641129145292
+          },
+          {
+            "multiplier_sum": 120,
+            "mask": 16,
+            "expected_current_win": 281.0461693717938
+          }
+        ]
+      }
+    ],
+    "known_mask_cases": 4,
+    "multiplier_variation_cases": 16,
+    "autoplay_rounds": 3,
+    "single_hint_mask": 15,
+    "hint_preserved_session": true,
+    "held_up_hint_solid_red_until_release": true,
+    "hint_hold_delay_seconds": 0.3,
+    "hint_invisible_before_hold_delay_even_with_ready_advice": true,
+    "release_removes_all_advice_pixels": true,
+    "draw_five_real_advice_mask": 0,
+    "draw_five_only_actual_draw_button_flashes_red": true,
+    "draw_hint_flash_cycle_seconds": 1.0,
+    "autoplay_normal_renderer_with_small_footer_a_only": true,
+    "paced_autoplay_fake_clock_checks": {
+      "consider": 3,
+      "draw": 3,
+      "result": 2,
+      "one_card_per_update": 304
+    },
+    "autoplay_stage_timeline": [
+      {
+        "time": 4.63,
+        "stage": "consider",
+        "phase": "hold",
+        "completed_rounds": 0
+      },
+      {
+        "time": 8.23,
+        "stage": "select",
+        "phase": "hold",
+        "completed_rounds": 0
+      },
+      {
+        "time": 9.48,
+        "stage": "draw",
+        "phase": "hold",
+        "completed_rounds": 0
+      },
+      {
+        "time": 9.78,
+        "stage": "result-animation",
+        "phase": "result",
+        "completed_rounds": 1
+      },
+      {
+        "time": 10.33,
+        "stage": "result",
+        "phase": "result",
+        "completed_rounds": 1
+      },
+      {
+        "time": 11.68,
+        "stage": "consider",
+        "phase": "hold",
+        "completed_rounds": 1
+      },
+      {
+        "time": 15.23,
+        "stage": "select",
+        "phase": "hold",
+        "completed_rounds": 1
+      },
+      {
+        "time": 16.48,
+        "stage": "draw",
+        "phase": "hold",
+        "completed_rounds": 1
+      },
+      {
+        "time": 16.78,
+        "stage": "result-animation",
+        "phase": "result",
+        "completed_rounds": 2
+      },
+      {
+        "time": 17.33,
+        "stage": "result",
+        "phase": "result",
+        "completed_rounds": 2
+      },
+      {
+        "time": 18.68,
+        "stage": "consider",
+        "phase": "hold",
+        "completed_rounds": 2
+      },
+      {
+        "time": 22.23,
+        "stage": "select",
+        "phase": "hold",
+        "completed_rounds": 2
+      },
+      {
+        "time": 23.48,
+        "stage": "draw",
+        "phase": "hold",
+        "completed_rounds": 2
+      },
+      {
+        "time": 23.78,
+        "stage": "result-animation",
+        "phase": "result",
+        "completed_rounds": 3
+      }
+    ],
+    "pacing_profiles": [
+      {
+        "name": "manual",
+        "consider": 1.6,
+        "select": 0.12,
+        "draw": 0.15,
+        "result": 0.8,
+        "animation": 0.04,
+        "manual": true,
+        "instant": true
+      },
+      {
+        "name": "medium",
+        "consider": 3.2,
+        "select": 0.24,
+        "draw": 0.28,
+        "result": 1.35,
+        "animation": 0.065
+      },
+      {
+        "name": "fast",
+        "consider": 1.6,
+        "select": 0.12,
+        "draw": 0.15,
+        "result": 0.8,
+        "animation": 0.04
+      }
+    ],
+    "double_up_speed_cycle_keeps_hand_and_autoplay": [
+      2,
+      0,
+      1
+    ],
+    "triple_up_toggles_both_directions_without_speed_change": true,
+    "manual_double_up_sets_best_holds_without_draw_or_spend": true,
+    "held_up_during_auto_does_not_change_speed": true,
+    "medium_one_chevron_fast_two_chevrons": true,
+    "small_filled_triangles_medium_left_fast_adds_right": true,
+    "manual_pause_preserved_state": true,
+    "three_captured_up_edges_060_apart_never_auto": true,
+    "three_captured_up_edges_020_apart_with_100_dispatch_gap_activate": true,
+    "stop_key_consumed_without_game_action": true,
+    "fresh_down_during_draw_immediately_deals_next_hand_once": true,
+    "fresh_down_during_deal_only_reveals_cards": true,
+    "both_advisor_workers_joined": true,
+    "manual_autoplay_real_advisor_cycles": 2,
+    "manual_autoplay_waits_without_debit_until_down": true,
+    "manual_autoplay_two_down_presses_per_round": true,
+    "manual_autoplay_waits_after_deal_before_holds_or_draw": true,
+    "manual_autoplay_ready_advice_draw_without_pacing_or_animation": true,
+    "manual_autoplay_default_first_mode": true,
+    "manual_autoplay_m_native_size": [
+      5,
+      4
+    ],
+    "manual_autoplay_marker": "A M beside speaker",
+    "all_advisor_workers_joined": true,
+    "table_sha256": "249615df37a6b18d3b5f96a9d7f1fb2a6ec0fbfe712fab679b93bcba37abb6f2",
+    "bellman_span": 3.512923285597935e-11,
+    "scope": "Actual delivered Python strategy, async advisor and UI in stock ARM emulation; fake presentation clock; fixture Random injection only"
+  },
+  "hidden_mode_gate": {
+    "status": "PASS",
+    "toggle_modes": [
+      true,
+      false
+    ],
+    "normal_boot_cabinet_body_identity": true,
+    "single_hardware_owner": true
+  },
+  "deal_frames": {
+    "status": "PASS",
+    "games": [
+      {
+        "game": "bp3",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "bpd3",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "ddb3",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "dw3",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "job5",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "db5",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "joker5",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "dw5",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "bp10",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "ddb10",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "tdb10",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      },
+      {
+        "game": "dwb10",
+        "regular_and_trainer_pixel_oracles_match": true,
+        "next_card_resize_pixels": 3888,
+        "full_screen_resize_avoided": true
+      }
+    ],
+    "LCD_presentation_anchor_verified": true,
+    "physical_timing_claimed": false
+  },
+  "calculator": {
+    "visible_compare_EV_button_verified": true,
+    "status": "PASS",
+    "game_mode_checks": [
+      {
+        "game_id": "bp3",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bp3",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bpd3",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bpd3",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb3",
+        "continued": true,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb3",
+        "continued": false,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw3",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw3",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "job5",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "job5",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "db5",
+        "continued": true,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "db5",
+        "continued": false,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "joker5",
+        "continued": true,
+        "mask": 15,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "joker5",
+        "continued": false,
+        "mask": 15,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw5",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dw5",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bp10",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "bp10",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb10",
+        "continued": true,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "ddb10",
+        "continued": false,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "tdb10",
+        "continued": true,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "tdb10",
+        "continued": false,
+        "mask": 7,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dwb10",
+        "continued": true,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      },
+      {
+        "game_id": "dwb10",
+        "continued": false,
+        "mask": 31,
+        "inline_EV_verified": true,
+        "status": "PASS"
+      }
+    ],
+    "multiplier_mode_literal_masks": [
+      14,
+      10,
+      10
+    ],
+    "default_entrypoint_has_no_signer_callback": true,
+    "all_workers_joined": true
+  },
+  "frames": {
+    "ready": {
+      "phase": "ready",
+      "autoplay": false,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "hold": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "hint-on": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": true,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "manual-best-hold": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "draw-hint": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": true,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "draw-hint-pulse": {
+      "phase": "hold",
+      "autoplay": false,
+      "hint_visible": true,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "autoplay": {
+      "phase": "hold",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "result": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "autoplay-manual": {
+      "phase": "hold",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "autoplay-manual-wait": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-menu": {
+      "phase": "ready",
+      "autoplay": false,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-bp3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-bpd3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-ddb3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-dw3": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-job5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-db5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-joker5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-dw5": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-bp10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-ddb10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-tdb10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "cabinet-dwb10": {
+      "phase": "result",
+      "autoplay": true,
+      "hint_visible": false,
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-menu": {
+      "calculator": true,
+      "game_id": "ddb10",
+      "page": "cabinet",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-bp3": {
+      "calculator": true,
+      "game_id": "bp3",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-bpd3": {
+      "calculator": true,
+      "game_id": "bpd3",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-ddb3": {
+      "calculator": true,
+      "game_id": "ddb3",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-dw3": {
+      "calculator": true,
+      "game_id": "dw3",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-job5": {
+      "calculator": true,
+      "game_id": "job5",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-db5": {
+      "calculator": true,
+      "game_id": "db5",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-joker5": {
+      "calculator": true,
+      "game_id": "joker5",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-dw5": {
+      "calculator": true,
+      "game_id": "dw5",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-bp10": {
+      "calculator": true,
+      "game_id": "bp10",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-ddb10": {
+      "calculator": true,
+      "game_id": "ddb10",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-tdb10": {
+      "calculator": true,
+      "game_id": "tdb10",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-dwb10": {
+      "calculator": true,
+      "game_id": "dwb10",
+      "page": "editor",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-picker": {
+      "calculator": true,
+      "game_id": "ddb10",
+      "page": "picker",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-multipliers": {
+      "calculator": true,
+      "game_id": "ddb10",
+      "page": "multipliers",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-pays": {
+      "calculator": true,
+      "game_id": "ddb10",
+      "page": "pays",
+      "native_resolution": [
+        320,
+        240
+      ],
+      "mode": "RGB"
+    },
+    "calculator-compare-ev": {
+      "calculator": true
+    }
+  },
+  "autoplay_rounds_checked": 3,
+  "png_sha256": {
+    "autoplay.png": "dafc92c44f3e7f03377e791f42162d6aee074ffe77d31f8a546ea5a6c6b8d37e",
+    "autoplay-manual.png": "d5134f8b6797ab8dab00f2003dbca17b5e17b8584e8e5ee8e5c4b4bde930afbf",
+    "autoplay-manual-wait.png": "962cfabc703b2fbc200416a44f7b578625c377902014963add68969b1dd2db22",
+    "cabinet-bp10.png": "6437da5ea5b5fd63cd466ac151ccf107b660a4cb5f3bcd09f0ae543d05ca6c2c",
+    "cabinet-bp3.png": "7a209de6c12d19491fa4162dcba2180aa7a5dcfb45df3f4091fc488122e6996f",
+    "cabinet-bpd3.png": "e09e392421e36f60fb3ae3daa222ef76813dfc254e5ba5bc94d9f908e618b7d4",
+    "cabinet-db5.png": "ee105262edeeb31e70dfd54eb820c823024b33213c8269e6e270b29122b08e39",
+    "cabinet-ddb10.png": "e8bc8eeb1defedc81e0cab8a0447cfd14a775341c49502069ad9b5b8aa6f2bc6",
+    "cabinet-ddb3.png": "37dec0664896dc12bcb739715a4fe4a349a8bee82d0a6c01a0f0841e5988d12c",
+    "cabinet-dw3.png": "b305ca31b4cc4e6c6827986ddf5b26948eea522ae3ebad47f74aade16ba75cd4",
+    "cabinet-dw5.png": "e4118057bf0a6d0ae73604e0647d6afad9498a4fbd0174d2269c5f8992abcc19",
+    "cabinet-dwb10.png": "244ccf88a7761d2f9a51a1af686debcad31c0bd59dc8a254abe6607e0d9350cd",
+    "cabinet-job5.png": "619145606cb2e3ce53d4ed0f6101be69fe8a0071b105ccae7ef79562ae08f6aa",
+    "cabinet-joker5.png": "a39e2bf1bbfba9a22c96b003cbd7a1e605adb06a1d0f2470f09e7e03fe2cbd7d",
+    "cabinet-menu.png": "a968a2746e57f254888d6c9d5fd5d35c6916436bdb1f95b0cf732430d1fa0d77",
+    "cabinet-tdb10.png": "d9bd2d1b951e94ae0181027e3a7d67b777bedbbcf6752a76ac0ebe19a0f65fcc",
+    "calculator-bp10.png": "6b2777c801d8a4c5211dfd43c8cbd18ce8d4310f76723f12a499e64d36207fa2",
+    "calculator-bp3.png": "951b6f08aeb4042d7a0fabf1ba13be39adf75bfc86caace6fd22dc9342af06e0",
+    "calculator-bpd3.png": "64b0df153dced5ff679daf374f779c8940fd38ad73392005aeba098860244b6f",
+    "calculator-compare-ev.png": "2dd18987dcf4969454e28f364c2746c844d1d55d04e6134dc07276a89ade06b1",
+    "calculator-db5.png": "431d2e59fd4e778619fdd56fb3d3dea90262ef92b25faa166539a2ef75e1ec78",
+    "calculator-ddb10.png": "a386681f46a94e2d1c2734e41f6b5b5fe146d3708d5c773f0fee9c366dd54305",
+    "calculator-ddb3.png": "01c034f0809b215353db25c60df0188a1c579b3c12eb10d7128d8cc6780217e4",
+    "calculator-dw3.png": "3689c9715a58c4fecb97c98ab427d275418296fe110f85754055596d809f0705",
+    "calculator-dw5.png": "4440d130a81edfe30a2ad278162bb3268960924b669917d3ccc79d725ecd3381",
+    "calculator-dwb10.png": "c507d2c6d6009a3c061b1028808fda4c6fd011337cc1984f442fac4010636ae3",
+    "calculator-job5.png": "c068e77e81fe407c16490e41b41d39ac2a168b48205ca0fc5444c64b0d4b74d4",
+    "calculator-joker5.png": "eb3bd33bd426c91a412c8986993955c80abc10a4399c3740c5c4e413fadf8cbb",
+    "calculator-menu.png": "c14645a446700e0fcadee6d05da3f26f255d0a1e5f485ff926907d0097bfb48f",
+    "calculator-multipliers.png": "e61c4afe3cf48dd1d70f6c852b0e21cc3b7fa40ee8f1036afa16a800e1a88818",
+    "calculator-pays.png": "a2d835ddbb59433d42c13de9f6be0e3999a61adedf6d82c2888790525daae5ea",
+    "calculator-picker.png": "5be5267c337dcc8b1f27bac8350b3fc5b5d82e5ebb415b480e55ccc2591face8",
+    "calculator-tdb10.png": "c92cc6662b214c0940d31feec2d26a3cb5269a649c2043f6bb26917517a3e8b8",
+    "draw-hint.png": "402f9fbaef25774e8bdb7c74fb2c0a7dbeb9b9b22cb1d2dbb98d205af16d686a",
+    "draw-hint-pulse.png": "387bdfd09001ce1f73847715510d799f51df1b071226716975e9db7359b136cf",
+    "hint-on.png": "a91cd2c9359f4bb413d56e6845c159068f5fd1c280b90aae8a1402d1dde5438b",
+    "hold.png": "04e51ef5631f51815a3bacf0fdccfe31f5b9726223912e6cd074350157e3c575",
+    "manual-best-hold.png": "209ba549e0fb4d7204ac848b701a66af79ac17f63476a9e40581b88c5d1f6ae2",
+    "ready.png": "2979b24f7eb66dd6aa2bb193b6afa72b0eb9f005d0120975c92d7bcbbcfe8831",
+    "result.png": "681356109298cb60e4fc267298ec375f5f07bcc19367f574269824c509d366c4"
+  },
+  "input_wall_clock_qualification": "NOT CLAIMED",
+  "full_probe_timing_report_replaced": false,
+  "full_probe_timing_report_scope": "Separate full probe results, including failures, remain authoritative for their wall-clock checks",
+  "delivered_image_entrypoint_untouched": true,
+  "diagnostic_entrypoint_replaced": true,
+  "physical_display_tested": false,
+  "physical_buttons_tested": false,
+  "camera_or_signing_tested": false,
+  "production_rng_path_tested": false,
+  "duration_seconds": 57.455,
+  "guest_png_readback_verified": true,
+  "qemu_only_dtb_changes": {
+    "/soc/watchdog@7e100000": "disabled",
+    "/soc/mmc@7e300000": "okay",
+    "/soc/fb": "disabled",
+    "/soc/mailbox@7e00b840": "disabled"
+  },
+  "probe_mode": "strategy-and-ui-functional-only",
+  "diagnostic_clock": "virtual-instruction-clock; no wall-clock qualification",
+  "production_dtb_modified": false,
+  "production_image_sha256": "ba6f311d794dd5f6cd2eb1d04e93aaed3341f99da3b66a6764d91907ae720424",
+  "qemu_only_dtb_sha256": "c7f851ff2da226f072fad7df58eb9882f51c779504113244a5f7e4cab498e175",
+  "qemu_termination": "Stopped after completed guest marker or bounded timeout",
+  "marker_polling": "Lightweight mtools mtype; full FAT decode only after completion",
+  "guest_sync_before_done_marker": true,
+  "gpu_bootloader_tested": false
+}

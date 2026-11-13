@@ -26,6 +26,7 @@ PATH = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,199}\Z")
 APP_FILES = frozenset(("start.sh", "opt/dino/LICENSE", "opt/dino/NOTICE",
                       "opt/dino/THIRD-PARTY-ASSETS.txt",
                       "opt/dino/hardware.py", "opt/dino/launcher.py",
+                      "opt/dino/poker_app.py", "opt/dino/poker_calculator.py",
                       "opt/dino/poker_engine.py", "opt/dino/poker_ui.py",
                       "opt/dino/poker_strategy.py",
                       "opt/dino/strategy/subset_counts.dat",
@@ -35,6 +36,11 @@ APP_FILES = frozenset(("start.sh", "opt/dino/LICENSE", "opt/dino/NOTICE",
                       "opt/dino/strategy/deuces_counts.dat", "opt/dino/strategy/joker_counts.dat"))
 APP_FILES = APP_FILES | frozenset("opt/dino/strategy/cabinet/"+name+".json" for name in
     ("bp3","bpd3","ddb3","dw3","job5","db5","joker5","dw5","bp10","ddb10","tdb10","dwb10"))
+APP_FILES = APP_FILES | frozenset(('opt/dino/poker_training.py', 'opt/dino/poker_training_ui.py',
+    'opt/dino/poker_training_store.py', 'opt/dino/poker_training_hud.py', 'opt/dino/training_drills.json',
+    'opt/dino/poker_settings.py'))
+APP_FILES = APP_FILES | frozenset('opt/dino/strategy/cabinet/'+base+'_'+suffix+'.json'
+    for base in ('ddb3','ddb10') for suffix in ('95','85','75'))
 
 
 def _integer(value, low, high, label):

@@ -55,16 +55,16 @@ class FakeUI:
 
 
 class GateTests(unittest.TestCase):
-    def test_full_chord_and_every_key_release_are_required(self):
+    def test_full_chord_opens_exactly_at_two_seconds_before_release(self):
         gate = launcher.HoldReleaseGate()
         chord = launcher.SIGNER_CHORD
         self.assertFalse(gate.update(0, chord))
         self.assertFalse(gate.update(1.999, chord))
-        self.assertFalse(gate.update(2.0, chord))
+        self.assertTrue(gate.update(2.0, chord))
         self.assertTrue(gate.latched)
-        self.assertFalse(gate.update(3.0, launcher.KEY2))
-        self.assertFalse(gate.update(3.1, 0))
-        self.assertFalse(gate.update(3.179, 0))
+        self.assertTrue(gate.update(3.0, launcher.KEY2))
+        self.assertTrue(gate.update(3.1, 0))
+        self.assertTrue(gate.update(3.179, 0))
         self.assertTrue(gate.update(3.181, 0))
 
     def test_interrupted_hold_does_not_count_towards_next_hold(self):
@@ -497,7 +497,8 @@ class RuntimeTests(unittest.TestCase):
                       clock=clock, sleep=clock.sleep, input_factory=SynchronousInput,
                       signer_runner=lambda argv: events.append("signer"))
         self.assertEqual(len(attempts), 2)
-        self.assertGreaterEqual(clock(), 3.28)
+        self.assertGreaterEqual(clock(), 3.0)
+        self.assertLess(clock(), 3.2)
         self.assertEqual(events[-2:], ["close", "signer"])
         self.assertTrue(any(isinstance(event, tuple) and event[0] == "message" for event in events))
         self.assertIn(("message", "Game unavailable", "Down button: retry"), events)
@@ -512,7 +513,8 @@ class RuntimeTests(unittest.TestCase):
             return 0
         hardware = FakeHardware(clock, trace, events)
         launcher.run_poker_gate(lambda: hardware, lambda: ui, clock, clock.sleep, input_factory=SynchronousInput)
-        self.assertGreaterEqual(clock(), 5.28)
+        self.assertGreaterEqual(clock(), 5.0)
+        self.assertLess(clock(), 5.2)
         self.assertEqual(events[-1], "close")
 
     def test_render_failure_remains_in_recovery_until_deliberate_exit(self):
@@ -525,7 +527,8 @@ class RuntimeTests(unittest.TestCase):
         hardware = FakeHardware(clock, lambda t: launcher.SIGNER_CHORD if 1 <= t < 3.2 else 0, events)
         launcher.run_poker_gate(lambda: hardware, BrokenRender, clock, clock.sleep, input_factory=SynchronousInput)
         self.assertEqual(events[-1], "close")
-        self.assertGreaterEqual(clock(), 3.28)
+        self.assertGreaterEqual(clock(), 3.0)
+        self.assertLess(clock(), 3.2)
         self.assertEqual(events.count("ui-close"), 1)
         self.assertLess(events.index("ui-close"), events.index("close"))
 
