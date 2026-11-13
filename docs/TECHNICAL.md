@@ -42,6 +42,10 @@ Host tests cover all inherited cabinet/calculator behavior, independent dense-po
 
 The stock ARM probe executes delivered Python and renders native PNGs in the upstream ARMv6 rootfs, using diagnostic RNG and a virtual presentation clock. It verifies default OFF behavior and ON/OFF/clear/reboot transitions using a disposable regular file in guest RAM. It never writes a physical SD card. GPIO/LCD are simulated: this is not physical Pi boot, latency, LCD, entropy, or power-loss qualification.
 
+## Build from source
+
+Download the [matching source archive](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-source.tar.gz), extract it and open a terminal in its project folder. The archive is for building; flash the released `.img` to play.
+
 Build with Python 3.12, Pillow 10.3.0 and mtools. Supply the pinned upstream base as `inputs/base-os-v0.8.7-pi0.img`, SHA-256 `67f005c7ace26500a78be3f4d97eaf02d76d018550ec54df011741dde1933ce9`.
 
 ```sh

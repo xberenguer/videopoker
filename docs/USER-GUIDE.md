@@ -1,24 +1,21 @@
 # Video Poker user guide
 
-This guide describes **v0.6.6**. It covers the twelve-tile cabinet, ordinary play, device settings, optional SD memory, calculator and hidden trainer. All money amounts in this program are **virtual credits**.
+[Download the IMG](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img) · [Raspberry Pi Imager](https://www.raspberrypi.com/software/) · [Buy or build the handheld](../README.md#get-the-hardware)
 
 [Install](#install-and-first-boot) · [Controls](#physical-controls) · [Cabinet](#cabinet-and-game-selection) · [Settings](#general-settings) · [Paytables](#paytable-presets-and-vegas-configurations) · [Memory](#persistent-memory) · [Calculator](#card-calculator) · [Trainer](#hidden-trainer) · [Statistics](#statistics-and-ev) · [Troubleshooting](#troubleshooting)
 
 ## Install and first boot
 
-Use the [README flashing instructions](../README.md#quick-install) with Raspberry Pi Imager. The supplied image targets a **Raspberry Pi Zero 1.3, ST7789 display in 320 × 240 landscape orientation, D-pad with center switch and three action buttons**. A 240 × 240 display, different GPIO layout or another Pi model needs its own qualification; changing the device selector in Imager does not adapt the image.
+You'll need the handheld, a microSD card, a computer and a card reader.
 
-Download the IMG and matching SHA-256 file from the same release. On macOS or Linux, run the following from the download folder:
+1. [Download the game image (.img)](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img) and install [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+2. Insert the microSD card into your computer using a card reader, then open Imager.
+3. Choose **Raspberry Pi Zero** as the device. For the operating system, choose **Use Custom** and open the downloaded `.img` file.
+4. Choose your **microSD card** as storage. Skip OS customisation if asked.
+5. Click **Write**, confirm erasing that card and approve the computer's permission prompt. Let writing and verification finish.
+6. Eject the card, put it in the powered-off handheld's boot slot (**top slot on Play**) and connect USB power. The game opens automatically.
 
-```sh
-shasum -a 256 -c videopoker-v0.6.6-pi0-320x240.img.sha256
-```
-
-The result must be `OK`. On Windows PowerShell, use `Get-FileHash .\videopoker-v0.6.6-pi0-320x240.img -Algorithm SHA256` and compare its hash with the checksum file. Hash verification checks the download; Imager's verification checks what was written to the card.
-
-No Wi-Fi, account, phone, BIOS, game ROM or additional installation is required. The image already includes its operating system, program, artwork and offline strategy tables. Do not extract or flash the corresponding-source archive.
-
-On boot, the first tile—**Triple Play Bonus Poker**—is highlighted. This is a fixed default. Maximum bet and the complete hand count are selected for each game. Persistent memory does not resume a live hand or automatically start the trainer.
+For hardware, see [where to buy or build it](../README.md#get-the-hardware). For software builds, see [build from source](TECHNICAL.md#build-from-source).
 
 ## Physical controls
 
@@ -265,6 +262,16 @@ Autoplay records its actual selected hold separately from personal accuracy. Its
 | Calculator recommendation is stale | Editing inputs clears/replaces old analysis. Incomplete cards cannot be analyzed. TOP/Calculate retries a failed analysis. |
 | New paytable appears wrong | Review every award and multiplier, not just full house/flush. The South Point label refers only to the supplied photographed configuration. |
 | No Close/Clear drills for an alternate table | Use ALL. Alternate DDB strategy is included; preset-specific curated difficulty banks are not. |
+
+## Verify the download
+
+Download the [matching SHA-256 file](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img.sha256) into the same folder as the IMG. On macOS or Linux, open a terminal in that folder and run:
+
+```sh
+shasum -a 256 -c videopoker-v0.6.6-pi0-320x240.img.sha256
+```
+
+The result should say `OK`. On Windows PowerShell, run `Get-FileHash .\videopoker-v0.6.6-pi0-320x240.img -Algorithm SHA256` and compare its hash with the checksum file. This checks the downloaded file; Imager separately verifies the card after writing.
 
 ## Validation and source
 
