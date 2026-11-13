@@ -1,81 +1,80 @@
-![Video Poker running on SeedSigner Play](docs/images/seedsigner-play-videopoker.jpg)
+![Video Poker on a handheld](docs/images/handheld-videopoker.jpg)
 
 # Video Poker
 
-An offline Ultimate X style video poker cabinet for **SeedSigner Play / compatible Plus hardware**, with the twelve-game menu, three-, five- and ten-hand layouts, game-specific paytables, next-hand multipliers, hints and autoplay. Version **0.5.1** includes the twelve-game cabinet, triple-UP autoplay toggle, and fixed maximum wagers.
+An offline, twelve-game video poker cabinet with best-hold hints, three autoplay modes, an EV calculator and a hidden trainer. Built for a **Raspberry Pi Zero 1.3, 320 × 240 ST7789 display, D-pad with center button and three action buttons**. Virtual credits only; no account or connection required.
 
-[Download IMG](https://github.com/xberenguer/videopoker/releases/download/v0.5.1/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img) · [SHA-256](https://github.com/xberenguer/videopoker/releases/download/v0.5.1/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img.sha256) · [Matching source](https://github.com/xberenguer/videopoker/releases/download/v0.5.1/seedsigner-poker-v0.5.1-source.tar.gz)
+**v0.6.5:** optional persistent memory with explanations, general Settings with brightness and animation speed, verified DDB paytable presets, automatic calculator results and immediate trainer-menu entry.
 
-Virtual credits only. State stays in RAM and resets when powered off. This is an independent community project; third-party graphics keep their original rights. It is not an official SeedSigner, BitKit, IGT, Action Gaming or VideoPoker.com release.
+[Download IMG](https://github.com/xberenguer/videopoker/releases/download/v0.6.5/videopoker-v0.6.5-pi0-320x240.img) · [SHA-256](https://github.com/xberenguer/videopoker/releases/download/v0.6.5/videopoker-v0.6.5-pi0-320x240.img.sha256) · [Matching source](https://github.com/xberenguer/videopoker/releases/download/v0.6.5/videopoker-v0.6.5-source.tar.gz)
 
-## Screenshots
+[Complete user guide](docs/USER-GUIDE.md) · [All menus and settings](docs/USER-GUIDE.md#general-settings) · [Trainer and statistics](docs/USER-GUIDE.md#hidden-trainer) · [Build and validation](docs/TECHNICAL.md) · [Licenses and credits](NOTICE)
 
-Actual software renders at 320 × 240, enlarged for readability.
+## Quick install
 
-| Cabinet | Three hands |
+1. Download the **IMG** and matching **.sha256** from the same release. Verify the checksum; [commands](docs/USER-GUIDE.md#install-and-first-boot) are in the guide.
+2. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/) and insert your microSD card into the computer.
+3. Select **Raspberry Pi Zero** as the device. Under the OS selection, choose **Use Custom** and select the downloaded `.img`.
+4. Select the intended microSD card as storage. Writing replaces its contents.
+5. Skip OS customisation such as Wi-Fi/SSH, then write the image. Approve any system authorisation and let verification finish.
+6. Eject the card, insert it into the powered-off handheld, then power on. The first cabinet tile is selected; choose a game and press DOWN to deal.
+
+Imager versions vary in layout. These steps follow the [official Raspberry Pi installation guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#install-an-os-onto-boot-media); this custom offline image does not use normal Raspberry Pi OS customisation. Do not flash the source `.tar.gz` archive.
+
+## Play
+
+| Input | Action |
 | --- | --- |
-| ![Twelve-game cabinet](docs/screenshots/cabinet-menu.png) | ![Three-hand Bonus Poker](docs/screenshots/cabinet-bp3-result.png) |
-| Five hands | Ten hands |
-| ![Five-hand Joker Poker](docs/screenshots/cabinet-joker5-result.png) | ![Ten-hand Double Double Bonus](docs/screenshots/cabinet-ddb10-result.png) |
-| Deuces Bonus paytable | Manual autoplay |
-| ![Deuces Bonus paytable](docs/screenshots/cabinet-dwb10-paytable.png) | ![Manual autoplay](docs/screenshots/autoplay-manual-think.png) |
+| LEFT / RIGHT | Select cards or bottom machine controls |
+| Either middle button | Hold/unhold, select, or next deal after results |
+| DOWN | Deal / Draw |
+| Hold UP | Red best-hold peek after 0.30 seconds; release hides it |
+| Double UP | Apply best holds manually; change mode during autoplay |
+| Triple UP | Toggle autoplay on/off |
+| Cabinet BOTTOM | General Settings |
+| Hold D-pad UP + DOWN for two seconds | Open/exit the hidden trainer menu immediately, before release |
 
-## Games
+When no cards should be held, held-UP flashes the actual Draw button red. Fast taps deliberately do not show the red hint. Both middle buttons retain their card-hold/next-hand behavior.
 
-| Three hands | Five hands | Ten hands |
-| --- | --- | --- |
-| Bonus Poker | Jacks or Better | Bonus Poker |
-| Bonus Poker Deluxe | Double Bonus | Double Double Bonus |
-| Double Double Bonus | Joker Poker | Triple Double Bonus |
-| Deuces Wild | Deuces Wild | Deuces Bonus Poker |
+Autoplay starts in **AM**: DOWN deals, then another DOWN applies the best hold and draws immediately. Double UP cycles **AM → Medium → Fast**. The small footer indicator uses `A M`, one filled triangle or two filled triangles. UP does not cancel autoplay except an explicit triple tap; AM also keeps autoplay active when DOWN is pressed. See the [complete control guide](docs/USER-GUIDE.md#physical-controls).
 
-The menu opens on boot. Every game is fixed at **max bet with all 3, 5 or 10 hands active**: ten credits per hand, made up of five base credits plus five feature credits. Tile selection prepares this full board without spending credits; DOWN deals. Bet Per Hand and Select Hands are disabled in this cabinet. BET MAX remains a Deal shortcut. Joker Poker uses a 53-card deck; Deuces Wild variants use wild twos. Triple Double Bonus includes the reference's lower-coin royal and aces-with-kicker exceptions.
+| Cabinet | Ten-hand play |
+| --- | --- |
+| ![Twelve-game cabinet](docs/screenshots/live-regular-menu.png) | ![Ten-hand Double Double Bonus](docs/screenshots/live-regular-game.png) |
+| ![Three-hand play](docs/screenshots/live-triple-ddb.png) | ![Five-hand Deuces Wild](docs/screenshots/live-five-deuces.png) |
 
-Returning from More Games preserves the entire current game. Selecting a tile clears the cards, restores the full max-bet board, preserves shared credits, and restores that game's pending multipliers. Games cannot be changed during a live hand.
+## Settings and Vegas paytables
 
-## Controls
+General Settings includes **brightness, manual animation speed, paytable presets, persistent memory and virtual-credit reset**. Each setting has a short explanation. Three- and ten-hand Double Double Bonus offer **9/6, 9/5, 8/5 and 7/5**, with matching payout and offline strategy data. Other games retain their original cabinet tables.
 
-- **D-pad:** navigate the cabinet menu. Either middle button selects a game; bottom right returns from a menu when a game is open.
-- **LEFT / RIGHT:** select a card. **Either middle:** hold/unhold; advance to the next deal after results.
-- **DOWN:** Deal / Draw. A fresh DOWN during draw-result presentation immediately deals the next hand; during a deal reveal it only finishes revealing. Held buttons do not repeat.
-- **UP held for 0.30 seconds, during manual play:** peek at best holds with solid red borders. Release clears the hint. When holding nothing is best, the Draw button flashes red. Brief multi-taps do not show red.
-- **Double UP during manual play:** select all best holds without drawing.
-- **Triple UP:** toggle autoplay on/off. Every activation starts in **M**.
-- **During autoplay:** double UP cycles **M → Medium → Fast → M**. Triple UP turns autoplay off without also changing speed. Single/held UP keeps autoplay active. Other buttons stop it and consume that click, except DOWN in M.
-- **M:** DOWN deals and waits for you to think; the next DOWN applies best holds together and draws immediately. Results wait for the next DOWN. No artificial pauses or card animations. A tiny M appears beside A.
-- **Medium / Fast:** fully automatic, with one / two small filled yellow triangles beside A. They retain the established study, selection and result timings.
-- **Top right:** inspect completed hands. **Bottom right:** select the gold controls; either middle activates the selected control.
-- **SeedSigner:** hold the outer right top and bottom buttons for two seconds, then release all buttons. Autoplay stops, workers close and GPIO/SPI are released before the unchanged signer application starts. Reboot returns to the cabinet.
+The ten-hand **7/5 DDB** preset matches the [supplied South Point paytable photo](docs/images/south-point-ddb-75.jpg), including its multiplier schedule. Casino names do not establish one universal configuration. Review the actual awards and multipliers; [preset details](docs/USER-GUIDE.md#paytable-presets-and-vegas-configurations) explain what is verified.
 
-Input recovery discards stale physical presses and requires neutral release. It preserves the autoplay mode. M cancels a queued Draw and waits for a fresh press; continuous modes preserve their intentional playback progress. M retries only an already requested Deal/Draw if secure randomness is temporarily unavailable. A stop key cancels pending actions. No weaker random source is substituted.
+| General settings | Optional memory |
+| --- | --- |
+| ![General Settings](docs/screenshots/settings-general.png) | ![Persistent memory with explanation](docs/screenshots/settings-memory-on.png) |
 
-Advice starts in the background during Deal, including the first hand. Releasing UP hides the hint without cancelling that read-only calculation; a double-tap best-hold request waits for its answer without needing another tap sequence.
+## Memory
 
-## Hardware and flashing
+**OFF is the factory default.** Training and device settings stay in RAM and disappear after power-off. ON saves device preferences, per-preset training settings, error history and statistics. Turning OFF clears the saved copies while keeping the current RAM session. A separate confirmed **Clear training data** action resets training records while preserving device settings and the memory preference.
 
-Raspberry Pi **Zero 1.3**, compatible Play/Plus ST7789 **320 × 240** display and standard SeedSigner button wiring. Other boards and the regular 240 × 240 screen are not qualified.
+Cards, held flags, live credits, game multipliers, RNG state and active autoplay always reset after power-off. Boot always selects the first cabinet tile, **Triple Play Bonus Poker**. The program checks the saved preference at startup; OFF does not mean that boot performs no SD reads. [Storage behavior and save status](docs/USER-GUIDE.md#persistent-memory).
 
-Verify the matching IMG's SHA-256 file, then flash the IMG with Raspberry Pi Imager. The builder writes regular files only; it never writes an SD card. The pinned SeedSigner OS 0.8.7 firmware, kernel and application remain stock. A deterministic gzip/newc overlay adds the game and configures the existing 320 × 240 display. The complete image remains 50 MiB.
+## Trainer and calculator
+
+Ordinary gameplay has no training labels or sidebar. The hidden trainer offers TEST/COACH modes, inline error feedback, live Advice/EV/Stats panels, all 32 hold alternatives, payout probabilities, error review/replay, practice drills and separate autoplay statistics. Assisted decisions stay separate from personal accuracy.
+
+The calculator starts automatically when the fifth card is confirmed, then refreshes after complete-hand input changes. It displays **EV**, **NOW** and **NEXT**, with **COMPARE EV** for the full ranked list. It uses the selected game's exact paytable, deck and current multiplier board.
+
+| Live coach | Inline error feedback |
+| --- | --- |
+| ![Live coach panel](docs/screenshots/live-coach.png) | ![Incorrect-hold feedback](docs/screenshots/live-error.png) |
+| ![Live EV panel](docs/screenshots/live-ev.png) | ![Personal session statistics](docs/screenshots/live-stats.png) |
+| ![Calculator EV](docs/screenshots/calculator-inline-ev.png) | ![Autoplay statistics](docs/screenshots/autoplay-session-stats.png) |
+
+EV retained measures decision quality; it is not casino RTP or a profit guarantee. Continued-play values use a numerical all-1× reference. Identical vendor XEV formatting is not claimed. [EV definitions and limits](docs/USER-GUIDE.md#statistics-and-ev).
 
 ## Build and verification
 
-Use Python 3.12 with Pillow and mtools for image assembly. The checked runtime PNGs, raster glyphs and certified strategy tables are included; a normal rebuild needs no network or raw font files. Obtain the pinned official `seedsigner_os.0.8.7.pi0.img` in `inputs/` and verify it against the supplied upstream checksum/signature material.
+See [technical notes](docs/TECHNICAL.md) for the pinned base OS, source assembly, tests, numerical policy generation and release evidence. Host and stock ARM emulation checks cover all twelve games and the additional paytable policies. Physical cold boot, LCD/PWM behavior, GPIO and Pi timing still need hardware testing.
 
-```sh
-python -B scripts/validate_host.py --deterministic-only
-python -B scripts/build_poker_image.py build \
-  --base inputs/seedsigner_os.0.8.7.pi0.img --payload payload \
-  --output outputs/seedsigner-v0.8.7-poker-v0.5.1-play-plus-pi0.img
-```
-
-Final reports are in `validation/`. Host checks bind every runtime file to its SHA-256. Independent image readback compares the packaged files and all 334 preserved upstream files. The stock ARMv6 kernel/rootfs probe boots the compressed overlay and exercises all twelve actual asynchronous advisors, menu selection, full boards, M holds and payouts.
-
-Math checks independently transcribe every displayed paytable, test credit settlement and multiplier carryover, compare all 32 holds against an unpruned EV calculation for every game, and check wild-hand counts against an independent rank/suit oracle. The continuation policies also have Bellman and independent stationary-policy certificates. These are numerical checks, not formal interval proofs.
-
-Actual software screenshots cover every game's menu selection, ready, hold, results and paytable screens. Artwork auditing checks the original pixels and explicitly records the menu graphics cropped from the visible reference screenshot. Browser rasterization and screenshot compression prevent a claim of universal pixel identity. No vendor gameplay JavaScript is shipped.
-
-The functional ARM diagnostic uses virtual instruction and presentation clocks. Physical cold boot, button latency, Pi performance, camera scanning and signing still need device testing. Earlier failed diagnostics remain recorded separately. Do not treat an emulated pass as a physical hardware test.
-
-## Sources and rights
-
-Reference: [Ultimate X Poker](https://www.videopoker.com/play/?game=69&title=Ultimate%20X%20Poker). Original code: GPL-2.0-or-later. Stock components, reference graphics and rasterized Arial glyphs retain their own rights; see `NOTICE` and `payload/opt/dino/THIRD-PARTY-ASSETS.txt`. Public visibility does not itself grant a redistribution license.
+This independent community project is not an official casino or game-vendor release. Original code is GPL-2.0-or-later; third-party components, artwork, marks and font-derived bitmaps retain their own rights. See [LICENSE](LICENSE), [NOTICE](NOTICE) and `payload/opt/dino/THIRD-PARTY-ASSETS.txt`.
