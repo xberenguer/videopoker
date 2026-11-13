@@ -22,6 +22,8 @@ class SynchronousInput:
 
     def reset(self):
         self.router.reset()
+        self.router.gate.blocked=True
+        self.router.suppress_until_neutral=True
 
     @property
     def pressed_mask(self):
@@ -32,7 +34,7 @@ class SynchronousInput:
     def gesture_pending(self):
         gate = self.router.gate
         return (gate.hold_started is not None or gate.latched or
-                self.router.suppress_until_neutral)
+                (self.router.suppress_until_neutral and not gate.blocked))
 
     def read(self):
         entered, events = self.read_timed()

@@ -81,7 +81,8 @@ class RealControllerTests(unittest.TestCase):
         self.assertIsNotNone(ui.notice)
         self.assertIn("shuffling", ui.notice.lower())
         self.assertIsNone(ui._animation)
-        self.assertGreaterEqual(clock(), 3.03)
+        self.assertGreaterEqual(clock(), 2.8)
+        self.assertLess(clock(), 2.95)
         self.assertEqual(events[-2], "close")
 
     def test_fresh_down_during_draw_deals_once_and_held_down_never_repeats(self):
@@ -101,7 +102,8 @@ class RealControllerTests(unittest.TestCase):
         self.assertEqual(game.snapshot(),expected.snapshot())
         self.assertEqual(game.credits,expected.credits)
         self.assertIsNone(ui._animation)
-        self.assertGreaterEqual(clock(), 4.23)
+        self.assertGreaterEqual(clock(), 4.0)
+        self.assertLess(clock(), 4.15)
         self.assertGreaterEqual(sum(isinstance(event, tuple) and event[0] == "frame" for event in events), 8)
 
     def test_manual_autoplay_held_down_runs_one_cycle_per_physical_press(self):
@@ -161,7 +163,8 @@ class RealControllerTests(unittest.TestCase):
         self.assertEqual(game.phase, "ready")
         self.assertEqual(game.credits, 10000)
         self.assertEqual(ui.menu["page"], "paytable")
-        self.assertGreaterEqual(clock(), 3.03)
+        self.assertGreaterEqual(clock(), 2.8)
+        self.assertLess(clock(), 2.95)
 
     def test_short_chord_in_game_does_not_toggle_hold_or_activate_gold_controls(self):
         def trace(t):

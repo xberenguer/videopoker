@@ -491,15 +491,10 @@ class SampledInputTests(unittest.TestCase):
                 wait_for(latched_without_reset, 'Real two-second hold did not latch', timeout=3.0)
                 latched = router_state()
                 stimulus['observed_hold_seconds'] = time.monotonic() - observed_start
-                if stimulus['observed_hold_seconds'] < 2.0 or latched['entered']:
-                    raise AssertionError('Chord completed before its real hold/release: ' + repr(diagnostics()))
-                set_mask(launcher.KEY2)  # Every button, including this one, must be released.
-                wait_for(lambda: router_state()['raw'] == launcher.KEY2,
-                         'Extra held button was not sampled')
-                time.sleep(.040)
-                if router_state()['entered']:
-                    raise AssertionError('Handoff occurred before every button was released')
-                set_mask(0)
+                if stimulus['observed_hold_seconds'] < 2.0 or not latched['entered']:
+                    raise AssertionError('Chord must fire at its real two-second hold: ' + repr(diagnostics()))
+                if latched['raw'] & launcher.MENU_CHORD != launcher.MENU_CHORD:
+                    raise AssertionError('Entry waited for release instead of the held chord')
             except BaseException as error:
                 producer_errors.append(type(error).__name__ + ': ' + str(error))
                 hardware.set(0)
@@ -520,7 +515,7 @@ class SampledInputTests(unittest.TestCase):
         self.assertFalse(services[0].running)
         OBSERVATIONS.append({'scenario': 'production-chord-and-input-thread-handoff',
                              'status': 'PASS', 'ordinary_actions': 0,
-                             'all_keys_release_required': True,
+                             'opens_while_chord_still_held': True,
                              'first_frame_and_neutral_rearm_before_stimulus': True,
                              'stimulus': stimulus,
                              'observed_mask_transitions': list(observed_masks),

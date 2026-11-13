@@ -68,13 +68,12 @@ class HardwareTests(unittest.TestCase):
         sample(.72, ())
         self.assertEqual(actions, ["DOWN", "CENTER", "KEY2"])
         self.assertFalse(entered)
-        # The same two outer physical action buttons still reserve entry;
-        # neither produces a hold/menu action while forming the chord.
-        sample(.8, (40,))
-        sample(.82, (40,))
-        sample(.9, (40, 36))
+        # Physical right TOP + BOTTOM reserves immediate trainer entry.
+        sample(.8, (40,36))
+        sample(.82, (40,36))
+        sample(.9, (40,36))
         self.assertEqual(owner.read_mask(), launcher.SIGNER_CHORD)
-        sample(2.91, (40, 36))
+        sample(2.91, (40,36))
         sample(3.0, ())
         sample(3.081, ())
         self.assertTrue(entered)

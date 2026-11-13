@@ -153,7 +153,8 @@ class FullFlowTests(unittest.TestCase):
         for line in result["hands"]:
             self.assertEqual(line[:2], result["initial"][:2])
             self.assertTrue(set(line[2:]).isdisjoint(result["initial"]))
-        self.assertGreaterEqual(clock(), 5.58)
+        self.assertGreaterEqual(clock(), 5.3)
+        self.assertLess(clock(), 5.5)
         OBSERVATIONS.append({
             "scenario": "deal-hold0-right-hold1-draw-deal-signer",
             "status": "PASS", "actions": ui.actions,
