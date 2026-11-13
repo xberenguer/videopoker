@@ -1,0 +1,13 @@
+{
+  "version": "0.6.6",
+  "production_image_sha256": "ba6f311d794dd5f6cd2eb1d04e93aaed3341f99da3b66a6764d91907ae720424",
+  "fixture": "Actual production rendering with a simulated in-memory journal adapter; not physical photos",
+  "screenshots": {
+    "general-settings": "4c301bd444027fe4e73a2d3c83ac83a786a2102b3ded0401d4b6e934d290898d",
+    "paytable-presets": "34ad5450b0166aeb8655aa7575caf9ffde96163af87137978312cf25e317802d",
+    "south-point-pays": "af8d631fc39e41ba401f81a67ded878b279cd4470b86a0e1f7687af22c44c377",
+    "memory-off": "f71ec36d4f12be8f19acfd0bf10fb62605db74e9c92ab9a9ad0182f40f7d73ae",
+    "memory-on": "6a840fcd1be94080c2030b17ecdfef3ac4ea307e89455f7295d22ab721412b21",
+    "clear-training-data": "5e668713b17a1eff88ef7e98afebe88d44f60bae515364be7e82ad882d18ca47"
+  }
+}
