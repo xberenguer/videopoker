@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""RAM-only poker gate, followed by the unchanged SeedSigner application.
+"""Offline poker cabinet, trainer and manual card calculator.
 
 The button gesture is an interface gate, not authentication or isolation.
-Game failure, a short chord, and ordinary menu actions never open SeedSigner.
+The production entrypoint starts only Video Poker. Right TOP+BOTTOM held for two
+seconds toggles the live trainer immediately; release is required before reuse.
 """
 from collections import deque
 import sys
@@ -13,11 +14,13 @@ POLL_INTERVAL = 0.01
 INPUT_INTERVAL = 0.005
 BUTTONS = ("UP", "DOWN", "LEFT", "RIGHT", "CENTER", "KEY1", "KEY2", "KEY3")
 KEY1, KEY2, KEY3 = 1 << 5, 1 << 6, 1 << 7
-SIGNER_CHORD = KEY1 | KEY3
+MENU_CHORD = KEY1 | KEY3
+SIGNER_CHORD = MENU_CHORD  # Compatibility name for existing diagnostic tools.
+RELEASE_BUTTONS = KEY1 | KEY3
 
 
 class HoldReleaseGate:
-    """Require the full continuous chord, then every button released for 80ms."""
+    """Fire at two seconds; an explicit reset can require neutral rearming."""
 
     def __init__(self, hold_seconds=2.0, release_seconds=0.08):
         self.hold_seconds, self.release_seconds = hold_seconds, release_seconds
@@ -27,12 +30,22 @@ class HoldReleaseGate:
         self.hold_started = None
         self.release_started = None
         self.latched = self.complete = False
+        self.blocked = False
         self.previous = None
 
     def update(self, now, mask):
         if self.previous is not None and now < self.previous:
             self.reset()
         self.previous = now
+        if self.blocked:
+            if mask:
+                self.release_started = None
+            elif self.release_started is None:
+                self.release_started = now
+            elif now-self.release_started >= self.release_seconds:
+                self.blocked = False
+                self.release_started = None
+            return False
         if self.complete:
             return True
         if not self.latched:
@@ -41,14 +54,7 @@ class HoldReleaseGate:
             elif self.hold_started is None:
                 self.hold_started = now
             elif now - self.hold_started >= self.hold_seconds:
-                self.latched = True
-        if self.latched:
-            if mask:
-                self.release_started = None
-            elif self.release_started is None:
-                self.release_started = now
-            elif now - self.release_started >= self.release_seconds:
-                self.complete = True
+                self.latched = self.complete = True
         return self.complete
 
 
@@ -89,7 +95,7 @@ class DebouncedButtons:
 
 
 class InputRouter:
-    """Separate ordinary game edges from the reserved signer chord.
+    """Separate ordinary game edges from the reserved right TOP+BOTTOM chord.
 
     KEY1/KEY3 are actions on release, so forming the chord never changes a hold
     or opens a menu. An incomplete chord is cancelled without either action.
@@ -123,18 +129,18 @@ class InputRouter:
             self.suppress_until_neutral = True
         pressed, released, stable = self.buttons.update(now, mask)
         if self.suppress_until_neutral:
-            if mask == 0 and stable == 0 and not self.gate.latched:
+            if mask == 0 and stable == 0 and not self.gate.latched and not self.gate.blocked:
                 self.suppress_until_neutral = False
             return False, ()
-        self.pending |= pressed & SIGNER_CHORD
+        self.pending |= pressed & RELEASE_BUTTONS
         actions = []
         for bit, action in enumerate(BUTTONS):
             flag = 1 << bit
-            if flag & SIGNER_CHORD:
+            if flag & RELEASE_BUTTONS:
                 if released & flag and self.pending & flag:
                     actions.append(action)
                     self.pending &= ~flag
-            elif pressed & flag and not (mask & SIGNER_CHORD):
+            elif pressed & flag and not (mask & RELEASE_BUTTONS):
                 actions.append(action)
         return False, tuple(actions)
 
@@ -186,6 +192,8 @@ class SampledInput:
 
     def _reset_locked(self):
         self.router.reset()
+        self.router.gate.blocked = True
+        self.router.suppress_until_neutral = True
         self._queue.clear()
         self._events.clear()
         self._events.append((self.clock(), 'reset', 0))
@@ -219,7 +227,7 @@ class SampledInput:
         with self._lock:
             gate = self.router.gate
             return (gate.hold_started is not None or gate.latched or
-                    self.router.suppress_until_neutral)
+                    (self.router.suppress_until_neutral and not gate.blocked))
 
     def __enter__(self):
         if self._thread is not None:
@@ -324,8 +332,8 @@ class SampledInput:
 
 
 def _default_ui():
-    from poker_ui import PokerUI
-    return PokerUI(width=320, height=240)
+    from poker_app import PokerApp
+    return PokerApp(width=320, height=240)
 
 
 def _neutral_message(hardware):
@@ -351,7 +359,7 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
     if hardware_factory is None:
         from hardware import PlusHardware
         hardware_factory = PlusHardware
-    # Hardware-construction failure cannot expose SeedSigner. Retry safely.
+    # Hardware-construction failure cannot open a different application. Retry safely.
     while True:
         inputs, ui = None, None
         try:
@@ -385,6 +393,17 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                         sleep(POLL_INTERVAL)
                         continue
                     if enter_signer:
+                        toggle=getattr(ui,'toggle_hidden_mode',None)
+                        if not callable(toggle):toggle=getattr(ui,'toggle_calculator',None)
+                        if callable(toggle):
+                            toggle()
+                            inputs.reset()
+                            brightness=getattr(hardware,'set_brightness',None)
+                            if callable(brightness):brightness(getattr(ui,'display_brightness',100))
+                            hardware.present(ui.render())
+                            dirty=False
+                            sleep(POLL_INTERVAL)
+                            continue
                         return
                     if retry:
                         retry = False
@@ -445,7 +464,11 @@ def run_game_gate(hardware_factory=None, ui_factory=_default_ui,
                                     dirty = True
                             dirty = bool(ui.update(now)) or dirty
                             if dirty:
+                                brightness=getattr(hardware,'set_brightness',None)
+                                if callable(brightness):brightness(getattr(ui,'display_brightness',100))
                                 hardware.present(ui.render())
+                                presented=getattr(ui,'on_frame_presented',None)
+                                if callable(presented):presented(clock())
                                 dirty = False
                         except Exception:
                             discarded_ui, ui = ui, None
@@ -487,10 +510,17 @@ run_poker_gate = run_game_gate
 
 
 def main(argv=None, *, hardware_factory=None, ui_factory=_default_ui,
-         clock=time.monotonic, sleep=time.sleep, signer_runner=start_signer,
+         clock=time.monotonic, sleep=time.sleep, signer_runner=None,
          input_factory=SampledInput):
-    run_poker_gate(hardware_factory, ui_factory, clock, sleep, input_factory=input_factory)
-    signer_runner(argv)
+    # An explicit injected callback is retained only for the existing harness.
+    # There is no signer fallback in this build's normal boot path, even if a
+    # UI cannot be initialized while the reserved gesture completes.
+    while True:
+        run_poker_gate(hardware_factory, ui_factory, clock, sleep, input_factory=input_factory)
+        if signer_runner is not None:
+            signer_runner(argv)
+            return
+        sleep(POLL_INTERVAL)
 
 
 if __name__ == "__main__":

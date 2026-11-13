@@ -390,7 +390,16 @@ class Renderer:
         if menu:
             source = self.render_source(snapshot, selected_card, selected_hand, menu)
             return source.resize((WIDTH, HEIGHT), lanczos).convert('RGB')
-        board = self._board_for(snapshot, selected_card, selected_hand)
+        deal=self.deal_layer_key(snapshot)
+        previous=getattr(self,'_native_deal',None)
+        if (deal is not None and previous is not None and deal[0]==previous[0]
+                and deal[1]>=previous[1] and self._normal_native is not None):
+            self.patch_deal_cards(self._normal_board,self._normal_native,snapshot,
+                                  previous[1],deal[1],*self.base_box(snapshot),badge=True)
+            self._normal_key=self._freeze({k:v for k,v in snapshot.items()
+                                           if k not in ('_badge_frame','_button_focus')})
+            board=self._normal_board
+        else:board = self._board_for(snapshot, selected_card, selected_hand)
         badge = self._badge_name(snapshot)
         if self._normal_native is None:
             source = board.copy()
@@ -407,10 +416,40 @@ class Renderer:
             patch = patch.resize((56, 76), lanczos)
             self._normal_native.paste(patch.crop((3, 3, 56, 73)), (267, 125))
         self._normal_badge = badge
+        self._native_deal=deal
         # The caller may draw notices or otherwise mutate its returned frame.
         image = self._normal_native.copy()
         self._draw_focus(image, snapshot, selected_card)
         return image
+
+    @classmethod
+    def deal_layer_key(cls,snapshot):
+        if snapshot.get('phase')!='hold' or len(snapshot.get('initial',()))!=5 or any(snapshot.get('held',())):
+            return None
+        key=cls._freeze({k:v for k,v in snapshot.items()
+                         if k not in ('_deal_reveal','_badge_frame','_button_focus')})
+        return key,max(0,min(5,int(snapshot.get('_deal_reveal',5))))
+
+    def patch_deal_cards(self,source,native,snapshot,old,new,left,top,badge=False):
+        """Patch only newly revealed cards, retaining the exact LANCZOS halo."""
+        if new==old:return
+        if hasattr(self,'game'):self._game=self.game(snapshot)
+        for index in range(old,new):
+            x=left+87*index
+            tile=self.background.crop((x,top,x+83,top+119))
+            face=self.card(snapshot['initial'][index],83,119)
+            tile.paste(face,(0,0),face);source.paste(tile,(x,top))
+        x0=max(0,math.floor((left+87*old)/2)-3)
+        y0=max(0,top//2-3)
+        x1=min(native.width,math.ceil((left+87*(new-1)+83)/2)+3)
+        y1=min(native.height,math.ceil((top+119)/2)+3)
+        # Another three native pixels isolate crop-boundary filter effects.
+        sx0=max(0,x0-3);sy0=max(0,y0-3)
+        sx1=min(320,x1+3);sy1=min(240,y1+3)
+        patch=source.crop((sx0*2,sy0*2,sx1*2,sy1*2))
+        if badge:self.paste(patch,self._badge_name(snapshot),(541-sx0*2,257-sy0*2))
+        patch=patch.resize((sx1-sx0,sy1-sy0),getattr(Image,'Resampling',Image).LANCZOS)
+        native.paste(patch.crop((x0-sx0,y0-sy0,x1-sx0,y1-sy0)),(x0,y0))
 
     def render_uncached(self, snapshot, selected_card=0, selected_hand=0, menu=None):
         """Full native composition for cache and filtering equivalence checks."""
@@ -604,11 +643,13 @@ class PokerUI:
         self._retry_max_bet = False
         self.button_focus = None
         self.speed = 1
+        self.profile_resolver = lambda game_id: game_id
         self.pay_preview_bet = self.session.bet_per_hand if self.cabinet else 1
         self._clock = clock
         self._animation = None
         self._visual = None
         self._last_stage = None
+        self._presentation_feedback=False
         self._badge_started = self._clock()
         self._badge_feature = bool(self.session.snapshot()['feature'])
         self._badge_frame = 0
@@ -682,7 +723,7 @@ class PokerUI:
     @property
     def hint_visible(self):
         if (not self._up_held or not self._peek_ready or self._peek_blocked_until_release
-                or self.autoplay or self.menu is not None
+                or (self.autoplay and (not self.manual_autoplay or self._up_click_count>1)) or self.menu is not None
                 or self.button_focus is not None or self.notice or self._animation is not None
                 or self._advice is None):
             return False
@@ -1281,7 +1322,7 @@ class PokerUI:
             if self.cabinet:
                 if phase!='hold':
                     from poker_games import GAMES
-                    self.menu={'page':'cabinet','index':next(i for i,g in enumerate(GAMES) if g.id==self.session.game.id),'return':True}
+                    self.menu={'page':'cabinet','index':next(i for i,g in enumerate(GAMES) if g.id==self.session.game.cabinet_id),'return':True}
             else:self.menu = {'page': 'more_games', 'index': 0}
         elif index == 2:
             self.speed = (self.speed+1) % len(self.SPEEDS)
@@ -1309,7 +1350,7 @@ class PokerUI:
                 from poker_games import GAMES
                 self._cancel_advice();self._finish_animation()
                 self._cabinet_game_over=self._cabinet_game_over or self.session.rounds>0
-                self.session=self._cabinet_bank.select(GAMES[self.menu['index']].id,self.session)
+                self.session=self._cabinet_bank.select(self.profile_resolver(GAMES[self.menu['index']].id),self.session)
                 self.menu=self.button_focus=None
                 self.selected_card=self.selected_hand=0
                 self.pay_preview_bet=self.session.bet_per_hand
@@ -1363,6 +1404,15 @@ class PokerUI:
         self._visual = None
         self._last_stage = None
 
+    def on_frame_presented(self,now):
+        """The LCD, rather than render-start time, anchors an animated Deal."""
+        self._presentation_feedback=True
+        animation=self._animation
+        if (animation is not None and animation['kind']=='deal'
+                and not animation.get('presented',False)):
+            animation['started']=now
+            animation['presented']=True
+
     def update(self, now):
         if self._closed:
             return False
@@ -1373,8 +1423,11 @@ class PokerUI:
         if self.autoplay and self._auto_up_edge is not None:
             # Give a third tap time to arrive before committing a speed change.
             if now < self._auto_up_due:
+                if self.manual_autoplay and self._up_click_count==1:
+                    dirty=self._poll_advice(now) or gesture_dirty
+                    return self._update_draw_hint(now) or dirty
                 return False
-            gesture_dirty = self._commit_auto_up()
+            gesture_dirty = self._commit_auto_up() or gesture_dirty
         dirty = self._update_visual(now) or gesture_dirty
         if not self.autoplay and self._manual_up_due is not None and now >= self._manual_up_due:
             self._commit_manual_up()
@@ -1420,6 +1473,8 @@ class PokerUI:
             return badge_dirty
         animation = self._animation
         elapsed = max(0.0, now-animation['started'])
+        if (self._presentation_feedback and animation['kind']=='deal'
+                and not animation.get('presented',False)):elapsed=0.0
         interval = animation['interval']
         after = animation['after']
         card_stage = min(5, int(elapsed/interval)+1)

@@ -3,7 +3,7 @@
 No executable vendor code. All awards are play credits. The category vectors
 retain distinctions required by other paytables, even when a game merges them.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 STANDARD_CATEGORIES = (
     'royal_flush', 'straight_flush', 'four_aces_kicker', 'four_234_kicker',
@@ -38,6 +38,10 @@ class Game:
     rows: tuple
     # Exceptional base 1..4 per-coin awards, before the max-coin jackpot.
     low_coin: tuple = (('royal_flush',250),)
+
+    @property
+    def cabinet_id(self):
+        return self.id.split('_')[0]
 
     @property
     def categories(self):
@@ -126,6 +130,15 @@ GAMES=(
          (4,12,1,1,1,1,7,6,4,3,2,1,1,1,4,4,4,4,4,4),DWB_ROWS),
 )
 BY_ID={g.id:g for g in GAMES}
+# The supplied South Point photo is a ten-hand DDB 7/5 table. It does not
+# establish a casino-wide configuration or the three-hand multiplier schedule.
+EXTRA_PROFILES=tuple(replace(BY_ID[base],id=base+'_'+str(full)+str(flush),
+                             pays=DDB[:7]+(full,flush)+DDB[9:])
+                     for base in ('ddb3','ddb10') for full,flush in ((9,5),(8,5),(7,5)))
+BY_ID.update({g.id:g for g in EXTRA_PROFILES})
+PROFILE_GROUPS={g.id:(g.id,) for g in GAMES}
+for base in ('ddb3','ddb10'):
+    PROFILE_GROUPS[base]=(base,base+'_95',base+'_85',base+'_75')
 
 
 def get_game(game_id='ddb10'):

@@ -2,7 +2,7 @@
 import math
 from PIL import Image, ImageDraw
 from poker_engine import Session
-from poker_games import GAMES, get_game
+from poker_games import GAMES, EXTRA_PROFILES, get_game
 from poker_ui import Renderer, WIDTH, HEIGHT, GOLD, WHITE, _short_number
 
 LAYOUTS={
@@ -15,6 +15,7 @@ FOOTERS={'bp3':'Bonus Poker','bpd3':'Bonus Poker Dlx','ddb3':'Double Dbl Bonus',
          'dw3':'Deuces Wild','job5':'Jacks or Better','db5':'Double Bonus',
          'joker5':'Joker Poker','dw5':'Deuces Wild','bp10':'Bonus Poker',
          'ddb10':'Double Dbl Bonus','tdb10':'Triple Double Bonus','dwb10':'Deuces Wild Bonus'}
+FOOTERS.update({g.id:FOOTERS[g.cabinet_id] for g in EXTRA_PROFILES})
 WIN_ROWS={9:(3,9,10,11,12,13,14,15,16),
           10:(1,3,2,4,9,10,11,12,13,14),
           11:(3,9,6,5,10,11,12,13,14,15,16),
