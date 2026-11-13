@@ -510,9 +510,162 @@ try:
         cabinet_ui.handle('LEFT');assert not cabinet_ui.autoplay
     cabinet_ui.close()
     assert not cabinet_ui._advisor._thread.is_alive()
+    stage('calculator-functional-checks')
+    from poker_training_hud import TrainingHUD
+    from PIL import Image
+    deal_frame_checks=[]
+    for spec in GAMES:
+        render_ui=PokerUI(Session(game_id=spec.id,rng=random.Random(8841)),cabinet=True)
+        render_ui.menu=None;render_ui.session.deal();snapshot=render_ui.session.snapshot()
+        if spec.family=='joker':snapshot['initial']=[52,0,14,38,51]
+        hud=TrainingHUD()
+        for reveal in (0,1,2,3,4,5):
+            snap=dict(snapshot,_deal_reveal=reveal)
+            actual=render_ui.renderer.render(snap)
+            assert actual.tobytes()==render_ui.renderer.render_uncached(snap).tobytes(),(spec.id,reveal,'regular pixels')
+            assert hud.board(snap,render_ui.renderer).tobytes()==TrainingHUD().board(snap,render_ui.renderer).tobytes(),(spec.id,reveal,'trainer pixels')
+        # Rewind for a fresh first-card frame, then count subsequent resize work.
+        render_ui.renderer.render(dict(snapshot,_deal_reveal=1))
+        resize=Image.Image.resize;sizes=[]
+        def counted_resize(image,size,*args,**kwargs):
+            sizes.append(size);return resize(image,size,*args,**kwargs)
+        Image.Image.resize=counted_resize
+        try:render_ui.renderer.render(dict(snapshot,_deal_reveal=2))
+        finally:Image.Image.resize=resize
+        pixels=sum(w*h for w,h in sizes)
+        assert (320,240) not in sizes and pixels<320*240//4,(spec.id,sizes)
+        deal_frame_checks.append({'game':spec.id,'regular_and_trainer_pixel_oracles_match':True,'next_card_resize_pixels':pixels,'full_screen_resize_avoided':True})
+        render_ui.close()
+    presentation_clock=[0.]
+    anchor_ui=PokerUI(Session(rng=random.Random(9)),cabinet=True,clock=lambda:presentation_clock[0])
+    anchor_ui.menu=None;anchor_ui.on_frame_presented(0.);anchor_ui.handle('DOWN')
+    presentation_clock[0]=.4;anchor_ui.update(.4)
+    assert anchor_ui._visual['_deal_reveal']==1
+    anchor_ui.on_frame_presented(.4);presentation_clock[0]=.466;anchor_ui.update(.466)
+    assert anchor_ui._visual['_deal_reveal']==2
+    anchor_ui.close()
+    from poker_calculator import CardCalculator
+    from poker_app import PokerApp
+    from poker_cabinet_strategy import GameStrategyTable, freeze_round
+    import inspect
+    def capture_calculator(calc,name):
+        image=calc.render()
+        assert image.mode=='RGB' and image.size==(320,240)
+        image.save(out/(name+'.png'))
+        frames[name]={'calculator':True,'game_id':calc.game.id,'page':calc.page,
+                      'native_resolution':[320,240],'mode':image.mode}
+    calc=CardCalculator()
+    capture_calculator(calc,'calculator-menu')
+    calculator_checks=[]
+    for game_spec in GAMES:
+        calc.select_game(game_spec.id)
+        entered=(52,12,25,38,0) if game_spec.deck_size==53 else (12,25,38,11,24)
+        for i,card in enumerate(entered):calc.set_card(i,card)
+        for i in range(game_spec.hands):calc.set_multiplier(i,game_spec.possible_multipliers[(i+2)%len(game_spec.possible_multipliers)])
+        for continued in (True,False):
+            calc.set_continued(continued)
+            expected=GameStrategyTable(game_spec.id).advise(freeze_round(calc.snapshot())[1:])
+            assert calc.calculate()
+            deadline=time.monotonic()+120
+            while calc._token is not None:
+                assert time.monotonic()<deadline,(game_spec.id,'calculator worker timeout')
+                calc.update(time.monotonic());time.sleep(.005)
+            assert calc.result is not None,(game_spec.id,calc.status)
+            assert calc.result['mask']==expected['mask'],(game_spec.id,continued,calc.result,expected)
+            ev=calc.ev_values();assert ev is not None
+            assert abs(ev[0]-expected['value'])<1e-7 and abs(ev[1]-expected['expected_current_win'])<1e-7
+            assert abs(ev[0]-ev[1]-ev[2])<1e-7
+            if not continued:assert ev[2]==0.
+            calculator_checks.append({'game_id':game_spec.id,'continued':continued,'mask':calc.result['mask'],'inline_EV_verified':True,'status':'PASS'})
+        capture_calculator(calc,'calculator-'+game_spec.id)
+    calc.select_game('ddb10')
+    calc.focus=10;calc.handle('CENTER')
+    for i,card in enumerate((9,24,14,23,4)):calc.set_card(i,card)
+    masks=[]
+    for continued,multiplier in ((True,1),(True,12),(False,1)):
+        calc.set_continued(continued)
+        for i in range(10):calc.set_multiplier(i,multiplier)
+        assert calc.calculate()
+        deadline=time.monotonic()+120
+        while calc._token is not None:
+            assert time.monotonic()<deadline
+            calc.update(time.monotonic());time.sleep(.005)
+        masks.append(calc.result['mask'])
+    assert masks==[14,10,10],masks
+    calc.page='picker';capture_calculator(calc,'calculator-picker')
+    calc.page='multipliers';capture_calculator(calc,'calculator-multipliers')
+    calc.page='pays';capture_calculator(calc,'calculator-pays')
+    calc.close();assert not calc._advisor._thread.is_alive()
+    compare_app=PokerApp();compare_app.toggle_calculator()
+    editor=compare_app.calculator;editor.select_game('ddb10')
+    for i,card in enumerate((12,4,40,46,5)):editor.set_card(i,card)
+    editor.focus=8;compare_app.handle('KEY2');assert compare_app.trainer.page=='ev'
+    deadline=time.monotonic()+90
+    while compare_app.trainer.report is None and time.monotonic()<deadline:
+        compare_app.trainer.update(time.monotonic());time.sleep(.001)
+    assert compare_app.trainer.report and len(compare_app.trainer.report['holds'])==32
+    compare_app.render().save(out/'calculator-compare-ev.png');frames['calculator-compare-ev']={'calculator':True}
+    compare_app.handle('KEY3')
+    assert compare_app.calculator_active and not compare_app.trainer.active and editor.ev_values() is not None
+    compare_app.close()
+    # Exercise the delivered default UI, gesture router and launcher together.
+    import launcher
+    assert inspect.signature(launcher.main).parameters['signer_runner'].default is None
+    class EndCalculatorTrace(BaseException):pass
+    class CalculatorClock:
+        now=0.0
+        def __call__(self):return self.now
+        def sleep(self,seconds):
+            self.now+=seconds
+            if self.now>6:raise EndCalculatorTrace()
+    calc_clock=CalculatorClock();calc_modes=[];calc_hardware_events=[]
+    app=launcher._default_ui()
+    assert isinstance(app,PokerApp) and app.play.menu['page']=='cabinet'
+    assert app.play.menu['index']==0 and GAMES[0].id=='bp3'
+    assert not app.training_mode and app.render().crop((0,0,320,220)).tobytes()==app.play.render().crop((0,0,320,220)).tobytes()
+    original_toggle=app.toggle_hidden_mode
+    def recorded_toggle():
+        original_toggle();calc_modes.append(app.training_mode)
+    app.toggle_hidden_mode=recorded_toggle
+    class CalculatorHardware:
+        def __enter__(self):calc_hardware_events.append('open');return self
+        def __exit__(self,*args):calc_hardware_events.append('close')
+        def read_mask(self):
+            t=calc_clock()
+            return launcher.SIGNER_CHORD if .3<=t<2.5 or 3<=t<5.3 else 0
+        def present(self,image):assert image.size==(320,240)
+        def show_message(self,*args):raise AssertionError(args)
+    class CalculatorInput:
+        def __init__(self,hardware,clock):self.hardware=hardware;self.clock=clock;self.router=launcher.InputRouter();self.running=False
+        def __enter__(self):self.running=True;return self
+        def __exit__(self,*args):self.running=False
+        def reset(self):self.router.reset()
+        @property
+        def gesture_pending(self):return self.router.gate.hold_started is not None or self.router.gate.latched or self.router.suppress_until_neutral
+        @property
+        def pressed_mask(self):return self.router.buttons.stable if self.router.buttons.armed else 0
+        def read_timed(self):
+            now=self.clock();entered,actions=self.router.update(now,self.hardware.read_mask())
+            return entered,tuple((now,action) for action in actions)
+    try:launcher.run_poker_gate(CalculatorHardware,lambda:app,calc_clock,calc_clock.sleep,input_factory=CalculatorInput)
+    except EndCalculatorTrace:pass
+    else:raise AssertionError('Integrated gate unexpectedly returned')
+    assert calc_modes==[True,False],calc_modes
+    assert calc_hardware_events==['open','close'] and app._closed
+    stage('RAM-only-training-proof')
+    from poker_training_store import TrainingStore
+    from poker_training import TrainingState
+    store=TrainingStore.hardware()
+    assert not store.persistent and store._thread is None
+    state=TrainingState(store);state.settings('ddb10')['mode']='test';state.begin('ddb10')
+    state.totals('ddb10')['correct']=1;state.save()
+    assert store.status=='RAM only' and store.data['totals']['ddb10']['correct']==1
+    store.close();fresh_store=TrainingStore.hardware();fresh_state=TrainingState(fresh_store)
+    assert not fresh_state.data['settings'] and not fresh_state.data['totals'] and not fresh_state.data['sessions']
+    fresh_store.close()
     report = {
-        'status':'PASS','mode':'strategy-and-ui-functional-only',
-        'python':sys.version,'pillow':PIL.__version__,'version':'0.5.1',
+        'status':'PASS','mode':'strategy-and-ui-functional-only','native_RAM_only_training_verified':True,
+        'python':sys.version,'pillow':PIL.__version__,'version':'0.6.6',
         'machine':os.uname().machine,'native_resolution':[320,240],
         'cabinet':{'status':'PASS','games':cabinet_checks,'menu_boot_checked':True,
                    'real_async_advice_all_twelve':True,'two_press_M_preserved':True,
@@ -557,6 +710,9 @@ try:
             'table_sha256':hashlib.sha256(table.raw).hexdigest(),
             'bellman_span':table.certificate,
             'scope':'Actual delivered Python strategy, async advisor and UI in stock ARM emulation; fake presentation clock; fixture Random injection only'},
+        'hidden_mode_gate':{'status':'PASS','toggle_modes':calc_modes,'normal_boot_cabinet_body_identity':True,'single_hardware_owner':True},
+        'deal_frames':{'status':'PASS','games':deal_frame_checks,'LCD_presentation_anchor_verified':True,'physical_timing_claimed':False},
+        'calculator':{'visible_compare_EV_button_verified':True,'status':'PASS','game_mode_checks':calculator_checks,'multiplier_mode_literal_masks':masks,'default_entrypoint_has_no_signer_callback':True,'all_workers_joined':True},
         'frames':frames,'autoplay_rounds_checked':3,
         'png_sha256':{name+'.png':hashlib.sha256((out/(name+'.png')).read_bytes()).hexdigest()
                       for name in sorted(frames)},

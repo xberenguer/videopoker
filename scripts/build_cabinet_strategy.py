@@ -85,8 +85,11 @@ def main():
               'method':'Exact integer terminal/subset enumeration and suit-orbit weighting; next-multiplier convolution; average-reward Bellman iteration; independent Markov policy evaluation',
               'arithmetic':'IEEE754 doubles; long double policy accumulation; numerical certificate, no interval proof',
               'generator_sha256':source_hash,'game_config_sha256':config_hash,
-              'reference_pay_screen':'validation/cabinet/reference/'+game.id+'-paytable.png',
-              'reference_url':'https://www.videopoker.com/play/?game=69&title=Ultimate%20X%20Poker',
+              'reference_pay_screen':('docs/images/south-point-ddb-75.jpg' if game.id=='ddb10_75' else
+                                      None if '_' in game.id else 'validation/cabinet/reference/'+game.id+'-paytable.png'),
+              'reference_url':None if '_' in game.id else 'https://www.videopoker.com/play/?game=69&title=Ultimate%20X%20Poker',
+              'reference_note':('User-supplied South Point photo; exact ten-hand payout and multiplier vectors.' if game.id=='ddb10_75' else
+                                'Numerically specified alternate DDB full-house/flush awards; original hand-count multiplier schedule. No casino location claimed.' if '_' in game.id else 'Original reference cabinet preset.'),
               'physical_timing_qualified':False}
         target=output/(game.id+'.json');target.write_text(json.dumps(meta,indent=2)+'\n')
         results[game.id]={'status':'PASS','metadata_sha256':digest(target),'table_sha256':meta['table_sha256'],

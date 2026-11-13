@@ -582,10 +582,11 @@ def main():
     parser.add_argument('--timeout', type=int, default=180)
     parser.add_argument('--strategy-only', action='store_true',
                         help='Focused strategy/UI check; does not qualify wall-clock GPIO timing')
+    parser.add_argument('--training-only',action='store_true',help='Delivered trainer, all games, and reserved SD journal in stock ARM')
     parser.add_argument('--instruction-clock', action='store_true',
                         help='Use virtual instruction time for functional-only emulation, never physical timing')
     args = parser.parse_args()
-    if args.instruction_clock and not args.strategy_only:
+    if args.instruction_clock and not (args.strategy_only or args.training_only):
         parser.error('--instruction-clock is restricted to the functional-only probe')
     folder = args.output.resolve()
     folder.mkdir(parents=True, exist_ok=False)
@@ -601,6 +602,15 @@ def main():
     if args.strategy_only:
         from arm_strategy_probe import GUEST as strategy_guest
         probe_guest = strategy_guest
+    if args.training_only:
+        from arm_training_probe import GUEST as training_guest
+        probe_guest=training_guest
+    # The settings/storage suite is qualified with the training run. Keeping it
+    # out of the much larger regression process avoids retaining both fixtures
+    # in one guest; production runs only one active app, not this test matrix.
+    if args.training_only:
+        from arm_settings_probe import GUEST as settings_guest
+        probe_guest+='\n'+settings_guest
     records['opt/dino/arm_probe.py'] = (stat.S_IFREG|0o644, probe_guest.encode())
     (folder/'probe.cpio').write_bytes(pack_overlay(records))
     (folder/'zImage').write_bytes(fat.files['zImage'])
@@ -668,7 +678,7 @@ def main():
             raise ValueError('Guest PNG readback failed: '+name)
     report['guest_png_readback_verified'] = bool(report.get('png_sha256'))
     report.update({'qemu_only_dtb_changes':dtb_changes,
-                   'probe_mode':'strategy-and-ui-functional-only' if args.strategy_only else 'full-including-realtime-input',
+                   'probe_mode':'training-and-journal-functional-only' if args.training_only else 'strategy-and-ui-functional-only' if args.strategy_only else 'full-including-realtime-input',
                    'diagnostic_clock':'virtual-instruction-clock; no wall-clock qualification' if args.instruction_clock else 'default QEMU clock',
                    'production_dtb_modified':False,
                    'production_image_sha256':hashlib.sha256(original).hexdigest(),
