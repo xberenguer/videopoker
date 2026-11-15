@@ -2,7 +2,7 @@
 
 [Download the IMG](https://github.com/xberenguer/videopoker/releases/download/v0.6.6/videopoker-v0.6.6-pi0-320x240.img) · [Raspberry Pi Imager](https://www.raspberrypi.com/software/) · [Buy or build the handheld](../README.md#get-the-hardware)
 
-[Install](#install-and-first-boot) · [Controls](#physical-controls) · [Cabinet](#cabinet-and-game-selection) · [Settings](#general-settings) · [Paytables](#paytable-presets-and-vegas-configurations) · [Memory](#persistent-memory) · [Calculator](#card-calculator) · [Trainer](#hidden-trainer) · [Statistics](#statistics-and-ev) · [Troubleshooting](#troubleshooting)
+[Install](#install-and-first-boot) · [Controls](#physical-controls) · [Cabinet](#cabinet-and-game-selection) · [Settings](#general-settings) · [Paytables](#paytable-presets) · [Memory](#persistent-memory) · [Calculator](#card-calculator) · [Trainer](#hidden-trainer) · [Statistics](#statistics-and-ev) · [Troubleshooting](#troubleshooting)
 
 ## Install and first boot
 
@@ -101,15 +101,17 @@ Device settings take effect immediately. They survive power-off only when persis
 
 ![General Settings](screenshots/settings-general.png)
 
-## Paytable presets and Vegas configurations
+<a id="paytable-presets-and-vegas-configurations"></a>
+
+## Paytable presets
 
 Open **Settings → Paytable presets**. Select the game row and use LEFT/RIGHT to choose a cabinet game. Select the preset row and use LEFT/RIGHT to choose a supported configuration. **Review payouts and multipliers** shows the actual table; **Apply preset** commits the selection. BOTTOM returns.
 
 Three- and ten-hand Double Double Bonus each offer **9/6, 9/5, 8/5 and 7/5**. The first number is the full-house award per base credit; the second is the flush award. Other award categories and the selected hand count's original multiplier schedule remain unchanged. Other games retain their original cabinet table in this release.
 
-The supplied South Point photograph establishes the **ten-hand DDB 7/5** configuration shown below. It is not evidence that every machine, denomination or game at that casino uses the same table. The three-hand alternate is a numeric preset using the original three-hand schedule; it is not claimed as a photographed South Point machine.
+The **ten-hand Double Double Bonus 7/5** table is shown below. Three-hand presets retain their own three-hand multiplier schedule.
 
-| Winning hand | One base credit | Five base credits | Next-hand multiplier, photographed ten-hand table |
+| Winning hand | One base credit | Five base credits | Next-hand multiplier (ten hands) |
 | --- | ---: | ---: | ---: |
 | Royal flush | 250 | 4,000 | 4× |
 | Straight flush | 50 | 250 | 4× |
@@ -125,13 +127,11 @@ The supplied South Point photograph establishes the **ten-hand DDB 7/5** configu
 | Two pair | 1 | 5 | 3× |
 | Jacks or better | 1 | 5 | 2× |
 
-[Reference photo](images/south-point-ddb-75.jpg). The royal's five-credit award includes its maximum-coin jackpot; it is not 250 × 5.
+The royal's five-credit award includes its maximum-coin jackpot; it is not 250 × 5.
 
 Changing a preset changes **settlement, paytable display, hints, auto-hold, autoplay, calculator and trainer EV together**. Each alternate has its own generated continuation policy and numeric checks. This is more than changing two display labels. The selected preset has separate training totals and error history. There is no unrestricted numeric paytable editor that could leave advice bound to the wrong awards.
 
-| Select a preset | Review its complete table |
-| --- | --- |
-| ![Paytable selector](screenshots/settings-paytable-presets.png) | ![Ten-hand DDB 7/5 table](screenshots/settings-south-point-pays.png) |
+![Ten-hand Double Double Bonus 7/5 payouts and multipliers](screenshots/settings-south-point-pays.png)
 
 Finish a dealt hand before replacing its active game's preset. Applying a preset for an inactive game does not change the current game's hand. Selecting a newly used preset starts its own multiplier board; already visited presets keep their separate RAM boards. Cash denomination is not implemented: the program reports credits. With a fixed paytable, denomination alone changes dollar scale rather than card probabilities.
 
@@ -260,7 +260,7 @@ Autoplay records its actual selected hold separately from personal accuracy. Its
 | Autoplay stops | Triple UP stops it. Other keys stop it too, except UP and AM's DOWN. Holding a chord pauses it. |
 | Menu toggles repeatedly | Release the right-column TOP and BOTTOM buttons fully. A continuous hold should toggle once; report repeat behavior if it occurs. |
 | Calculator recommendation is stale | Editing inputs clears/replaces old analysis. Incomplete cards cannot be analyzed. TOP/Calculate retries a failed analysis. |
-| New paytable appears wrong | Review every award and multiplier, not just full house/flush. The South Point label refers only to the supplied photographed configuration. |
+| New paytable appears wrong | Review every award and multiplier, not just the full-house/flush numbers. Confirm the game and hand count as well as the numeric preset. |
 | No Close/Clear drills for an alternate table | Use ALL. Alternate DDB strategy is included; preset-specific curated difficulty banks are not. |
 
 ## Verify the download
