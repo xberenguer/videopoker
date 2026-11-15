@@ -21,8 +21,21 @@ You'll need the handheld, a microSD card, a computer and a card reader.
 
 ## Get the hardware
 
-- **Buy assembled:** [SeedSigner Play](https://bitkitbtc.com/product/seedsigner-play/) or [SeedSigner Plus](https://bitkitbtc.com/product/seedsigner-plus/) from BitKit. Choose a **Pi Zero 1.3 / 320 × 240** configuration for this image.
-- **Build the handheld:** use a Pi Zero 1.3, a [Plus display HAT](https://github.com/3rdIteration/seedsigner-hardware/tree/main/display_hats/plus_hat), a suitable case and a microSD card. The linked project includes board design, fabrication and display details. The regular 240 × 240 HAT needs a different image.
+**SeedSigner Play:** buy [BitKit's Play model](https://bitkitbtc.com/product/seedsigner-play/). **SeedSigner Plus (SeedSigner+)** is available from several independent sellers:
+
+| Region | SeedSigner Plus sellers | Other suppliers in the SeedSigner directory |
+| --- | --- | --- |
+| US / Canada | [BTC Hardware Solutions — assembled Plus or full build kit](https://btc-hardware-solutions.square.site/product/assembled-seedsigner-or-full-build-kit/31) | [NovaSapien](https://novasapien.com/shop/seedsigners-hardware-wallets/) — standard/Premium models; [Bitcoin Butlers](https://www.bitcoinbutlers.com/shop) — directory-listed components/enclosures |
+| Europe / UK | [GoBrrr — Plus, assembled or DIY](https://www.gobrrr.me/product/seedsigner/); [21Drucker.Farm — Plus](https://21drucker.farm/en/produkt/seedsigner-plus); [Bitcoin Brabant — Plus Battery Smartcard](https://bitcoinbrabant.com/product/seedsigner-battery-smartcard/) | [BitVero](https://www.bitvero.it/seedsignergo/) — 240 × 240 kits/devices; [AnchorHodl](https://anchorhodl.com/shop) — directory-listed enclosures/components |
+| Asia | [BitKit — Plus](https://bitkitbtc.com/product/seedsigner-plus/) | [Bitgyan, India](https://bitgyan.com/product/seedsigner/) — assembled SeedSigner; confirm the display before ordering |
+| Australia / Oceania | [HansMade via Shop Bitcoin Australia — Plus](https://shopbitcoin.com.au/products/seedsigner-plus) | — |
+| South America / Brazil | No Plus offering confirmed in the linked directory | [StackBit](https://stackbit.me/produto/seedsigner/) — standard OpenPill devices and cases |
+
+For this image, choose a **Raspberry Pi Zero 1.3 with the 2.8-inch Plus ST7789 display, 320 × 240 in landscape, a D-pad with center switch and three action buttons**. Standard **240 × 240** models need a different image. The seller's Plus listing establishes its hardware specification; this project has not physically tested every enclosure or battery/smartcard variant.
+
+The [SeedSigner hardware directory](https://seedsigner.com/hardware/) lists regional shops for devices, kits and parts; it does not identify every listed product as a Plus. Regions above group sellers, not guaranteed shipping destinations. Check delivery to your address, stock and the exact configuration. BTC Hardware Solutions currently announces US-only direct shipping, so Canadian buyers should confirm delivery arrangements first. Links checked 14 November 2026.
+
+- **Build the handheld:** use a Pi Zero 1.3, a [Plus display HAT](https://github.com/3rdIteration/seedsigner-hardware/tree/main/display_hats/plus_hat), a suitable case and a microSD card. The linked project includes board design, fabrication and display details.
 - **Build the software:** [source and image-build instructions](docs/TECHNICAL.md#build-from-source).
 
 [Optional download verification](docs/USER-GUIDE.md#verify-the-download) · [Official Imager guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#install-using-imager)
@@ -49,11 +62,11 @@ Autoplay starts in **AM**: DOWN deals, then another DOWN applies the best hold a
 | ![Twelve-game cabinet](docs/screenshots/live-regular-menu.png) | ![Ten-hand Double Double Bonus](docs/screenshots/live-regular-game.png) |
 | ![Three-hand play](docs/screenshots/live-triple-ddb.png) | ![Five-hand Deuces Wild](docs/screenshots/live-five-deuces.png) |
 
-## Settings and Vegas paytables
+## Settings and paytables
 
 General Settings includes **brightness, manual animation speed, paytable presets, persistent memory and virtual-credit reset**. Each setting has a short explanation. Three- and ten-hand Double Double Bonus offer **9/6, 9/5, 8/5 and 7/5**, with matching payout and offline strategy data. Other games retain their original cabinet tables.
 
-The ten-hand **7/5 DDB** preset matches the [supplied South Point paytable photo](docs/images/south-point-ddb-75.jpg), including its multiplier schedule. Casino names do not establish one universal configuration. Review the actual awards and multipliers; [preset details](docs/USER-GUIDE.md#paytable-presets-and-vegas-configurations) explain what is verified.
+Presets are identified by their full-house/flush awards: **9/6, 9/5, 8/5 or 7/5**. See the [complete payouts and multiplier schedules](docs/USER-GUIDE.md#paytable-presets) before choosing a table.
 
 | General settings | Optional memory |
 | --- | --- |
